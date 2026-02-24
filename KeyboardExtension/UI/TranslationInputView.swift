@@ -219,6 +219,7 @@ class TranslationInputView: UIView {
             cursorLeading?.constant = 0
             return
         }
+        inputLabel.layoutIfNeeded()
         let size = (text as NSString).size(withAttributes: [.font: inputLabel.font!])
         let maxWidth = inputLabel.bounds.width
         cursorLeading?.constant = min(size.width, maxWidth)
