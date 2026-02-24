@@ -41,6 +41,7 @@
 		AA1234567890ABCDEF123456 /* LanguagePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1234567890ABCDEF654321 /* LanguagePickerView.swift */; };
 		CC1234567890ABCDEF789012 /* TranslationLanguageBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1234567890ABCDEF345678 /* TranslationLanguageBar.swift */; };
 		EE1234567890ABCDEF901234 /* EmojiKeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF1234567890ABCDEF567890 /* EmojiKeyboardView.swift */; };
+		D4E5F60718293A4B5CA1B2C3 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B5C /* SettingsViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -97,6 +98,7 @@
 		E56C026C05D186CC2E5F2172 /* KeyboardExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KeyboardExtension.entitlements; sourceTree = "<group>"; };
 		ED4D8415F1183E7FDB8673AA /* PaywallViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallViewController.swift; sourceTree = "<group>"; };
 		F2F7E0ADFB1B186D6E02D410 /* RewardedAdsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewardedAdsViewController.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718293A4B5C /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		BB1234567890ABCDEF654321 /* LanguagePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguagePickerView.swift; sourceTree = "<group>"; };
 		DD1234567890ABCDEF345678 /* TranslationLanguageBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationLanguageBar.swift; sourceTree = "<group>"; };
 		FF1234567890ABCDEF567890 /* EmojiKeyboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiKeyboardView.swift; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 				B5272BEEFF8BB77D51B53B8F /* Onboarding */,
 				029E3101DC7948E229F6347C /* Paywall */,
 				FC17688ECD68EF751C993FD2 /* RewardedAds */,
+				E7F8A9B0C1D2E3F405162738 /* Settings */,
 				F9D76C690D906097982DA8D4 /* ThemeStore */,
 			);
 			path = TranslatorKeyboard;
@@ -226,6 +229,14 @@
 				42A4980833C4BD8661FF38DB /* ThemeStoreViewController.swift */,
 			);
 			path = ThemeStore;
+			sourceTree = "<group>";
+		};
+		E7F8A9B0C1D2E3F405162738 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D4E5F60718293A4B5C /* SettingsViewController.swift */,
+			);
+			path = Settings;
 			sourceTree = "<group>";
 		};
 		FC17688ECD68EF751C993FD2 /* RewardedAds */ = {
@@ -360,6 +371,7 @@
 				F979FB1196C79873FEB4DA20 /* SubscriptionStatus.swift in Sources */,
 				93A28AD89882938CABFFC72D /* ThemeStoreViewController.swift in Sources */,
 				DCD3592930A0D79C8DE0C43C /* TranslationCache.swift in Sources */,
+				D4E5F60718293A4B5CA1B2C3 /* SettingsViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

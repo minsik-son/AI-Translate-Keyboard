@@ -7,6 +7,7 @@ class ToolbarView: UIView {
     var onTranslateToggle: (() -> Void)?
     var onEmojiTap: ((String) -> Void)?
     var onEmojiKeyboardToggle: (() -> Void)?
+    var onSettingsTap: (() -> Void)?
 
     // MARK: - Toolbar button definitions
 
@@ -23,7 +24,7 @@ class ToolbarView: UIView {
         ToolbarItem(iconName: "doc.on.clipboard", action: #selector(clipboardTapped), tag: 3),
         ToolbarItem(iconName: "checklist", action: #selector(checklistTapped), tag: 4),
         ToolbarItem(iconName: "character.book.closed.fill", action: #selector(translateTapped), tag: 5),
-        ToolbarItem(iconName: "plus.circle", action: #selector(moreTapped), tag: 6),
+        ToolbarItem(iconName: "gearshape", action: #selector(settingsTapped), tag: 6),
     ]
 
     // MARK: - Views
@@ -143,7 +144,7 @@ class ToolbarView: UIView {
         onTranslateToggle?()
     }
 
-    @objc private func moreTapped() {
-        // More options — no-op for now
+    @objc private func settingsTapped() {
+        onSettingsTap?()
     }
 }

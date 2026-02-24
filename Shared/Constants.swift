@@ -14,6 +14,11 @@ enum AppConstants {
         static let bonusSessions = "bonus_sessions"
         static let sourceLanguage = "source_language"
         static let targetLanguage = "target_language"
+        static let autoComplete = "auto_complete"
+        static let autoCapitalize = "auto_capitalize"
+        static let hapticFeedback = "haptic_feedback"
+        static let appLanguage = "app_language"
+        static let keyboardLayout = "keyboard_layout"
     }
 
     enum API {

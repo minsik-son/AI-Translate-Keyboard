@@ -70,6 +70,7 @@ class KeyboardViewController: UIInputViewController {
         setupHeightConstraint()
         textProxyManager.updateProxy(textDocumentProxy)
         updateReturnKeyAppearance()
+        checkAutoCapitalize()
     }
 
     override func textDidChange(_ textInput: UITextInput?) {
@@ -84,6 +85,8 @@ class KeyboardViewController: UIInputViewController {
             defaultTextInputHandler.clear()
             defaultModeComposingLength = 0
         }
+
+        checkAutoCapitalize()
     }
 
     // MARK: - Height
@@ -202,6 +205,9 @@ class KeyboardViewController: UIInputViewController {
         }
         toolbarView.onEmojiKeyboardToggle = { [weak self] in
             self?.toggleEmojiKeyboard()
+        }
+        toolbarView.onSettingsTap = { [weak self] in
+            self?.openContainingApp()
         }
 
         // Translation Input — close button
@@ -494,6 +500,8 @@ class KeyboardViewController: UIInputViewController {
                 textDocumentProxy.insertText(key)
             }
         }
+
+        checkAutoCapitalize()
     }
 
     private func commitDefaultComposing() {
@@ -623,6 +631,48 @@ class KeyboardViewController: UIInputViewController {
             // .default — used in text editors, messaging body, notes → newline
             keyboardLayoutView.returnKeyDisplayName = "줄바꿈"
             keyboardLayoutView.returnKeyIsBlue = false
+        }
+    }
+
+    // MARK: - Open Containing App
+
+    @objc protocol URLOpener {
+        func open(_ url: URL, options: [String: Any], completionHandler: ((Bool) -> Void)?)
+    }
+
+    private func openContainingApp() {
+        guard let url = URL(string: "translatorkeyboard://settings") else { return }
+        var responder: UIResponder? = self
+        while let r = responder {
+            if let opener = r as? URLOpener {
+                opener.open(url, options: [:], completionHandler: nil)
+                return
+            }
+            responder = r.next
+        }
+    }
+
+    // MARK: - Auto Capitalize
+
+    private func checkAutoCapitalize() {
+        guard AppGroupManager.shared.bool(forKey: AppConstants.UserDefaultsKeys.autoCapitalize) else { return }
+        guard currentMode == .defaultMode else { return }
+        guard keyboardLayoutView.getCurrentLanguage() == .english else { return }
+
+        let shouldCapitalize: Bool
+        let context = textDocumentProxy.documentContextBeforeInput
+
+        if context == nil || context?.isEmpty == true {
+            shouldCapitalize = true
+        } else if let text = context,
+                  text.hasSuffix(". ") || text.hasSuffix("? ") || text.hasSuffix("! ") || text.hasSuffix("\n") {
+            shouldCapitalize = true
+        } else {
+            shouldCapitalize = false
+        }
+
+        if shouldCapitalize {
+            keyboardLayoutView.setShifted(true)
         }
     }
 

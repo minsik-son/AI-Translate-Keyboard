@@ -45,6 +45,7 @@ class KeyboardLayoutView: UIView {
     private var trackpadAccumulatorY: CGFloat = 0
     private let trackpadSensitivity: CGFloat = 6   // points per character move
     private let trackpadSensitivityY: CGFloat = 12  // points per line move (higher = slower)
+    private let hapticGenerator = UIImpactFeedbackGenerator(style: .light)
 
     // MARK: - Layout Constants
 
@@ -155,6 +156,7 @@ class KeyboardLayoutView: UIView {
     }()
 
     private var allKeyButtons: [UIButton] = []
+    private var referenceLetterButton: UIButton?
 
     // MARK: - Init
 
@@ -208,6 +210,7 @@ class KeyboardLayoutView: UIView {
         guard !isTrackpadMode else { return }  // 트랙패드 중 재빌드 방지
         keyboardContainer.subviews.forEach { $0.removeFromSuperview() }
         allKeyButtons.removeAll()
+        referenceLetterButton = nil
 
         let rows = currentRows()
         let totalRows = rows.count
@@ -273,6 +276,11 @@ class KeyboardLayoutView: UIView {
         var previousButton: UIButton?
         let firstButton = createKeyButton(keys[0], rowIndex: rowIndex)
 
+        // Save the first button of a 10-key row as reference for mixed row width matching
+        if keys.count == 10 && referenceLetterButton == nil {
+            referenceLetterButton = firstButton
+        }
+
         for (i, key) in keys.enumerated() {
             let btn = (i == 0) ? firstButton : createKeyButton(key, rowIndex: rowIndex)
             container.addSubview(btn)
@@ -303,11 +311,96 @@ class KeyboardLayoutView: UIView {
     // MARK: - Row 2: Mixed row (shift/mode + letters + backspace)
 
     private func buildMixedRow(container: UIView, keys: [String], rowIndex: Int) {
-        let wideKeyWidth: CGFloat = 42  // Shift/backspace width — matches stock iOS keyboard
+        let wideKeyWidth: CGFloat = 42  // Shift/backspace base width
+
+        // Letters page with reference available: match letter key widths to 10-key row
+        if let refBtn = referenceLetterButton, currentPage == .letters {
+            var leftWideBtn: UIButton?
+            var rightWideBtn: UIButton?
+            var letterButtons: [UIButton] = []
+
+            for key in keys {
+                let btn = createKeyButton(key, rowIndex: rowIndex)
+                btn.translatesAutoresizingMaskIntoConstraints = false
+                container.addSubview(btn)
+
+                NSLayoutConstraint.activate([
+                    btn.topAnchor.constraint(equalTo: container.topAnchor),
+                    btn.bottomAnchor.constraint(equalTo: container.bottomAnchor),
+                ])
+
+                if key == Self.shiftKey || key == Self.moreSymKey || key == Self.symbolKey {
+                    leftWideBtn = btn
+                } else if key == Self.backKey {
+                    rightWideBtn = btn
+                } else {
+                    letterButtons.append(btn)
+                }
+            }
+
+            guard let shiftBtn = leftWideBtn, let backspaceBtn = rightWideBtn else { return }
+
+            // Each letter key matches the reference 10-key row button width
+            for btn in letterButtons {
+                btn.widthAnchor.constraint(equalTo: refBtn.widthAnchor).isActive = true
+            }
+
+            // Invisible spacer views to distribute leftover space evenly
+            let spacerLeft = UIView()
+            spacerLeft.translatesAutoresizingMaskIntoConstraints = false
+            spacerLeft.isUserInteractionEnabled = false
+            container.addSubview(spacerLeft)
+
+            let spacerRight = UIView()
+            spacerRight.translatesAutoresizingMaskIntoConstraints = false
+            spacerRight.isUserInteractionEnabled = false
+            container.addSubview(spacerRight)
+
+            // Spacers are zero-height, just used for width calculation
+            NSLayoutConstraint.activate([
+                spacerLeft.topAnchor.constraint(equalTo: container.topAnchor),
+                spacerLeft.heightAnchor.constraint(equalToConstant: 0),
+                spacerRight.topAnchor.constraint(equalTo: container.topAnchor),
+                spacerRight.heightAnchor.constraint(equalToConstant: 0),
+            ])
+
+            // Layout: shift | spacerLeft | letterKeys | spacerRight | backspace
+            shiftBtn.leadingAnchor.constraint(equalTo: container.leadingAnchor).isActive = true
+            spacerLeft.leadingAnchor.constraint(equalTo: shiftBtn.trailingAnchor).isActive = true
+
+            // First letter key after left spacer
+            if let firstLetter = letterButtons.first {
+                firstLetter.leadingAnchor.constraint(equalTo: spacerLeft.trailingAnchor, constant: Layout.keySpacingH).isActive = true
+            }
+
+            // Chain letter keys
+            for i in 1..<letterButtons.count {
+                letterButtons[i].leadingAnchor.constraint(equalTo: letterButtons[i-1].trailingAnchor, constant: Layout.keySpacingH).isActive = true
+            }
+
+            // Last letter key to right spacer
+            if let lastLetter = letterButtons.last {
+                spacerRight.leadingAnchor.constraint(equalTo: lastLetter.trailingAnchor, constant: Layout.keySpacingH).isActive = true
+            }
+
+            backspaceBtn.leadingAnchor.constraint(equalTo: spacerRight.trailingAnchor).isActive = true
+            backspaceBtn.trailingAnchor.constraint(equalTo: container.trailingAnchor).isActive = true
+
+            // shift.width = wideKeyWidth + spacerLeft.width, backspace.width = wideKeyWidth + spacerRight.width
+            shiftBtn.widthAnchor.constraint(equalTo: spacerLeft.widthAnchor, constant: wideKeyWidth).isActive = true
+            backspaceBtn.widthAnchor.constraint(equalTo: spacerRight.widthAnchor, constant: wideKeyWidth).isActive = true
+
+            // Equal spacers → even distribution of leftover space
+            spacerLeft.widthAnchor.constraint(equalTo: spacerRight.widthAnchor).isActive = true
+
+            return
+        }
+
+        // Fallback: symbol pages or no reference — original fixed-width behavior
         var letterButtons: [UIButton] = []
         var firstLetter: UIButton?
 
-        for (_, key) in keys.enumerated() {
+        for key in keys {
             let btn = createKeyButton(key, rowIndex: rowIndex)
             btn.translatesAutoresizingMaskIntoConstraints = false
             container.addSubview(btn)
@@ -318,15 +411,12 @@ class KeyboardLayoutView: UIView {
             ])
 
             if key == Self.shiftKey || key == Self.moreSymKey || key == Self.symbolKey {
-                // Left wide key
                 btn.leadingAnchor.constraint(equalTo: container.leadingAnchor).isActive = true
                 btn.widthAnchor.constraint(equalToConstant: wideKeyWidth).isActive = true
             } else if key == Self.backKey {
-                // Backspace - right side
                 btn.trailingAnchor.constraint(equalTo: container.trailingAnchor).isActive = true
                 btn.widthAnchor.constraint(equalToConstant: wideKeyWidth).isActive = true
             } else {
-                // Letter/symbol key
                 if let prev = letterButtons.last ?? container.subviews.first {
                     btn.leadingAnchor.constraint(equalTo: prev.trailingAnchor, constant: Layout.keySpacingH).isActive = true
                 }
@@ -339,7 +429,6 @@ class KeyboardLayoutView: UIView {
             }
         }
 
-        // Connect last letter to backspace
         if let lastLetter = letterButtons.last {
             let backspaceBtn = container.subviews.last!
             lastLetter.trailingAnchor.constraint(equalTo: backspaceBtn.leadingAnchor, constant: -Layout.keySpacingH).isActive = true
@@ -548,6 +637,7 @@ class KeyboardLayoutView: UIView {
             let loc = touch.location(in: self)
             guard let button = findButtonAt(loc) else { continue }
             guard let key = button.accessibilityLabel else { continue }
+            triggerHaptic()
 
             // ── Space bar: track for potential trackpad mode ──
             if key == " " && !isTrackpadMode {
@@ -764,6 +854,14 @@ class KeyboardLayoutView: UIView {
 
     // MARK: - Visual Feedback
 
+    private func triggerHaptic() {
+        let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier)
+        if let obj = defaults?.object(forKey: AppConstants.UserDefaultsKeys.hapticFeedback) {
+            guard (obj as? Bool) == true else { return }
+        }
+        hapticGenerator.impactOccurred()
+    }
+
     /// Brief background color flash — no transform, no animation delay, no coordinate disruption
     private func flashButton(_ button: UIButton) {
         let original = button.backgroundColor ?? .clear
@@ -820,5 +918,12 @@ class KeyboardLayoutView: UIView {
 
     func getCurrentLanguage() -> KeyboardLanguage {
         return currentLanguage
+    }
+
+    func setShifted(_ shifted: Bool) {
+        guard currentPage == .letters else { return }
+        guard isShifted != shifted else { return }
+        isShifted = shifted
+        buildKeyboard()
     }
 }

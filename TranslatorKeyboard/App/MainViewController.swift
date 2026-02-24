@@ -5,5 +5,17 @@ class MainViewController: UIViewController {
         super.viewDidLoad()
         title = "Translator Keyboard"
         view.backgroundColor = .systemBackground
+
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            image: UIImage(systemName: "gearshape"),
+            style: .plain,
+            target: self,
+            action: #selector(openSettings)
+        )
+    }
+
+    @objc private func openSettings() {
+        let settingsVC = SettingsViewController()
+        navigationController?.pushViewController(settingsVC, animated: true)
     }
 }

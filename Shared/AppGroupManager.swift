@@ -7,6 +7,10 @@ final class AppGroupManager {
 
     private init() {
         userDefaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier)
+        userDefaults?.register(defaults: [
+            AppConstants.UserDefaultsKeys.autoCapitalize: true,
+            AppConstants.UserDefaultsKeys.hapticFeedback: true
+        ])
     }
 
     func set(_ value: Any?, forKey key: String) {
