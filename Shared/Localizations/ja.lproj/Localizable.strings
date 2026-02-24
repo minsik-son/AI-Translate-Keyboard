@@ -1,0 +1,86 @@
+// === Settings ===
+"settings.title" = "設定";
+"settings.section.keyboard" = "キーボード設定";
+"settings.keyboard_theme" = "キーボードテーマ";
+"settings.language" = "言語";
+"settings.layout" = "レイアウト";
+"settings.autocomplete" = "オートコンプリート";
+"settings.auto_capitalize" = "自動大文字";
+"settings.haptic" = "触覚フィードバック";
+"settings.section.about" = "About & Support";
+"settings.rate_us" = "Rate Us";
+"settings.faq" = "FAQ & Support";
+"settings.privacy" = "Privacy Policy";
+"settings.terms" = "Terms of Use";
+"settings.app_language" = "アプリの言語";
+
+// === Onboarding ===
+"onboarding.welcome.subtitle" = "どこでも翻訳できるキーボード";
+"onboarding.permission.title" = "キーボード設定";
+"onboarding.permission.step1" = "設定 → 一般 → キーボード → キーボード追加で\nTranslator Keyboardを追加してください";
+"onboarding.permission.step2" = "「フルアクセスを許可」をオンにしてください\n（翻訳機能に必要です）";
+"onboarding.feature.translate.title" = "リアルタイム翻訳";
+"onboarding.feature.translate.description" = "キーボードから直接翻訳\n入力しながらすぐに結果を確認できます";
+"onboarding.feature.multilang.title" = "多言語対応";
+"onboarding.feature.multilang.description" = "韓国語、英語を含む\n様々な言語に対応しています";
+"onboarding.feature.smart.title" = "スマート機能";
+"onboarding.feature.smart.description" = "トラックパッドカーソル移動、テーマ変更など\n便利な機能を提供します";
+"onboarding.subscription.restore" = "復元";
+"onboarding.subscription.title" = "Proにアップグレード";
+"onboarding.subscription.benefit.unlimited" = "無制限翻訳";
+"onboarding.subscription.benefit.quality" = "高品質翻訳";
+"onboarding.subscription.benefit.no_ads" = "広告なし";
+"onboarding.subscription.benefit.themes" = "プレミアムテーマ";
+"onboarding.subscription.trial_badge" = "  7日間無料体験  ";
+"onboarding.subscription.monthly" = "月額";
+"onboarding.subscription.yearly" = "年額";
+"onboarding.subscription.best_label" = "(BEST)";
+"onboarding.subscription.start_trial" = "無料体験を始める";
+"onboarding.cta.start" = "はじめる";
+"onboarding.cta.go_settings" = "設定へ移動";
+"onboarding.cta.next" = "次へ";
+
+// === Keyboard Errors & Status ===
+"keyboard.error.full_access" = "フルアクセスを許可してください";
+"keyboard.error.session_limit" = "本日の翻訳回数を使い切りました";
+"keyboard.error.max_chars" = "最大%d文字まで入力可能です";
+"keyboard.error.timeout" = "翻訳がタイムアウトしました";
+"keyboard.error.offline" = "オフラインです";
+"keyboard.error.rate_limited" = "しばらくしてからお試しください";
+"keyboard.error.translate_failed" = "翻訳に失敗しました";
+"keyboard.status.translating" = "翻訳中...";
+
+// === Return Key Labels ===
+"keyboard.return.go" = "移動";
+"keyboard.return.search" = "検索";
+"keyboard.return.send" = "送信";
+"keyboard.return.done" = "完了";
+"keyboard.return.next" = "次へ";
+"keyboard.return.join" = "参加";
+"keyboard.return.route" = "経路";
+"keyboard.return.emergency" = "緊急";
+"keyboard.return.continue" = "続ける";
+"keyboard.return.newline" = "改行";
+
+// === Keyboard UI ===
+"keyboard.space" = "スペース";
+
+// === Translation Input ===
+"translation.placeholder" = "翻訳するテキストを入力してください";
+
+// === Language Picker ===
+"langpicker.source_tab" = "入力言語";
+"langpicker.target_tab" = "翻訳言語";
+"lang.ko" = "韓国語";
+"lang.en" = "英語";
+"lang.ja" = "日本語";
+"lang.zh_cn" = "中国語（簡体）";
+"lang.zh_tw" = "中国語（繁体）";
+"lang.vi" = "ベトナム語";
+"lang.th" = "タイ語";
+"lang.id" = "インドネシア語";
+"lang.es" = "スペイン語";
+"lang.fr" = "フランス語";
+"lang.de" = "ドイツ語";
+"lang.ru" = "ロシア語";
+"lang.it" = "イタリア語";

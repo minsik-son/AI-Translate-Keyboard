@@ -1,0 +1,86 @@
+// === Settings ===
+"settings.title" = "设置";
+"settings.section.keyboard" = "键盘设置";
+"settings.keyboard_theme" = "键盘主题";
+"settings.language" = "语言";
+"settings.layout" = "布局";
+"settings.autocomplete" = "自动补全";
+"settings.auto_capitalize" = "自动大写";
+"settings.haptic" = "触觉反馈";
+"settings.section.about" = "About & Support";
+"settings.rate_us" = "Rate Us";
+"settings.faq" = "FAQ & Support";
+"settings.privacy" = "Privacy Policy";
+"settings.terms" = "Terms of Use";
+"settings.app_language" = "应用语言";
+
+// === Onboarding ===
+"onboarding.welcome.subtitle" = "随时随地翻译的键盘";
+"onboarding.permission.title" = "键盘设置";
+"onboarding.permission.step1" = "前往设置 → 通用 → 键盘 → 添加新键盘\n添加 Translator Keyboard";
+"onboarding.permission.step2" = "请开启"允许完全访问"\n（翻译功能需要此权限）";
+"onboarding.feature.translate.title" = "实时翻译";
+"onboarding.feature.translate.description" = "直接在键盘上翻译\n边输入边查看翻译结果";
+"onboarding.feature.multilang.title" = "多语言支持";
+"onboarding.feature.multilang.description" = "支持韩语、英语等\n多种语言";
+"onboarding.feature.smart.title" = "智能功能";
+"onboarding.feature.smart.description" = "触控板光标移动、主题切换等\n便捷功能";
+"onboarding.subscription.restore" = "恢复购买";
+"onboarding.subscription.title" = "升级到 Pro";
+"onboarding.subscription.benefit.unlimited" = "无限翻译";
+"onboarding.subscription.benefit.quality" = "高质量翻译";
+"onboarding.subscription.benefit.no_ads" = "无广告";
+"onboarding.subscription.benefit.themes" = "高级主题";
+"onboarding.subscription.trial_badge" = "  7天免费试用  ";
+"onboarding.subscription.monthly" = "月度订阅";
+"onboarding.subscription.yearly" = "年度订阅";
+"onboarding.subscription.best_label" = "(BEST)";
+"onboarding.subscription.start_trial" = "开始免费试用";
+"onboarding.cta.start" = "开始使用";
+"onboarding.cta.go_settings" = "前往设置";
+"onboarding.cta.next" = "下一步";
+
+// === Keyboard Errors & Status ===
+"keyboard.error.full_access" = "请允许完全访问";
+"keyboard.error.session_limit" = "今日翻译次数已用完";
+"keyboard.error.max_chars" = "最多可输入%d个字符";
+"keyboard.error.timeout" = "翻译超时";
+"keyboard.error.offline" = "当前处于离线状态";
+"keyboard.error.rate_limited" = "请稍后再试";
+"keyboard.error.translate_failed" = "翻译失败";
+"keyboard.status.translating" = "翻译中...";
+
+// === Return Key Labels ===
+"keyboard.return.go" = "前往";
+"keyboard.return.search" = "搜索";
+"keyboard.return.send" = "发送";
+"keyboard.return.done" = "完成";
+"keyboard.return.next" = "下一步";
+"keyboard.return.join" = "加入";
+"keyboard.return.route" = "路线";
+"keyboard.return.emergency" = "紧急";
+"keyboard.return.continue" = "继续";
+"keyboard.return.newline" = "换行";
+
+// === Keyboard UI ===
+"keyboard.space" = "空格";
+
+// === Translation Input ===
+"translation.placeholder" = "请输入要翻译的文本";
+
+// === Language Picker ===
+"langpicker.source_tab" = "源语言";
+"langpicker.target_tab" = "目标语言";
+"lang.ko" = "韩语";
+"lang.en" = "英语";
+"lang.ja" = "日语";
+"lang.zh_cn" = "中文（简体）";
+"lang.zh_tw" = "中文（繁体）";
+"lang.vi" = "越南语";
+"lang.th" = "泰语";
+"lang.id" = "印尼语";
+"lang.es" = "西班牙语";
+"lang.fr" = "法语";
+"lang.de" = "德语";
+"lang.ru" = "俄语";
+"lang.it" = "意大利语";

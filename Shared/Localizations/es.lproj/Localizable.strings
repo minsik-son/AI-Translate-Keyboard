@@ -1,0 +1,86 @@
+// === Settings ===
+"settings.title" = "Ajustes";
+"settings.section.keyboard" = "Ajustes del teclado";
+"settings.keyboard_theme" = "Tema del teclado";
+"settings.language" = "Idioma";
+"settings.layout" = "Diseño";
+"settings.autocomplete" = "Autocompletar";
+"settings.auto_capitalize" = "Mayúsculas automáticas";
+"settings.haptic" = "Háptica";
+"settings.section.about" = "About & Support";
+"settings.rate_us" = "Rate Us";
+"settings.faq" = "FAQ & Support";
+"settings.privacy" = "Privacy Policy";
+"settings.terms" = "Terms of Use";
+"settings.app_language" = "Idioma de la app";
+
+// === Onboarding ===
+"onboarding.welcome.subtitle" = "Un teclado para traducir en cualquier lugar";
+"onboarding.permission.title" = "Configuración del teclado";
+"onboarding.permission.step1" = "Ve a Ajustes → General → Teclado → Añadir teclado\ny añade Translator Keyboard";
+"onboarding.permission.step2" = "Activa 'Permitir acceso completo'\n(Necesario para la traducción)";
+"onboarding.feature.translate.title" = "Traducción en tiempo real";
+"onboarding.feature.translate.description" = "Traduce directamente desde el teclado\nVe los resultados al instante mientras escribes";
+"onboarding.feature.multilang.title" = "Soporte multilingüe";
+"onboarding.feature.multilang.description" = "Compatible con varios idiomas\nincluyendo coreano e inglés";
+"onboarding.feature.smart.title" = "Funciones inteligentes";
+"onboarding.feature.smart.description" = "Movimiento del cursor con trackpad, cambio de temas\ny otras funciones útiles";
+"onboarding.subscription.restore" = "Restaurar";
+"onboarding.subscription.title" = "Actualizar a Pro";
+"onboarding.subscription.benefit.unlimited" = "Traducción ilimitada";
+"onboarding.subscription.benefit.quality" = "Traducción de alta calidad";
+"onboarding.subscription.benefit.no_ads" = "Sin anuncios";
+"onboarding.subscription.benefit.themes" = "Temas premium";
+"onboarding.subscription.trial_badge" = "  Prueba gratuita de 7 días  ";
+"onboarding.subscription.monthly" = "Mensual";
+"onboarding.subscription.yearly" = "Anual";
+"onboarding.subscription.best_label" = "(BEST)";
+"onboarding.subscription.start_trial" = "Iniciar prueba gratuita";
+"onboarding.cta.start" = "Comenzar";
+"onboarding.cta.go_settings" = "Ir a Ajustes";
+"onboarding.cta.next" = "Siguiente";
+
+// === Keyboard Errors & Status ===
+"keyboard.error.full_access" = "Por favor, permite el acceso completo";
+"keyboard.error.session_limit" = "Has agotado las traducciones de hoy";
+"keyboard.error.max_chars" = "Máximo %d caracteres permitidos";
+"keyboard.error.timeout" = "Tiempo de traducción agotado";
+"keyboard.error.offline" = "Estás sin conexión";
+"keyboard.error.rate_limited" = "Inténtalo de nuevo más tarde";
+"keyboard.error.translate_failed" = "Error de traducción";
+"keyboard.status.translating" = "Traduciendo...";
+
+// === Return Key Labels ===
+"keyboard.return.go" = "Ir";
+"keyboard.return.search" = "Buscar";
+"keyboard.return.send" = "Enviar";
+"keyboard.return.done" = "Listo";
+"keyboard.return.next" = "Siguiente";
+"keyboard.return.join" = "Unirse";
+"keyboard.return.route" = "Ruta";
+"keyboard.return.emergency" = "Emergencia";
+"keyboard.return.continue" = "Continuar";
+"keyboard.return.newline" = "intro";
+
+// === Keyboard UI ===
+"keyboard.space" = "espacio";
+
+// === Translation Input ===
+"translation.placeholder" = "Escribe el texto a traducir";
+
+// === Language Picker ===
+"langpicker.source_tab" = "Origen";
+"langpicker.target_tab" = "Destino";
+"lang.ko" = "Coreano";
+"lang.en" = "Inglés";
+"lang.ja" = "Japonés";
+"lang.zh_cn" = "Chino (simplificado)";
+"lang.zh_tw" = "Chino (tradicional)";
+"lang.vi" = "Vietnamita";
+"lang.th" = "Tailandés";
+"lang.id" = "Indonesio";
+"lang.es" = "Español";
+"lang.fr" = "Francés";
+"lang.de" = "Alemán";
+"lang.ru" = "Ruso";
+"lang.it" = "Italiano";

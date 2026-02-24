@@ -1,0 +1,86 @@
+// === Settings ===
+"settings.title" = "Settings";
+"settings.section.keyboard" = "Keyboard Settings";
+"settings.keyboard_theme" = "Keyboard Theme";
+"settings.language" = "Language";
+"settings.layout" = "Layout";
+"settings.autocomplete" = "Autocomplete";
+"settings.auto_capitalize" = "Auto Capitalize";
+"settings.haptic" = "Haptic";
+"settings.section.about" = "About & Support";
+"settings.rate_us" = "Rate Us";
+"settings.faq" = "FAQ & Support";
+"settings.privacy" = "Privacy Policy";
+"settings.terms" = "Terms of Use";
+"settings.app_language" = "App Language";
+
+// === Onboarding ===
+"onboarding.welcome.subtitle" = "Translate anywhere with your keyboard";
+"onboarding.permission.title" = "Keyboard Setup";
+"onboarding.permission.step1" = "Go to Settings → General → Keyboard → Add Keyboard\nand add Translator Keyboard";
+"onboarding.permission.step2" = "Enable 'Allow Full Access'\n(Required for translation)";
+"onboarding.feature.translate.title" = "Real-time Translation";
+"onboarding.feature.translate.description" = "Translate right from your keyboard\nSee results instantly as you type";
+"onboarding.feature.multilang.title" = "Multi-language Support";
+"onboarding.feature.multilang.description" = "Supports various languages\nincluding Korean and English";
+"onboarding.feature.smart.title" = "Smart Features";
+"onboarding.feature.smart.description" = "Trackpad cursor movement, theme changes\nand other convenient features";
+"onboarding.subscription.restore" = "Restore";
+"onboarding.subscription.title" = "Upgrade to Pro";
+"onboarding.subscription.benefit.unlimited" = "Unlimited Translation";
+"onboarding.subscription.benefit.quality" = "High Quality Translation";
+"onboarding.subscription.benefit.no_ads" = "No Ads";
+"onboarding.subscription.benefit.themes" = "Premium Themes";
+"onboarding.subscription.trial_badge" = "  7-Day Free Trial  ";
+"onboarding.subscription.monthly" = "Monthly";
+"onboarding.subscription.yearly" = "Yearly";
+"onboarding.subscription.best_label" = "(BEST)";
+"onboarding.subscription.start_trial" = "Start Free Trial";
+"onboarding.cta.start" = "Get Started";
+"onboarding.cta.go_settings" = "Go to Settings";
+"onboarding.cta.next" = "Next";
+
+// === Keyboard Errors & Status ===
+"keyboard.error.full_access" = "Please allow Full Access";
+"keyboard.error.session_limit" = "You've used all translations for today";
+"keyboard.error.max_chars" = "Maximum %d characters allowed";
+"keyboard.error.timeout" = "Translation timed out";
+"keyboard.error.offline" = "You are offline";
+"keyboard.error.rate_limited" = "Please try again later";
+"keyboard.error.translate_failed" = "Translation failed";
+"keyboard.status.translating" = "Translating...";
+
+// === Return Key Labels ===
+"keyboard.return.go" = "Go";
+"keyboard.return.search" = "Search";
+"keyboard.return.send" = "Send";
+"keyboard.return.done" = "Done";
+"keyboard.return.next" = "Next";
+"keyboard.return.join" = "Join";
+"keyboard.return.route" = "Route";
+"keyboard.return.emergency" = "Emergency";
+"keyboard.return.continue" = "Continue";
+"keyboard.return.newline" = "return";
+
+// === Keyboard UI ===
+"keyboard.space" = "space";
+
+// === Translation Input ===
+"translation.placeholder" = "Enter text to translate";
+
+// === Language Picker ===
+"langpicker.source_tab" = "Source";
+"langpicker.target_tab" = "Target";
+"lang.ko" = "Korean";
+"lang.en" = "English";
+"lang.ja" = "Japanese";
+"lang.zh_cn" = "Chinese (Simplified)";
+"lang.zh_tw" = "Chinese (Traditional)";
+"lang.vi" = "Vietnamese";
+"lang.th" = "Thai";
+"lang.id" = "Indonesian";
+"lang.es" = "Spanish";
+"lang.fr" = "French";
+"lang.de" = "German";
+"lang.ru" = "Russian";
+"lang.it" = "Italian";
