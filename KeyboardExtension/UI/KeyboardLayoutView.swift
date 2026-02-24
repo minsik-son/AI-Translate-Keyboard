@@ -156,7 +156,6 @@ class KeyboardLayoutView: UIView {
     }()
 
     private var allKeyButtons: [UIButton] = []
-    private var referenceLetterButton: UIButton?
 
     // MARK: - Init
 
@@ -210,7 +209,6 @@ class KeyboardLayoutView: UIView {
         guard !isTrackpadMode else { return }  // 트랙패드 중 재빌드 방지
         keyboardContainer.subviews.forEach { $0.removeFromSuperview() }
         allKeyButtons.removeAll()
-        referenceLetterButton = nil
 
         let rows = currentRows()
         let totalRows = rows.count
@@ -276,11 +274,6 @@ class KeyboardLayoutView: UIView {
         var previousButton: UIButton?
         let firstButton = createKeyButton(keys[0], rowIndex: rowIndex)
 
-        // Save the first button of a 10-key row as reference for mixed row width matching
-        if keys.count == 10 && referenceLetterButton == nil {
-            referenceLetterButton = firstButton
-        }
-
         for (i, key) in keys.enumerated() {
             let btn = (i == 0) ? firstButton : createKeyButton(key, rowIndex: rowIndex)
             container.addSubview(btn)
@@ -313,8 +306,8 @@ class KeyboardLayoutView: UIView {
     private func buildMixedRow(container: UIView, keys: [String], rowIndex: Int) {
         let wideKeyWidth: CGFloat = 42  // Shift/backspace base width
 
-        // Letters page with reference available: match letter key widths to 10-key row
-        if let refBtn = referenceLetterButton, currentPage == .letters {
+        // Letters page: match letter key widths to 10-key row using multiplier
+        if currentPage == .letters {
             var leftWideBtn: UIButton?
             var rightWideBtn: UIButton?
             var letterButtons: [UIButton] = []
@@ -340,9 +333,15 @@ class KeyboardLayoutView: UIView {
 
             guard let shiftBtn = leftWideBtn, let backspaceBtn = rightWideBtn else { return }
 
-            // Each letter key matches the reference 10-key row button width
+            // Each letter key width = container.width * (1/10) - 9*spacing/10
+            // This produces the same width as keys in the 10-key row above
+            let keySpacing = Layout.keySpacingH
             for btn in letterButtons {
-                btn.widthAnchor.constraint(equalTo: refBtn.widthAnchor).isActive = true
+                btn.widthAnchor.constraint(
+                    equalTo: container.widthAnchor,
+                    multiplier: 1.0 / 10.0,
+                    constant: -9.0 * keySpacing / 10.0
+                ).isActive = true
             }
 
             // Invisible spacer views to distribute leftover space evenly
@@ -396,7 +395,7 @@ class KeyboardLayoutView: UIView {
             return
         }
 
-        // Fallback: symbol pages or no reference — original fixed-width behavior
+        // Fallback: symbol pages — original fixed-width behavior
         var letterButtons: [UIButton] = []
         var firstLetter: UIButton?
 
