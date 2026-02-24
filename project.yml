@@ -1,0 +1,81 @@
+name: TranslatorKeyboard
+options:
+  bundleIdPrefix: com.translatorkeyboard
+  deploymentTarget:
+    iOS: "17.0"
+  xcodeVersion: "16.0"
+  generateEmptyDirectories: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+    DEVELOPMENT_TEAM: 3Q2D38NW4X
+    CODE_SIGN_STYLE: Automatic
+
+targets:
+  TranslatorKeyboard:
+    type: application
+    platform: iOS
+    sources:
+      - path: TranslatorKeyboard
+        excludes:
+          - "Resources/Info.plist"
+      - path: Shared
+    info:
+      path: TranslatorKeyboard/Resources/Info.plist
+      properties:
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+          UISceneConfigurations:
+            UIWindowSceneSessionRoleApplication:
+              - UISceneConfigurationName: Default Configuration
+                UISceneDelegateClassName: $(PRODUCT_MODULE_NAME).SceneDelegate
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        CFBundleDisplayName: Translator Keyboard
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.translatorkeyboard.app
+        INFOPLIST_FILE: TranslatorKeyboard/Resources/Info.plist
+        CODE_SIGN_ENTITLEMENTS: TranslatorKeyboard/TranslatorKeyboard.entitlements
+        DEVELOPMENT_TEAM: 3Q2D38NW4X
+    entitlements:
+      path: TranslatorKeyboard/TranslatorKeyboard.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.translatorkeyboard.shared
+    dependencies:
+      - target: KeyboardExtension
+
+  KeyboardExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: KeyboardExtension
+        excludes:
+          - "Resources/Info.plist"
+      - path: Shared
+    info:
+      path: KeyboardExtension/Resources/Info.plist
+      properties:
+        NSExtension:
+          NSExtensionAttributes:
+            IsASCIICapable: false
+            PrefersRightToLeft: false
+            PrimaryLanguage: en
+            RequestsOpenAccess: true
+          NSExtensionPointIdentifier: com.apple.keyboard-service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).KeyboardViewController
+        CFBundleDisplayName: Translator KB
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.translatorkeyboard.app.keyboard
+        INFOPLIST_FILE: KeyboardExtension/Resources/Info.plist
+        CODE_SIGN_ENTITLEMENTS: KeyboardExtension/KeyboardExtension.entitlements
+        DEVELOPMENT_TEAM: 3Q2D38NW4X
+    entitlements:
+      path: KeyboardExtension/KeyboardExtension.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.translatorkeyboard.shared
