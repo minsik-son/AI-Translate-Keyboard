@@ -27,7 +27,7 @@ class KeyboardViewController: UIInputViewController {
     private lazy var textProxyManager = TextProxyManager(textDocumentProxy: textDocumentProxy)
     private let translationManager = TranslationManager()
     private let sessionManager = SessionManager.shared
-    private let autocorrectEngine = AutocorrectEngine()
+    private let suggestionManager = SuggestionManager()
 
     // MARK: - Constraints
 
@@ -46,6 +46,9 @@ class KeyboardViewController: UIInputViewController {
         }
         return true
     }
+
+    // Suggestion dismiss state
+    private var isSuggestionDismissedForCurrentWord = false
 
     // Language state
     private var sourceLanguageCode: String = "ko"
@@ -93,6 +96,7 @@ class KeyboardViewController: UIInputViewController {
         if currentMode == .defaultMode {
             defaultTextInputHandler.clear()
             defaultModeComposingLength = 0
+            isSuggestionDismissedForCurrentWord = false
         }
 
         checkAutoCapitalize()
@@ -221,6 +225,9 @@ class KeyboardViewController: UIInputViewController {
         }
         toolbarView.onSuggestionTap = { [weak self] suggestion in
             self?.applySuggestion(suggestion)
+        }
+        toolbarView.onSuggestionDismiss = { [weak self] in
+            self?.dismissSuggestions()
         }
 
         // Translation Input — close button
@@ -489,10 +496,12 @@ class KeyboardViewController: UIInputViewController {
         case KeyboardLayoutView.returnKey:
             commitDefaultComposing()
             textDocumentProxy.insertText("\n")
+            isSuggestionDismissedForCurrentWord = false
 
         case " ":
             commitDefaultComposing()
             textDocumentProxy.insertText(" ")
+            isSuggestionDismissedForCurrentWord = false
 
         default:
             let isKorean = isKoreanJamo(key)
@@ -624,29 +633,43 @@ class KeyboardViewController: UIInputViewController {
         return components.last?.isEmpty == false ? components.last : nil
     }
 
+    private func dismissSuggestions() {
+        isSuggestionDismissedForCurrentWord = true
+        toolbarView.hideSuggestions()
+    }
+
     private func updateSuggestions() {
         guard currentMode == .defaultMode, isAutocorrectEnabled else {
             toolbarView.hideSuggestions(); return
         }
+        guard !isSuggestionDismissedForCurrentWord else { return }
         let currentLang = keyboardLayoutView.getCurrentLanguage()
-        if currentLang == .korean && !defaultTextInputHandler.composingText.isEmpty {
-            toolbarView.hideSuggestions(); return
+        let isComposing = !defaultTextInputHandler.composingText.isEmpty
+        let context = textDocumentProxy.documentContextBeforeInput
+        let word = currentTypingWord()
+
+        let result = suggestionManager.getSuggestions(
+            context: context, currentWord: word,
+            isComposing: isComposing, language: currentLang
+        )
+        switch result.mode {
+        case .none: toolbarView.hideSuggestions()
+        case .autocorrect, .prediction: toolbarView.showSuggestions(result.suggestions)
         }
-        guard let word = currentTypingWord(), !word.isEmpty else {
-            toolbarView.hideSuggestions(); return
-        }
-        let suggestions = autocorrectEngine.suggestions(for: word, language: currentLang)
-        suggestions.isEmpty ? toolbarView.hideSuggestions() : toolbarView.showSuggestions(suggestions)
     }
 
     private func applySuggestion(_ suggestion: String) {
-        commitDefaultComposing()
-        if let word = currentTypingWord() {
+        let word = currentTypingWord()
+        if let word = word, !word.isEmpty {
+            commitDefaultComposing()
             for _ in 0..<word.count { textDocumentProxy.deleteBackward() }
         }
         textDocumentProxy.insertText(suggestion + " ")
         toolbarView.hideSuggestions()
         checkAutoCapitalize()
+        DispatchQueue.main.async { [weak self] in
+            self?.updateSuggestions()
+        }
     }
 
     // MARK: - Return Key

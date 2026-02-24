@@ -9,6 +9,7 @@ class ToolbarView: UIView {
     var onEmojiKeyboardToggle: (() -> Void)?
     var onSettingsTap: (() -> Void)?
     var onSuggestionTap: ((String) -> Void)?
+    var onSuggestionDismiss: (() -> Void)?
 
     // MARK: - Toolbar button definitions
 
@@ -63,6 +64,24 @@ class ToolbarView: UIView {
     private var separatorLines: [UIView] = []
     private let bottomBorder = UIView()
 
+    private let dismissButton: UIButton = {
+        let btn = UIButton(type: .system)
+        btn.setTitle("✕", for: .normal)
+        btn.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        btn.setTitleColor(.label, for: .normal)
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        btn.isHidden = true
+        return btn
+    }()
+
+    private let dismissSeparator: UIView = {
+        let v = UIView()
+        v.backgroundColor = .separator
+        v.translatesAutoresizingMaskIntoConstraints = false
+        v.isHidden = true
+        return v
+    }()
+
     // MARK: - Init
 
     override init(frame: CGRect) {
@@ -82,6 +101,10 @@ class ToolbarView: UIView {
         addSubview(stack)
         addSubview(statusLabel)
         addSubview(suggestionStack)
+        addSubview(dismissSeparator)
+        addSubview(dismissButton)
+
+        dismissButton.addTarget(self, action: #selector(dismissTapped), for: .touchUpInside)
 
         NSLayoutConstraint.activate([
             stack.topAnchor.constraint(equalTo: topAnchor),
@@ -94,8 +117,18 @@ class ToolbarView: UIView {
 
             suggestionStack.topAnchor.constraint(equalTo: topAnchor),
             suggestionStack.leadingAnchor.constraint(equalTo: leadingAnchor),
-            suggestionStack.trailingAnchor.constraint(equalTo: trailingAnchor),
+            suggestionStack.trailingAnchor.constraint(equalTo: dismissSeparator.leadingAnchor),
             suggestionStack.bottomAnchor.constraint(equalTo: bottomAnchor),
+
+            dismissSeparator.topAnchor.constraint(equalTo: topAnchor, constant: 8),
+            dismissSeparator.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
+            dismissSeparator.trailingAnchor.constraint(equalTo: dismissButton.leadingAnchor),
+            dismissSeparator.widthAnchor.constraint(equalToConstant: 0.5),
+
+            dismissButton.topAnchor.constraint(equalTo: topAnchor),
+            dismissButton.trailingAnchor.constraint(equalTo: trailingAnchor),
+            dismissButton.bottomAnchor.constraint(equalTo: bottomAnchor),
+            dismissButton.widthAnchor.constraint(equalToConstant: 44),
         ])
 
         for item in toolbarItems {
@@ -141,10 +174,14 @@ class ToolbarView: UIView {
         for btn in suggestionButtons {
             btn.setTitleColor(isDark ? .white : .label, for: .normal)
         }
+        // dismiss 버튼 색상
+        dismissButton.setTitleColor(isDark ? .white : .label, for: .normal)
         // suggestion 배경색 — 키보드 배경과 동일
-        suggestionStack.backgroundColor = isDark
+        let suggestionBg = isDark
             ? UIColor(white: 0.08, alpha: 1)
             : UIColor(red: 0.82, green: 0.84, blue: 0.86, alpha: 1)
+        suggestionStack.backgroundColor = suggestionBg
+        dismissButton.backgroundColor = suggestionBg
     }
 
     func showSuggestions(_ suggestions: [String]) {
@@ -161,6 +198,8 @@ class ToolbarView: UIView {
         stack.isHidden = true
         suggestionStack.isHidden = false
         separatorLines.forEach { $0.isHidden = false }
+        dismissButton.isHidden = false
+        dismissSeparator.isHidden = false
         bottomBorder.isHidden = false
         setNeedsLayout()
     }
@@ -169,6 +208,8 @@ class ToolbarView: UIView {
         suggestionStack.isHidden = true
         stack.isHidden = false
         separatorLines.forEach { $0.isHidden = true }
+        dismissButton.isHidden = true
+        dismissSeparator.isHidden = true
         bottomBorder.isHidden = true
     }
 
@@ -211,7 +252,8 @@ class ToolbarView: UIView {
     override func layoutSubviews() {
         super.layoutSubviews()
         guard !suggestionStack.isHidden, suggestionButtons.count == 3 else { return }
-        let thirdWidth = bounds.width / 3.0
+        let availableWidth = bounds.width - 44 - 0.5 // dismiss button + separator
+        let thirdWidth = availableWidth / 3.0
         for (i, sep) in separatorLines.enumerated() {
             let x = thirdWidth * CGFloat(i + 1)
             let sepHeight = bounds.height * 0.5
@@ -223,6 +265,10 @@ class ToolbarView: UIView {
     @objc private func suggestionTapped(_ sender: UIButton) {
         guard let title = sender.title(for: .normal), !title.isEmpty else { return }
         onSuggestionTap?(title)
+    }
+
+    @objc private func dismissTapped() {
+        onSuggestionDismiss?()
     }
 
     // MARK: - Actions

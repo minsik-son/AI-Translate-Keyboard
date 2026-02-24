@@ -45,6 +45,7 @@ class OnboardingViewController: UIViewController {
         setupPageViewController()
         setupBottomControls()
         disableSwipeGesture()
+        restoreProgress()
     }
 
     // MARK: - Page Factory
@@ -103,11 +104,25 @@ class OnboardingViewController: UIViewController {
         }
     }
 
+    private func restoreProgress() {
+        let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier) ?? UserDefaults.standard
+        let savedIndex = defaults.integer(forKey: "onboarding_current_page")
+        hasReturnedFromSettings = defaults.bool(forKey: "onboarding_returned_from_settings")
+        if savedIndex > 0, savedIndex < pages.count {
+            currentIndex = savedIndex
+            pageViewController.setViewControllers([pages[savedIndex]], direction: .forward, animated: false)
+            pageControl.currentPage = savedIndex
+            updateCTAForCurrentPage()
+        }
+    }
+
     // MARK: - Navigation
 
     @objc private func ctaTapped() {
         if currentIndex == 1 && !hasReturnedFromSettings {
             // 권한 설정 페이지: 설정 앱 열기
+            let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier) ?? UserDefaults.standard
+            defaults.set(true, forKey: "onboarding_returned_from_settings")
             if let url = URL(string: UIApplication.openSettingsURLString) {
                 UIApplication.shared.open(url)
             }
@@ -130,6 +145,8 @@ class OnboardingViewController: UIViewController {
         pageViewController.setViewControllers([pages[index]], direction: direction, animated: true)
         pageControl.currentPage = index
         updateCTAForCurrentPage()
+        let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier) ?? UserDefaults.standard
+        defaults.set(index, forKey: "onboarding_current_page")
     }
 
     private func updateCTAForCurrentPage() {
@@ -153,6 +170,8 @@ class OnboardingViewController: UIViewController {
     private func completeOnboarding() {
         let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier) ?? UserDefaults.standard
         defaults.set(true, forKey: AppConstants.UserDefaultsKeys.hasCompletedOnboarding)
+        defaults.removeObject(forKey: "onboarding_current_page")
+        defaults.removeObject(forKey: "onboarding_returned_from_settings")
         dismiss(animated: true)
     }
 
@@ -170,6 +189,8 @@ class OnboardingViewController: UIViewController {
     @objc private func appWillEnterForeground() {
         guard currentIndex == 1 else { return }
         hasReturnedFromSettings = true
+        let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier) ?? UserDefaults.standard
+        defaults.set(true, forKey: "onboarding_returned_from_settings")
         updateCTAForCurrentPage()
     }
 }

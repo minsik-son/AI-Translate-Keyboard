@@ -74,6 +74,8 @@ targets:
           - "Localizations"
     resources:
       - path: Shared/Localizations
+      - path: KeyboardExtension/Resources/ngram_en.json
+      - path: KeyboardExtension/Resources/ngram_ko.json
     info:
       path: KeyboardExtension/Resources/Info.plist
       properties:
