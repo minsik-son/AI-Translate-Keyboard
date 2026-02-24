@@ -1,0 +1,4 @@
+Target dependency graph (2 targets)
+Target 'TranslatorKeyboard' in project 'TranslatorKeyboard'
+➜ Explicit dependency on target 'KeyboardExtension' in project 'TranslatorKeyboard'
+Target 'KeyboardExtension' in project 'TranslatorKeyboard' (no dependencies)

@@ -11,6 +11,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.rootViewController = nav
         window?.makeKeyAndVisible()
 
+        // 온보딩: 첫 실행 시 표시
+        let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier) ?? UserDefaults.standard
+        if !defaults.bool(forKey: AppConstants.UserDefaultsKeys.hasCompletedOnboarding) {
+            let onboardingVC = OnboardingViewController()
+            onboardingVC.modalPresentationStyle = .fullScreen
+            nav.present(onboardingVC, animated: false)
+        }
+
         if let urlContext = connectionOptions.urlContexts.first {
             handleURL(urlContext.url, nav: nav)
         }

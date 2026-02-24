@@ -19,6 +19,7 @@ enum AppConstants {
         static let hapticFeedback = "haptic_feedback"
         static let appLanguage = "app_language"
         static let keyboardLayout = "keyboard_layout"
+        static let hasCompletedOnboarding = "has_completed_onboarding"
     }
 
     enum API {

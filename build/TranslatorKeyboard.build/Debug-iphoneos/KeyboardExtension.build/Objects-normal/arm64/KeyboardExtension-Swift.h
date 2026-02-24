@@ -347,6 +347,12 @@ SWIFT_CLASS("_TtC17KeyboardExtension22KeyboardViewController")
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)coder OBJC_DESIGNATED_INITIALIZER;
 @end
 
+@class NSURL;
+SWIFT_PROTOCOL("_TtPC17KeyboardExtension22KeyboardViewController9URLOpener_")
+@protocol URLOpener
+- (void)open:(NSURL * _Nonnull)url options:(NSDictionary<NSString *, id> * _Nonnull)options completionHandler:(void (^ _Nullable)(BOOL))completionHandler;
+@end
+
 SWIFT_CLASS("_TtC17KeyboardExtension18LanguagePickerView")
 @interface LanguagePickerView : UIView
 - (nonnull instancetype)initWithFrame:(CGRect)frame OBJC_DESIGNATED_INITIALIZER;

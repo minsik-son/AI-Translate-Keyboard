@@ -340,11 +340,6 @@ SWIFT_CLASS("_TtC18TranslatorKeyboard24OnboardingViewController")
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)coder OBJC_DESIGNATED_INITIALIZER;
 @end
 
-@class UIScrollView;
-@interface OnboardingViewController (SWIFT_EXTENSION(TranslatorKeyboard)) <UIScrollViewDelegate>
-- (void)scrollViewDidScroll:(UIScrollView * _Nonnull)scrollView;
-@end
-
 SWIFT_CLASS("_TtC18TranslatorKeyboard21PaywallViewController")
 @interface PaywallViewController : UIViewController
 - (void)viewDidLoad;
