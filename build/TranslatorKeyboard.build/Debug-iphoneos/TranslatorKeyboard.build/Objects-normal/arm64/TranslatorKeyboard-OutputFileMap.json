@@ -26,6 +26,16 @@
     "swift-dependencies" : "/Users/minmac/Documents/dev/Project/translator-keyboard/TranslatorKeyboard/build/TranslatorKeyboard.build/Debug-iphoneos/TranslatorKeyboard.build/Objects-normal/arm64/Constants.swiftdeps",
     "swiftmodule" : "/Users/minmac/Documents/dev/Project/translator-keyboard/TranslatorKeyboard/build/TranslatorKeyboard.build/Debug-iphoneos/TranslatorKeyboard.build/Objects-normal/arm64/Constants~partial.swiftmodule"
   },
+  "/Users/minmac/Documents/dev/Project/translator-keyboard/TranslatorKeyboard/Shared/LocalizationManager.swift" : {
+    "const-values" : "/Users/minmac/Documents/dev/Project/translator-keyboard/TranslatorKeyboard/build/TranslatorKeyboard.build/Debug-iphoneos/TranslatorKeyboard.build/Objects-normal/arm64/LocalizationManager.swiftconstvalues",
+    "dependencies" : "/Users/minmac/Documents/dev/Project/translator-keyboard/TranslatorKeyboard/build/TranslatorKeyboard.build/Debug-iphoneos/TranslatorKeyboard.build/Objects-normal/arm64/LocalizationManager.d",
+    "diagnostics" : "/Users/minmac/Documents/dev/Project/translator-keyboard/TranslatorKeyboard/build/TranslatorKeyboard.build/Debug-iphoneos/TranslatorKeyboard.build/Objects-normal/arm64/LocalizationManager.dia",
+    "index-unit-output-path" : "/TranslatorKeyboard.build/Debug-iphoneos/TranslatorKeyboard.build/Objects-normal/arm64/LocalizationManager.o",
+    "llvm-bc" : "/Users/minmac/Documents/dev/Project/translator-keyboard/TranslatorKeyboard/build/TranslatorKeyboard.build/Debug-iphoneos/TranslatorKeyboard.build/Objects-normal/arm64/LocalizationManager.bc",
+    "object" : "/Users/minmac/Documents/dev/Project/translator-keyboard/TranslatorKeyboard/build/TranslatorKeyboard.build/Debug-iphoneos/TranslatorKeyboard.build/Objects-normal/arm64/LocalizationManager.o",
+    "swift-dependencies" : "/Users/minmac/Documents/dev/Project/translator-keyboard/TranslatorKeyboard/build/TranslatorKeyboard.build/Debug-iphoneos/TranslatorKeyboard.build/Objects-normal/arm64/LocalizationManager.swiftdeps",
+    "swiftmodule" : "/Users/minmac/Documents/dev/Project/translator-keyboard/TranslatorKeyboard/build/TranslatorKeyboard.build/Debug-iphoneos/TranslatorKeyboard.build/Objects-normal/arm64/LocalizationManager~partial.swiftmodule"
+  },
   "/Users/minmac/Documents/dev/Project/translator-keyboard/TranslatorKeyboard/Shared/SessionManager.swift" : {
     "const-values" : "/Users/minmac/Documents/dev/Project/translator-keyboard/TranslatorKeyboard/build/TranslatorKeyboard.build/Debug-iphoneos/TranslatorKeyboard.build/Objects-normal/arm64/SessionManager.swiftconstvalues",
     "dependencies" : "/Users/minmac/Documents/dev/Project/translator-keyboard/TranslatorKeyboard/build/TranslatorKeyboard.build/Debug-iphoneos/TranslatorKeyboard.build/Objects-normal/arm64/SessionManager.d",

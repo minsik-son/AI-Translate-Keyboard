@@ -21,7 +21,7 @@ class KeyboardLayoutView: UIView {
     var onTrackpadModeChanged: ((Bool) -> Void)?
 
     // Return key appearance — set by controller
-    var returnKeyDisplayName: String = "이동" {
+    var returnKeyDisplayName: String = L("keyboard.return.go") {
         didSet { if oldValue != returnKeyDisplayName { buildKeyboard() } }
     }
     var returnKeyIsBlue: Bool = true {
@@ -601,7 +601,7 @@ class KeyboardLayoutView: UIView {
             button.titleLabel?.font = .systemFont(ofSize: Layout.specialFontSize, weight: .medium)
 
         case " ":
-            let spaceTitle = (currentLanguage == .korean && currentPage == .letters) ? "간격" : ""
+            let spaceTitle = (currentLanguage == .korean && currentPage == .letters) ? L("keyboard.space") : ""
             button.setTitle(spaceTitle, for: .normal)
             button.titleLabel?.font = .systemFont(ofSize: Layout.spaceFontSize)
 
@@ -917,6 +917,13 @@ class KeyboardLayoutView: UIView {
 
     func getCurrentLanguage() -> KeyboardLanguage {
         return currentLanguage
+    }
+
+    func setLanguage(_ language: KeyboardLanguage) {
+        currentLanguage = language
+        isShifted = false
+        currentPage = .letters
+        buildKeyboard()
     }
 
     func setShifted(_ shifted: Bool) {

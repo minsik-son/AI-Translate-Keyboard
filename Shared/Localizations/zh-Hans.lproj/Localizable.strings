@@ -18,7 +18,7 @@
 "onboarding.welcome.subtitle" = "随时随地翻译的键盘";
 "onboarding.permission.title" = "键盘设置";
 "onboarding.permission.step1" = "前往设置 → 通用 → 键盘 → 添加新键盘\n添加 Translator Keyboard";
-"onboarding.permission.step2" = "请开启"允许完全访问"\n（翻译功能需要此权限）";
+"onboarding.permission.step2" = "请开启\"允许完全访问\"\n（翻译功能需要此权限）";
 "onboarding.feature.translate.title" = "实时翻译";
 "onboarding.feature.translate.description" = "直接在键盘上翻译\n边输入边查看翻译结果";
 "onboarding.feature.multilang.title" = "多语言支持";

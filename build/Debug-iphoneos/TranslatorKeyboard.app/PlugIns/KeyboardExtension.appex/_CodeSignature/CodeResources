@@ -12,6 +12,51 @@
 		<data>
 		+msk/qW1kMAwKuhvTqSwCzyBhF0=
 		</data>
+		<key>en.lproj/Localizable.strings</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			uAOgSwyGDb2jtxL+nY6g/VkBMoo=
+			</data>
+			<key>optional</key>
+			<true/>
+		</dict>
+		<key>es.lproj/Localizable.strings</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			74VJo6kXPPlTEkydv1YgCcjXk5A=
+			</data>
+			<key>optional</key>
+			<true/>
+		</dict>
+		<key>ja.lproj/Localizable.strings</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			m8ikP//OPrZ82H1Vg+2/k4f8Px8=
+			</data>
+			<key>optional</key>
+			<true/>
+		</dict>
+		<key>ko.lproj/Localizable.strings</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			yiM5p5jzpK65n7goh9ZePR/fpCk=
+			</data>
+			<key>optional</key>
+			<true/>
+		</dict>
+		<key>zh-Hans.lproj/Localizable.strings</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			sQNV/VCRdMZ5m9dtsBYJBebdx5M=
+			</data>
+			<key>optional</key>
+			<true/>
+		</dict>
 	</dict>
 	<key>files2</key>
 	<dict>
@@ -21,6 +66,51 @@
 			<data>
 			0WbU97iJD3o9TxTZcuVs8HTU34PWVOyYv8R39N2FCtM=
 			</data>
+		</dict>
+		<key>en.lproj/Localizable.strings</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			QUZU8t4Qh7YpaycuvgAf+rSp8u4PYugoyUnqE2AMa8M=
+			</data>
+			<key>optional</key>
+			<true/>
+		</dict>
+		<key>es.lproj/Localizable.strings</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			yGbjI60ipSnd31/S3Fli446TxbNvNzWR6CBx52d2nbA=
+			</data>
+			<key>optional</key>
+			<true/>
+		</dict>
+		<key>ja.lproj/Localizable.strings</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			H0QORe6X1NHC8JMId0qR3uy7E4qp4ZttZraO0QGLsL4=
+			</data>
+			<key>optional</key>
+			<true/>
+		</dict>
+		<key>ko.lproj/Localizable.strings</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			85MDVnLUAnJoujQrmL8ZHBxKBLqNdDdgUxK5bVQfAI0=
+			</data>
+			<key>optional</key>
+			<true/>
+		</dict>
+		<key>zh-Hans.lproj/Localizable.strings</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			UT6MzmWAkuH/iAMXf8+g+3/01UHk/C0KBzU0a/yJX8M=
+			</data>
+			<key>optional</key>
+			<true/>
 		</dict>
 	</dict>
 	<key>rules</key>

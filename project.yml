@@ -13,6 +13,15 @@ settings:
     DEVELOPMENT_TEAM: 3Q2D38NW4X
     CODE_SIGN_STYLE: Automatic
 
+schemes:
+  TranslatorKeyboard:
+    build:
+      targets:
+        TranslatorKeyboard: all
+        KeyboardExtension: all
+    run:
+      config: Debug
+
 targets:
   TranslatorKeyboard:
     type: application
@@ -22,6 +31,10 @@ targets:
         excludes:
           - "Resources/Info.plist"
       - path: Shared
+        excludes:
+          - "Localizations"
+    resources:
+      - path: Shared/Localizations
     info:
       path: TranslatorKeyboard/Resources/Info.plist
       properties:
@@ -34,6 +47,7 @@ targets:
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
         CFBundleDisplayName: Translator Keyboard
+        UILaunchScreen: {}
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.translatorkeyboard.app
@@ -56,6 +70,10 @@ targets:
         excludes:
           - "Resources/Info.plist"
       - path: Shared
+        excludes:
+          - "Localizations"
+    resources:
+      - path: Shared/Localizations
     info:
       path: KeyboardExtension/Resources/Info.plist
       properties:

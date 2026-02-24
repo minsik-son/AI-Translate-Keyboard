@@ -27,6 +27,7 @@ class KeyboardViewController: UIInputViewController {
     private lazy var textProxyManager = TextProxyManager(textDocumentProxy: textDocumentProxy)
     private let translationManager = TranslationManager()
     private let sessionManager = SessionManager.shared
+    private let autocorrectEngine = AutocorrectEngine()
 
     // MARK: - Constraints
 
@@ -37,6 +38,14 @@ class KeyboardViewController: UIInputViewController {
 
     // Status message
     private var statusMessageTimer: DispatchWorkItem?
+
+    private var isAutocorrectEnabled: Bool {
+        let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier)
+        if let obj = defaults?.object(forKey: AppConstants.UserDefaultsKeys.autoComplete) {
+            return (obj as? Bool) ?? false
+        }
+        return true
+    }
 
     // Language state
     private var sourceLanguageCode: String = "ko"
@@ -87,6 +96,7 @@ class KeyboardViewController: UIInputViewController {
         }
 
         checkAutoCapitalize()
+        updateSuggestions()
     }
 
     // MARK: - Height
@@ -209,6 +219,9 @@ class KeyboardViewController: UIInputViewController {
         toolbarView.onSettingsTap = { [weak self] in
             self?.openContainingApp()
         }
+        toolbarView.onSuggestionTap = { [weak self] suggestion in
+            self?.applySuggestion(suggestion)
+        }
 
         // Translation Input — close button
         translationInputView.onCloseTranslation = { [weak self] in
@@ -230,8 +243,10 @@ class KeyboardViewController: UIInputViewController {
         keyboardLayoutView.onKeyTap = { [weak self] key in
             self?.handleKeyTap(key)
         }
-        keyboardLayoutView.onLanguageChanged = { [weak self] _ in
+        keyboardLayoutView.onLanguageChanged = { [weak self] lang in
             self?.commitDefaultComposing()
+            let code: String = (lang == .korean) ? "korean" : "english"
+            AppGroupManager.shared.set(code, forKey: AppConstants.UserDefaultsKeys.keyboardLayout)
         }
         keyboardLayoutView.onCursorMove = { [weak self] horizontal, vertical in
             self?.handleCursorMove(horizontal: horizontal, vertical: vertical)
@@ -276,6 +291,11 @@ class KeyboardViewController: UIInputViewController {
         }
         translationManager.setLanguages(source: sourceLanguageCode, target: targetLanguageCode)
         updateLanguageLabels()
+
+        if let savedLang = AppGroupManager.shared.string(forKey: AppConstants.UserDefaultsKeys.keyboardLayout) {
+            let lang: KeyboardLanguage = (savedLang == "korean") ? .korean : .english
+            keyboardLayoutView.setLanguage(lang)
+        }
     }
 
     // MARK: - Mode Switching
@@ -302,6 +322,7 @@ class KeyboardViewController: UIInputViewController {
             translationInputView.isHidden = false
             textInputHandler.clear()
             translationInputView.clear()
+            toolbarView.hideSuggestions()
             keyboardTopToToolbarConstraint?.isActive = false
             keyboardTopToTranslationConstraint?.isActive = true
         }
@@ -322,12 +343,12 @@ class KeyboardViewController: UIInputViewController {
         commitDefaultComposing()
 
         guard hasFullAccess() else {
-            showStatusMessage("전체 접근을 허용해주세요")
+            showStatusMessage(L("keyboard.error.full_access"))
             return
         }
 
         guard sessionManager.canTranslate else {
-            showStatusMessage("오늘의 번역 횟수를 모두 사용했습니다")
+            showStatusMessage(L("keyboard.error.session_limit"))
             return
         }
 
@@ -502,6 +523,7 @@ class KeyboardViewController: UIInputViewController {
         }
 
         checkAutoCapitalize()
+        updateSuggestions()
     }
 
     private func commitDefaultComposing() {
@@ -526,7 +548,7 @@ class KeyboardViewController: UIInputViewController {
         default:
             if textInputHandler.totalLength >= AppConstants.Limits.maxCharacters {
                 hapticFeedback.impactOccurred()
-                showStatusMessage("최대 \(AppConstants.Limits.maxCharacters)자까지 입력 가능합니다")
+                showStatusMessage(String(format: L("keyboard.error.max_chars"), AppConstants.Limits.maxCharacters))
                 return
             }
 
@@ -594,6 +616,39 @@ class KeyboardViewController: UIInputViewController {
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0, execute: workItem)
     }
 
+    // MARK: - Autocorrect Suggestions
+
+    private func currentTypingWord() -> String? {
+        guard let context = textDocumentProxy.documentContextBeforeInput else { return nil }
+        let components = context.components(separatedBy: CharacterSet.whitespacesAndNewlines)
+        return components.last?.isEmpty == false ? components.last : nil
+    }
+
+    private func updateSuggestions() {
+        guard currentMode == .defaultMode, isAutocorrectEnabled else {
+            toolbarView.hideSuggestions(); return
+        }
+        let currentLang = keyboardLayoutView.getCurrentLanguage()
+        if currentLang == .korean && !defaultTextInputHandler.composingText.isEmpty {
+            toolbarView.hideSuggestions(); return
+        }
+        guard let word = currentTypingWord(), !word.isEmpty else {
+            toolbarView.hideSuggestions(); return
+        }
+        let suggestions = autocorrectEngine.suggestions(for: word, language: currentLang)
+        suggestions.isEmpty ? toolbarView.hideSuggestions() : toolbarView.showSuggestions(suggestions)
+    }
+
+    private func applySuggestion(_ suggestion: String) {
+        commitDefaultComposing()
+        if let word = currentTypingWord() {
+            for _ in 0..<word.count { textDocumentProxy.deleteBackward() }
+        }
+        textDocumentProxy.insertText(suggestion + " ")
+        toolbarView.hideSuggestions()
+        checkAutoCapitalize()
+    }
+
     // MARK: - Return Key
 
     private func updateReturnKeyAppearance() {
@@ -601,35 +656,35 @@ class KeyboardViewController: UIInputViewController {
 
         switch returnType {
         case .go:
-            keyboardLayoutView.returnKeyDisplayName = "이동"
+            keyboardLayoutView.returnKeyDisplayName = L("keyboard.return.go")
             keyboardLayoutView.returnKeyIsBlue = true
         case .search:
-            keyboardLayoutView.returnKeyDisplayName = "검색"
+            keyboardLayoutView.returnKeyDisplayName = L("keyboard.return.search")
             keyboardLayoutView.returnKeyIsBlue = true
         case .send:
-            keyboardLayoutView.returnKeyDisplayName = "전송"
+            keyboardLayoutView.returnKeyDisplayName = L("keyboard.return.send")
             keyboardLayoutView.returnKeyIsBlue = true
         case .done:
-            keyboardLayoutView.returnKeyDisplayName = "완료"
+            keyboardLayoutView.returnKeyDisplayName = L("keyboard.return.done")
             keyboardLayoutView.returnKeyIsBlue = true
         case .next:
-            keyboardLayoutView.returnKeyDisplayName = "다음"
+            keyboardLayoutView.returnKeyDisplayName = L("keyboard.return.next")
             keyboardLayoutView.returnKeyIsBlue = true
         case .join:
-            keyboardLayoutView.returnKeyDisplayName = "가입"
+            keyboardLayoutView.returnKeyDisplayName = L("keyboard.return.join")
             keyboardLayoutView.returnKeyIsBlue = true
         case .route:
-            keyboardLayoutView.returnKeyDisplayName = "경로"
+            keyboardLayoutView.returnKeyDisplayName = L("keyboard.return.route")
             keyboardLayoutView.returnKeyIsBlue = true
         case .emergencyCall:
-            keyboardLayoutView.returnKeyDisplayName = "긴급"
+            keyboardLayoutView.returnKeyDisplayName = L("keyboard.return.emergency")
             keyboardLayoutView.returnKeyIsBlue = true
         case .continue:
-            keyboardLayoutView.returnKeyDisplayName = "계속"
+            keyboardLayoutView.returnKeyDisplayName = L("keyboard.return.continue")
             keyboardLayoutView.returnKeyIsBlue = true
         default:
             // .default — used in text editors, messaging body, notes → newline
-            keyboardLayoutView.returnKeyDisplayName = "줄바꿈"
+            keyboardLayoutView.returnKeyDisplayName = L("keyboard.return.newline")
             keyboardLayoutView.returnKeyIsBlue = false
         }
     }
@@ -715,17 +770,17 @@ extension KeyboardViewController: TranslationManagerDelegate {
     func translationManager(_ manager: TranslationManager, didFailWithError error: TranslationError) {
         switch error {
         case .timeout:
-            showStatusMessage("번역 시간 초과")
+            showStatusMessage(L("keyboard.error.timeout"))
         case .offline:
-            showStatusMessage("오프라인입니다")
+            showStatusMessage(L("keyboard.error.offline"))
         case .rateLimited:
-            showStatusMessage("잠시 후 다시 시도해주세요")
+            showStatusMessage(L("keyboard.error.rate_limited"))
         case .networkError, .serverError, .invalidResponse:
-            showStatusMessage("번역 실패")
+            showStatusMessage(L("keyboard.error.translate_failed"))
         }
     }
 
     func translationManagerDidStartTranslating(_ manager: TranslationManager) {
-        toolbarView.showStatusMessage("번역 중...")
+        toolbarView.showStatusMessage(L("keyboard.status.translating"))
     }
 }
