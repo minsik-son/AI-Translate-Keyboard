@@ -43,9 +43,23 @@ class KeyboardLayoutView: UIView {
     private var trackpadLastY: CGFloat = 0
     private var trackpadAccumulator: CGFloat = 0
     private var trackpadAccumulatorY: CGFloat = 0
-    private let trackpadSensitivity: CGFloat = 6   // points per character move
-    private let trackpadSensitivityY: CGFloat = 12  // points per line move (higher = slower)
+    private let trackpadSensitivity: CGFloat = 8   // points per character move
+    private let trackpadSensitivityY: CGFloat = 20  // points per line move (higher = slower)
     private let hapticGenerator = UIImpactFeedbackGenerator(style: .light)
+
+    // Axis locking for trackpad
+    private enum TrackpadAxis { case none, horizontal, vertical }
+    private var lockedAxis: TrackpadAxis = .none
+    private var trackpadStartX: CGFloat = 0
+    private var trackpadStartY: CGFloat = 0
+    private let axisLockThreshold: CGFloat = 10
+    private let axisUnlockThreshold: CGFloat = 20
+
+    // CADisplayLink for smooth cursor movement
+    private var displayLink: CADisplayLink?
+
+    // Trackpad haptic (lighter than key tap)
+    private let selectionHaptic = UISelectionFeedbackGenerator()
 
     // MARK: - Layout Constants
 
@@ -651,6 +665,9 @@ class KeyboardLayoutView: UIView {
                 spaceLongPressTimer = Timer.scheduledTimer(withTimeInterval: 0.4, repeats: false) { [weak self] _ in
                     guard let self = self, self.spaceTrackingTouch != nil else { return }
                     self.spaceDidEnterTrackpad = true
+                    self.trackpadStartX = self.trackpadLastX
+                    self.trackpadStartY = self.trackpadLastY
+                    self.lockedAxis = .none
                     self.enterTrackpadMode()
                 }
                 flashButton(button)
@@ -680,37 +697,49 @@ class KeyboardLayoutView: UIView {
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        // Space bar trackpad cursor movement
+        // Space bar trackpad cursor movement — accumulate only; CADisplayLink fires moves
         if let tracked = spaceTrackingTouch, touches.contains(tracked) {
             if isTrackpadMode {
                 let loc = tracked.location(in: self)
 
-                // X-axis (left/right)
+                // Axis locking: determine dominant axis after threshold distance
+                if lockedAxis == .none {
+                    let dx = abs(loc.x - trackpadStartX)
+                    let dy = abs(loc.y - trackpadStartY)
+                    if dx >= axisLockThreshold || dy >= axisLockThreshold {
+                        lockedAxis = (dx >= dy) ? .horizontal : .vertical
+                    }
+                } else {
+                    // Allow axis switch if cross-axis movement exceeds unlock threshold
+                    let crossAxisDelta: CGFloat
+                    switch lockedAxis {
+                    case .horizontal:
+                        crossAxisDelta = abs(loc.y - trackpadStartY)
+                    case .vertical:
+                        crossAxisDelta = abs(loc.x - trackpadStartX)
+                    case .none:
+                        crossAxisDelta = 0
+                    }
+                    if crossAxisDelta >= axisUnlockThreshold {
+                        trackpadStartX = loc.x
+                        trackpadStartY = loc.y
+                        trackpadAccumulator = 0
+                        trackpadAccumulatorY = 0
+                        lockedAxis = .none
+                    }
+                }
+
+                // Accumulate deltas based on locked axis
                 let deltaX = loc.x - trackpadLastX
-                trackpadLastX = loc.x
-                trackpadAccumulator += deltaX
-
-                while trackpadAccumulator > trackpadSensitivity {
-                    trackpadAccumulator -= trackpadSensitivity
-                    onCursorMove?(1, 0)
-                }
-                while trackpadAccumulator < -trackpadSensitivity {
-                    trackpadAccumulator += trackpadSensitivity
-                    onCursorMove?(-1, 0)
-                }
-
-                // Y-axis (up/down)
                 let deltaY = loc.y - trackpadLastY
+                trackpadLastX = loc.x
                 trackpadLastY = loc.y
-                trackpadAccumulatorY += deltaY
 
-                while trackpadAccumulatorY > trackpadSensitivityY {
-                    trackpadAccumulatorY -= trackpadSensitivityY
-                    onCursorMove?(0, 1)   // down
+                if lockedAxis != .vertical {
+                    trackpadAccumulator += deltaX
                 }
-                while trackpadAccumulatorY < -trackpadSensitivityY {
-                    trackpadAccumulatorY += trackpadSensitivityY
-                    onCursorMove?(0, -1)  // up
+                if lockedAxis != .horizontal {
+                    trackpadAccumulatorY += deltaY
                 }
             }
         }
@@ -873,6 +902,11 @@ class KeyboardLayoutView: UIView {
     private func enterTrackpadMode() {
         guard !isTrackpadMode else { return }
         isTrackpadMode = true
+        selectionHaptic.prepare()
+
+        // Start CADisplayLink for smooth cursor movement
+        displayLink = CADisplayLink(target: self, selector: #selector(trackpadDisplayLinkFired))
+        displayLink?.add(to: .main, forMode: .common)
 
         // Hide all key labels/icons — keep blank key shapes only
         for button in allKeyButtons {
@@ -893,8 +927,53 @@ class KeyboardLayoutView: UIView {
     private func exitTrackpadMode() {
         guard isTrackpadMode else { return }
         isTrackpadMode = false
+        lockedAxis = .none
+
+        // Stop CADisplayLink
+        displayLink?.invalidate()
+        displayLink = nil
+
         buildKeyboard()  // Full rebuild to restore all key appearances
         onTrackpadModeChanged?(false)
+    }
+
+    @objc private func trackpadDisplayLinkFired() {
+        var moved = false
+
+        // X-axis
+        while trackpadAccumulator > trackpadSensitivity {
+            trackpadAccumulator -= trackpadSensitivity
+            onCursorMove?(1, 0)
+            moved = true
+        }
+        while trackpadAccumulator < -trackpadSensitivity {
+            trackpadAccumulator += trackpadSensitivity
+            onCursorMove?(-1, 0)
+            moved = true
+        }
+
+        // Y-axis — max 1 line per threshold crossing, reset accumulator to prevent multi-line jumps
+        if trackpadAccumulatorY > trackpadSensitivityY {
+            trackpadAccumulatorY = 0
+            onCursorMove?(0, 1)
+            moved = true
+        } else if trackpadAccumulatorY < -trackpadSensitivityY {
+            trackpadAccumulatorY = 0
+            onCursorMove?(0, -1)
+            moved = true
+        }
+
+        if moved {
+            triggerTrackpadHaptic()
+        }
+    }
+
+    private func triggerTrackpadHaptic() {
+        let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier)
+        if let obj = defaults?.object(forKey: AppConstants.UserDefaultsKeys.hapticFeedback) {
+            guard (obj as? Bool) == true else { return }
+        }
+        selectionHaptic.selectionChanged()
     }
 
     // MARK: - Hit Test

@@ -501,9 +501,9 @@ class KeyboardViewController: UIInputViewController {
         case " ":
             commitDefaultComposing()
             textDocumentProxy.insertText(" ")
-            isSuggestionDismissedForCurrentWord = false
 
         default:
+            isSuggestionDismissedForCurrentWord = false
             let isKorean = isKoreanJamo(key)
             if isKorean, let char = key.first {
                 if defaultModeComposingLength > 0 {
@@ -580,36 +580,91 @@ class KeyboardViewController: UIInputViewController {
             textDocumentProxy.adjustTextPosition(byCharacterOffset: horizontal)
         }
         if vertical != 0 {
-            moveCursorVertically(by: vertical)
+            if vertical < 0 {
+                moveUp()
+            } else {
+                moveDown()
+            }
         }
     }
 
-    private func moveCursorVertically(by direction: Int) {
-        if direction < 0 {
-            // Move up
-            guard let before = textDocumentProxy.documentContextBeforeInput else { return }
-            let lines = before.components(separatedBy: "\n")
-            guard lines.count >= 2 else { return }
-            let currentLine = lines.last!
-            let previousLine = lines[lines.count - 2]
-            let col = currentLine.count
-            let targetCol = min(col, previousLine.count)
-            let moveBack = currentLine.count + 1 + (previousLine.count - targetCol)
-            textDocumentProxy.adjustTextPosition(byCharacterOffset: -moveBack)
-        } else {
-            // Move down
-            guard let after = textDocumentProxy.documentContextAfterInput,
-                  let before = textDocumentProxy.documentContextBeforeInput else { return }
-            let currentLine = before.components(separatedBy: "\n").last ?? ""
-            let col = currentLine.count
-            let afterLines = after.components(separatedBy: "\n")
-            guard afterLines.count >= 2 else { return }
-            let nextLine = afterLines[1]
-            let remainingCurrentLine = afterLines[0].count
-            let targetCol = min(col, nextLine.count)
-            let moveForward = remainingCurrentLine + 1 + targetCol
-            textDocumentProxy.adjustTextPosition(byCharacterOffset: moveForward)
+    /// Estimate visual line width based on screen width and current language.
+    private var estimatedCharsPerLine: Int {
+        let screenWidth = UIScreen.main.bounds.width
+        let textWidth = screenWidth * 0.85  // ~85% of screen for typical text view margins
+        let lang = keyboardLayoutView.getCurrentLanguage()
+        let avgCharWidth: CGFloat = (lang == .korean) ? 17 : 9
+        return max(10, Int(textWidth / avgCharWidth))
+    }
+
+    /// Move cursor up one line.
+    /// Uses actual \n positions when available, falls back to estimated offset for soft-wrapped text.
+    private func moveUp() {
+        guard let before = textDocumentProxy.documentContextBeforeInput, !before.isEmpty else { return }
+
+        // Find the last newline before cursor — that's the start of current line
+        guard let currentLineStart = before.lastIndex(of: "\n") else {
+            // No \n found — soft-wrapped text, use estimated offset
+            textDocumentProxy.adjustTextPosition(byCharacterOffset: -estimatedCharsPerLine)
+            return
         }
+
+        let currentColumn = before.distance(from: before.index(after: currentLineStart), to: before.endIndex)
+
+        // Find the previous line
+        let textBeforeCurrentLine = before[before.startIndex..<currentLineStart]
+        let prevLineStart: String.Index
+        if let prevNewline = textBeforeCurrentLine.lastIndex(of: "\n") {
+            prevLineStart = textBeforeCurrentLine.index(after: prevNewline)
+        } else {
+            prevLineStart = textBeforeCurrentLine.startIndex
+        }
+
+        let prevLineLength = before.distance(from: prevLineStart, to: currentLineStart)
+        let targetColumn = min(currentColumn, prevLineLength)
+
+        // Move back: current column chars + newline char + remaining chars in prev line
+        let offset = -(currentColumn + 1 + (prevLineLength - targetColumn))
+        textDocumentProxy.adjustTextPosition(byCharacterOffset: offset)
+    }
+
+    /// Move cursor down one line.
+    /// Uses actual \n positions when available, falls back to estimated offset for soft-wrapped text.
+    private func moveDown() {
+        let after = textDocumentProxy.documentContextAfterInput ?? ""
+
+        // Try \n-based accurate movement
+        guard !after.isEmpty, let currentLineEnd = after.firstIndex(of: "\n") else {
+            // No context, empty, or no \n — use estimated offset
+            textDocumentProxy.adjustTextPosition(byCharacterOffset: estimatedCharsPerLine)
+            return
+        }
+
+        // Calculate current column position
+        let before = textDocumentProxy.documentContextBeforeInput ?? ""
+        let currentColumn: Int
+        if let lastNewline = before.lastIndex(of: "\n") {
+            currentColumn = before.distance(from: before.index(after: lastNewline), to: before.endIndex)
+        } else {
+            currentColumn = before.count
+        }
+
+        // Find the next line's length
+        let nextLineStart = after.index(after: currentLineEnd)
+        let nextLineEnd: String.Index
+        if let nextNewline = after[nextLineStart...].firstIndex(of: "\n") {
+            nextLineEnd = nextNewline
+        } else {
+            nextLineEnd = after.endIndex
+        }
+
+        let nextLineLength = after.distance(from: nextLineStart, to: nextLineEnd)
+        let targetColumn = min(currentColumn, nextLineLength)
+
+        // Offset = chars remaining on current line + 1 (newline) + targetColumn
+        let charsToCurrentLineEnd = after.distance(from: after.startIndex, to: currentLineEnd)
+        let offset = charsToCurrentLineEnd + 1 + targetColumn
+        textDocumentProxy.adjustTextPosition(byCharacterOffset: offset)
     }
 
     // MARK: - Status Messages
