@@ -49,6 +49,8 @@
 "keyboard.error.rate_limited" = "しばらくしてからお試しください";
 "keyboard.error.translate_failed" = "翻訳に失敗しました";
 "keyboard.status.translating" = "翻訳中...";
+"keyboard.error.correct_failed" = "校正に失敗しました";
+"keyboard.status.correcting" = "校正中...";
 
 // === Return Key Labels ===
 "keyboard.return.go" = "移動";

@@ -49,6 +49,8 @@
 "keyboard.error.rate_limited" = "Inténtalo de nuevo más tarde";
 "keyboard.error.translate_failed" = "Error de traducción";
 "keyboard.status.translating" = "Traduciendo...";
+"keyboard.error.correct_failed" = "Error de corrección";
+"keyboard.status.correcting" = "Corrigiendo...";
 
 // === Return Key Labels ===
 "keyboard.return.go" = "Ir";

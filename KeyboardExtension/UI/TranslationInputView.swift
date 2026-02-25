@@ -185,6 +185,10 @@ class TranslationInputView: UIView {
         updateCursorPosition()
     }
 
+    func setPlaceholder(_ text: String) {
+        placeholderLabel.text = text
+    }
+
     func updateAppearance(isDark: Bool) {
         backgroundColor = .clear
         containerView.backgroundColor = isDark ? UIColor(white: 0.18, alpha: 1) : UIColor(white: 0.95, alpha: 1)

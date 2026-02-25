@@ -5,6 +5,7 @@ class ToolbarView: UIView {
     // MARK: - Callbacks
 
     var onTranslateToggle: (() -> Void)?
+    var onCorrectionToggle: (() -> Void)?
     var onEmojiTap: ((String) -> Void)?
     var onEmojiKeyboardToggle: (() -> Void)?
     var onSettingsTap: (() -> Void)?
@@ -292,7 +293,7 @@ class ToolbarView: UIView {
     }
 
     @objc private func checklistTapped() {
-        // Checklist — no-op for now
+        onCorrectionToggle?()
     }
 
     @objc private func translateTapped() {

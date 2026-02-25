@@ -23,8 +23,9 @@ enum AppConstants {
     }
 
     enum API {
-        static let baseURL = "https://translator-keyboard-api.vercel.app"
+        static let baseURL = "https://proxy-server-for-tk.vercel.app"
         static let translateEndpoint = "/api/translate"
+        static let correctEndpoint = "/api/correct"
         static let timeout: TimeInterval = 10
     }
 

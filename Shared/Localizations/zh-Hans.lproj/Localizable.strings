@@ -49,6 +49,8 @@
 "keyboard.error.rate_limited" = "请稍后再试";
 "keyboard.error.translate_failed" = "翻译失败";
 "keyboard.status.translating" = "翻译中...";
+"keyboard.error.correct_failed" = "校正失败";
+"keyboard.status.correcting" = "校正中...";
 
 // === Return Key Labels ===
 "keyboard.return.go" = "前往";

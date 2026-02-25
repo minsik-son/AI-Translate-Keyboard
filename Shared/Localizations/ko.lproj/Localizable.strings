@@ -49,6 +49,8 @@
 "keyboard.error.rate_limited" = "잠시 후 다시 시도해주세요";
 "keyboard.error.translate_failed" = "번역 실패";
 "keyboard.status.translating" = "번역 중...";
+"keyboard.error.correct_failed" = "교정 실패";
+"keyboard.status.correcting" = "교정 중...";
 
 // === Return Key Labels ===
 "keyboard.return.go" = "이동";

@@ -22,6 +22,7 @@ class LanguagePickerView: UIView {
     private var currentTab: Tab = .source
     private var selectedSourceCode: String = "ko"
     private var selectedTargetCode: String = "en"
+    private var isSingleLanguageMode = false
 
     static let supportedLanguages: [LanguageItem] = [
         LanguageItem(code: "ko", displayName: "한국어"),
@@ -79,6 +80,16 @@ class LanguagePickerView: UIView {
         return tv
     }()
 
+    private let singleHeaderLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 15, weight: .semibold)
+        label.textColor = .white
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.isHidden = true
+        return label
+    }()
+
     private var tabIndicatorLeading: NSLayoutConstraint?
     private var tabIndicatorWidth: NSLayoutConstraint?
 
@@ -108,6 +119,12 @@ class LanguagePickerView: UIView {
         headerView.addSubview(sourceTabButton)
         headerView.addSubview(targetTabButton)
         headerView.addSubview(tabIndicator)
+        headerView.addSubview(singleHeaderLabel)
+
+        NSLayoutConstraint.activate([
+            singleHeaderLabel.centerXAnchor.constraint(equalTo: headerView.centerXAnchor),
+            singleHeaderLabel.centerYAnchor.constraint(equalTo: headerView.centerYAnchor),
+        ])
 
         NSLayoutConstraint.activate([
             headerView.topAnchor.constraint(equalTo: topAnchor),
@@ -159,10 +176,27 @@ class LanguagePickerView: UIView {
     // MARK: - Public
 
     func configure(sourceCode: String, targetCode: String, initialTab: Tab = .source) {
+        isSingleLanguageMode = false
+        sourceTabButton.isHidden = false
+        targetTabButton.isHidden = false
+        tabIndicator.isHidden = false
+        singleHeaderLabel.isHidden = true
         selectedSourceCode = sourceCode
         selectedTargetCode = targetCode
         currentTab = initialTab
         updateTabUI()
+        tableView.reloadData()
+    }
+
+    func configureSingleLanguage(code: String, title: String) {
+        isSingleLanguageMode = true
+        sourceTabButton.isHidden = true
+        targetTabButton.isHidden = true
+        tabIndicator.isHidden = true
+        singleHeaderLabel.isHidden = false
+        singleHeaderLabel.text = title
+        selectedSourceCode = code
+        currentTab = .source
         tableView.reloadData()
     }
 
