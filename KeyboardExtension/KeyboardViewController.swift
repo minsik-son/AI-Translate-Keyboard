@@ -363,6 +363,7 @@ class KeyboardViewController: UIInputViewController {
             self?.toggleCorrectionMode()
         }
         toolbarView.onSettingsTap = { [weak self] in
+            print("[Settings] toolbar settings button tapped")
             self?.openContainingApp()
         }
         toolbarView.onSavedPhrasesTap = { [weak self] in
@@ -1181,6 +1182,7 @@ class KeyboardViewController: UIInputViewController {
     // MARK: - Open Containing App
 
     @objc protocol URLOpener {
+        @objc(openURL:options:completionHandler:)
         func open(_ url: URL, options: [String: Any], completionHandler: ((Bool) -> Void)?)
     }
 

@@ -43,5 +43,16 @@
 	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.translatorkeyboard.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>translatorkeyboard</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
