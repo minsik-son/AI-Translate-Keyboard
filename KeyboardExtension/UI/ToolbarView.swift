@@ -109,7 +109,7 @@ class ToolbarView: UIView {
         dismissButton.addTarget(self, action: #selector(dismissTapped), for: .touchUpInside)
 
         NSLayoutConstraint.activate([
-            stack.topAnchor.constraint(equalTo: topAnchor),
+            stack.topAnchor.constraint(equalTo: topAnchor, constant: 2),
             stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
             stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
             stack.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -6),

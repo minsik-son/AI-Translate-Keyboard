@@ -92,10 +92,11 @@ class KeyboardViewController: UIInputViewController {
         static let toolbar: CGFloat = 40
         static let translationLanguageBar: CGFloat = 44
         static let translationInput: CGFloat = 44
-        // Toolbar 40 + key area 270 = 310pt total.
-        static let totalDefault: CGFloat = 310
-        static let totalTranslation: CGFloat = 358   // langBar 44 + input 44 + key area 270
-        static let totalCorrection: CGFloat = 358    // langBar 44 + input 44 + key area 270
+        static let topPadding: CGFloat = 4
+        // Toolbar 40 + key area 270 + topPadding 4 = 314pt total.
+        static let totalDefault: CGFloat = 314
+        static let totalTranslation: CGFloat = 362   // topPadding 4 + langBar 44 + input 44 + key area 270
+        static let totalCorrection: CGFloat = 362    // topPadding 4 + langBar 44 + input 44 + key area 270
     }
 
     // MARK: - Lifecycle
@@ -178,13 +179,13 @@ class KeyboardViewController: UIInputViewController {
             newHeight = Heights.totalDefault
         case .translationMode:
             let inputH = translationInputHeightConstraint?.constant ?? Heights.translationInput
-            newHeight = Heights.translationLanguageBar + inputH + 270  // langBar + input + keyArea
+            newHeight = Heights.topPadding + Heights.translationLanguageBar + inputH + 270  // padding + langBar + input + keyArea
         case .correctionMode:
             let inputH = correctionInputHeightConstraint?.constant ?? Heights.translationInput
-            newHeight = Heights.translationLanguageBar + inputH + 270
+            newHeight = Heights.topPadding + Heights.translationLanguageBar + inputH + 270
         case .phraseInputMode:
             let inputH = phraseInputHeightConstraint?.constant ?? Heights.translationInput
-            newHeight = Heights.translationLanguageBar + inputH + 270
+            newHeight = Heights.topPadding + Heights.translationLanguageBar + inputH + 270
         }
 
         heightConstraint?.constant = newHeight
@@ -210,6 +211,9 @@ class KeyboardViewController: UIInputViewController {
     private func setupUI() {
         guard let inputView = self.inputView else { return }
         inputView.backgroundColor = .clear
+        inputView.layer.cornerRadius = 20
+        inputView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        inputView.clipsToBounds = true
 
         // Add main views — toolbar, translationLanguageBar+translationInput, correctionLanguageBar+correctionInput
         // occupy the SAME top position. Only one group is visible at a time.
@@ -231,14 +235,14 @@ class KeyboardViewController: UIInputViewController {
         inputView.addSubview(savedPhrasesView)
 
         NSLayoutConstraint.activate([
-            // Toolbar — pinned to top
-            toolbarView.topAnchor.constraint(equalTo: inputView.topAnchor),
+            // Toolbar — pinned to top with padding
+            toolbarView.topAnchor.constraint(equalTo: inputView.topAnchor, constant: Heights.topPadding),
             toolbarView.leadingAnchor.constraint(equalTo: inputView.leadingAnchor),
             toolbarView.trailingAnchor.constraint(equalTo: inputView.trailingAnchor),
             toolbarView.heightAnchor.constraint(equalToConstant: Heights.toolbar),
 
-            // Translation Language Bar — pinned to top
-            translationLanguageBar.topAnchor.constraint(equalTo: inputView.topAnchor),
+            // Translation Language Bar — pinned to top with padding
+            translationLanguageBar.topAnchor.constraint(equalTo: inputView.topAnchor, constant: Heights.topPadding),
             translationLanguageBar.leadingAnchor.constraint(equalTo: inputView.leadingAnchor),
             translationLanguageBar.trailingAnchor.constraint(equalTo: inputView.trailingAnchor),
             translationLanguageBar.heightAnchor.constraint(equalToConstant: Heights.translationLanguageBar),
@@ -248,8 +252,8 @@ class KeyboardViewController: UIInputViewController {
             translationInputView.leadingAnchor.constraint(equalTo: inputView.leadingAnchor),
             translationInputView.trailingAnchor.constraint(equalTo: inputView.trailingAnchor),
 
-            // Correction Language Bar — pinned to top
-            correctionLanguageBar.topAnchor.constraint(equalTo: inputView.topAnchor),
+            // Correction Language Bar — pinned to top with padding
+            correctionLanguageBar.topAnchor.constraint(equalTo: inputView.topAnchor, constant: Heights.topPadding),
             correctionLanguageBar.leadingAnchor.constraint(equalTo: inputView.leadingAnchor),
             correctionLanguageBar.trailingAnchor.constraint(equalTo: inputView.trailingAnchor),
             correctionLanguageBar.heightAnchor.constraint(equalToConstant: Heights.translationLanguageBar),
@@ -269,8 +273,8 @@ class KeyboardViewController: UIInputViewController {
             emojiKeyboardView.trailingAnchor.constraint(equalTo: inputView.trailingAnchor),
             emojiKeyboardView.bottomAnchor.constraint(equalTo: inputView.bottomAnchor),
 
-            // Phrase Input Header — pinned to top
-            phraseInputHeaderView.topAnchor.constraint(equalTo: inputView.topAnchor),
+            // Phrase Input Header — pinned to top with padding
+            phraseInputHeaderView.topAnchor.constraint(equalTo: inputView.topAnchor, constant: Heights.topPadding),
             phraseInputHeaderView.leadingAnchor.constraint(equalTo: inputView.leadingAnchor),
             phraseInputHeaderView.trailingAnchor.constraint(equalTo: inputView.trailingAnchor),
             phraseInputHeaderView.heightAnchor.constraint(equalToConstant: Heights.translationLanguageBar),
@@ -1250,6 +1254,7 @@ class KeyboardViewController: UIInputViewController {
         phraseInputView.applyTheme(theme)
         phraseInputView.updateAppearance(isDark: isDark)
     }
+
 }
 
 // MARK: - TextInputHandlerDelegate
