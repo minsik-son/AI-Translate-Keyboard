@@ -93,16 +93,32 @@ class TranslationLanguageBar: UIView {
 
     // MARK: - Public
 
+    private var customTheme: KeyboardTheme?
+
+    func applyTheme(_ theme: KeyboardTheme?) {
+        customTheme = theme
+    }
+
     func updateLanguageNames(source: String, target: String) {
         sourcePill.setTitle(source, for: .normal)
         targetPill.setTitle(target, for: .normal)
     }
 
     func updateAppearance(isDark: Bool) {
-        sourcePill.backgroundColor = isDark ? UIColor(white: 0.25, alpha: 1) : .white
-        targetPill.backgroundColor = isDark ? UIColor(white: 0.25, alpha: 1) : .white
-        sourcePill.setTitleColor(isDark ? .white : .label, for: .normal)
-        targetPill.setTitleColor(isDark ? .white : .label, for: .normal)
-        swapButton.tintColor = isDark ? UIColor(white: 0.55, alpha: 1) : .secondaryLabel
+        if let theme = customTheme {
+            backgroundColor = theme.toolbarBackground
+            sourcePill.backgroundColor = theme.keyBackground
+            targetPill.backgroundColor = theme.keyBackground
+            sourcePill.setTitleColor(theme.keyTextColor, for: .normal)
+            targetPill.setTitleColor(theme.keyTextColor, for: .normal)
+            swapButton.tintColor = theme.keyTextColor.withAlphaComponent(0.6)
+        } else {
+            backgroundColor = .clear
+            sourcePill.backgroundColor = isDark ? UIColor(white: 0.25, alpha: 1) : .white
+            targetPill.backgroundColor = isDark ? UIColor(white: 0.25, alpha: 1) : .white
+            sourcePill.setTitleColor(isDark ? .white : .label, for: .normal)
+            targetPill.setTitleColor(isDark ? .white : .label, for: .normal)
+            swapButton.tintColor = isDark ? UIColor(white: 0.55, alpha: 1) : .secondaryLabel
+        }
     }
 }

@@ -53,12 +53,25 @@ class CorrectionLanguageBar: UIView {
 
     // MARK: - Public
 
+    private var customTheme: KeyboardTheme?
+
+    func applyTheme(_ theme: KeyboardTheme?) {
+        customTheme = theme
+    }
+
     func updateLanguageName(_ name: String) {
         languagePill.setTitle(name, for: .normal)
     }
 
     func updateAppearance(isDark: Bool) {
-        languagePill.backgroundColor = isDark ? UIColor(white: 0.25, alpha: 1) : .white
-        languagePill.setTitleColor(isDark ? .white : .label, for: .normal)
+        if let theme = customTheme {
+            backgroundColor = theme.toolbarBackground
+            languagePill.backgroundColor = theme.keyBackground
+            languagePill.setTitleColor(theme.keyTextColor, for: .normal)
+        } else {
+            backgroundColor = .clear
+            languagePill.backgroundColor = isDark ? UIColor(white: 0.25, alpha: 1) : .white
+            languagePill.setTitleColor(isDark ? .white : .label, for: .normal)
+        }
     }
 }

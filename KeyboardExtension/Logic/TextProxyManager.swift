@@ -5,6 +5,10 @@ class TextProxyManager {
     private weak var textDocumentProxy: UITextDocumentProxy?
     private var previousInsertedLength: Int = 0
 
+    var hasPendingText: Bool {
+        return previousInsertedLength > 0
+    }
+
     init(textDocumentProxy: UITextDocumentProxy) {
         self.textDocumentProxy = textDocumentProxy
     }

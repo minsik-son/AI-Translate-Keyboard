@@ -16,13 +16,15 @@ class CorrectionManager {
     private var lastCorrectedText: String = ""
     private var retryCount = 0
     private let maxRetries = 1
+    private var currentGeneration: Int = 0
 
     private var languageCode: String = "ko"
 
     init() {
-        let config = URLSessionConfiguration.ephemeral
+        let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = AppConstants.API.timeout
         config.timeoutIntervalForResource = AppConstants.API.timeout
+        config.httpShouldUsePipelining = true
         self.session = URLSession(configuration: config)
     }
 
@@ -37,6 +39,7 @@ class CorrectionManager {
         guard !trimmed.isEmpty, trimmed != lastCorrectedText else { return }
 
         if let cached = cache.get(text: trimmed, source: "correct", target: languageCode) {
+            currentGeneration += 1
             lastCorrectedText = trimmed
             delegate?.correctionManager(self, didCorrect: cached, language: languageCode)
             return
@@ -52,6 +55,7 @@ class CorrectionManager {
     func cancelPending() {
         debounceWorkItem?.cancel()
         debounceWorkItem = nil
+        currentGeneration += 1
     }
 
     func reset() {
@@ -61,11 +65,12 @@ class CorrectionManager {
 
     private func performCorrection(text: String) {
         delegate?.correctionManagerDidStartCorrecting(self)
+        currentGeneration += 1
         retryCount = 0
-        executeRequest(text: text)
+        executeRequest(text: text, generation: currentGeneration)
     }
 
-    private func executeRequest(text: String) {
+    private func executeRequest(text: String, generation: Int) {
         let urlString = AppConstants.API.baseURL + AppConstants.API.correctEndpoint
         guard let url = URL(string: urlString) else { return }
 
@@ -87,19 +92,22 @@ class CorrectionManager {
 
         let task = session.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
-                self?.handleResponse(text: text, data: data, response: response, error: error)
+                self?.handleResponse(text: text, generation: generation, data: data, response: response, error: error)
             }
         }
         task.resume()
     }
 
-    private func handleResponse(text: String, data: Data?, response: URLResponse?, error: Error?) {
+    private func handleResponse(text: String, generation: Int, data: Data?, response: URLResponse?, error: Error?) {
+        // Discard stale responses — only process the latest generation
+        guard generation == currentGeneration else { return }
+
         if let error = error {
             let nsError = error as NSError
             if nsError.code == NSURLErrorTimedOut {
                 if retryCount < maxRetries {
                     retryCount += 1
-                    executeRequest(text: text)
+                    executeRequest(text: text, generation: generation)
                     return
                 }
                 delegate?.correctionManager(self, didFailWithError: .timeout)
@@ -108,7 +116,7 @@ class CorrectionManager {
             } else {
                 if retryCount < maxRetries {
                     retryCount += 1
-                    executeRequest(text: text)
+                    executeRequest(text: text, generation: generation)
                     return
                 }
                 delegate?.correctionManager(self, didFailWithError: .networkError(error))

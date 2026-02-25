@@ -9,6 +9,7 @@ class ToolbarView: UIView {
     var onEmojiTap: ((String) -> Void)?
     var onEmojiKeyboardToggle: (() -> Void)?
     var onSettingsTap: (() -> Void)?
+    var onSavedPhrasesTap: (() -> Void)?
     var onSuggestionTap: ((String) -> Void)?
     var onSuggestionDismiss: (() -> Void)?
 
@@ -21,12 +22,12 @@ class ToolbarView: UIView {
     }
 
     private let toolbarItems: [ToolbarItem] = [
-        ToolbarItem(iconName: "t.circle.fill", action: #selector(logoTapped), tag: 0),
+        ToolbarItem(iconName: "t.circle", action: #selector(logoTapped), tag: 0),
         ToolbarItem(iconName: "face.smiling", action: #selector(emojiButtonTapped), tag: 1),
-        ToolbarItem(iconName: "face.smiling.inverse", action: #selector(emoticonTapped), tag: 2),
-        ToolbarItem(iconName: "doc.on.clipboard", action: #selector(clipboardTapped), tag: 3),
-        ToolbarItem(iconName: "checklist", action: #selector(checklistTapped), tag: 4),
-        ToolbarItem(iconName: "character.book.closed.fill", action: #selector(translateTapped), tag: 5),
+        ToolbarItem(iconName: "text.bubble", action: #selector(emoticonTapped), tag: 2),
+        ToolbarItem(iconName: "bookmark", action: #selector(clipboardTapped), tag: 3),
+        ToolbarItem(iconName: "checkmark.circle", action: #selector(checklistTapped), tag: 4),
+        ToolbarItem(iconName: "globe", action: #selector(translateTapped), tag: 5),
         ToolbarItem(iconName: "gearshape", action: #selector(settingsTapped), tag: 6),
     ]
 
@@ -35,7 +36,7 @@ class ToolbarView: UIView {
     private let stack: UIStackView = {
         let sv = UIStackView()
         sv.axis = .horizontal
-        sv.distribution = .equalSpacing
+        sv.distribution = .fillEqually
         sv.alignment = .center
         sv.translatesAutoresizingMaskIntoConstraints = false
         return sv
@@ -111,7 +112,7 @@ class ToolbarView: UIView {
             stack.topAnchor.constraint(equalTo: topAnchor),
             stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
             stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
-            stack.bottomAnchor.constraint(equalTo: bottomAnchor),
+            stack.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -6),
 
             statusLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
             statusLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
@@ -142,16 +143,13 @@ class ToolbarView: UIView {
 
     private func makeToolbarButton(iconName: String, action: Selector, tag: Int) -> UIButton {
         let btn = UIButton(type: .system)
-        let config = UIImage.SymbolConfiguration(pointSize: 20, weight: .regular)
+        let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .light)
         btn.setImage(UIImage(systemName: iconName, withConfiguration: config), for: .normal)
         btn.tintColor = .label
         btn.tag = tag
         btn.addTarget(self, action: action, for: .touchUpInside)
         btn.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            btn.widthAnchor.constraint(equalToConstant: 36),
-            btn.heightAnchor.constraint(equalToConstant: 40),
-        ])
+        btn.heightAnchor.constraint(equalToConstant: 34).isActive = true
         return btn
     }
 
@@ -166,23 +164,40 @@ class ToolbarView: UIView {
         statusLabel.isHidden = true
     }
 
+    private var customTheme: KeyboardTheme?
+
+    func applyTheme(_ theme: KeyboardTheme?) {
+        customTheme = theme
+    }
+
     func updateAppearance(isDark: Bool) {
-        backgroundColor = isDark ? UIColor(white: 0.12, alpha: 1) : .clear
-        for case let btn as UIButton in stack.arrangedSubviews {
-            btn.tintColor = isDark ? .white : .label
+        if let theme = customTheme {
+            backgroundColor = theme.toolbarBackground
+            for case let btn as UIButton in stack.arrangedSubviews {
+                btn.tintColor = theme.keyTextColor
+            }
+            for btn in suggestionButtons {
+                btn.setTitleColor(theme.keyTextColor, for: .normal)
+            }
+            dismissButton.setTitleColor(theme.keyTextColor, for: .normal)
+            let suggestionBg = theme.keyboardBackground
+            suggestionStack.backgroundColor = suggestionBg
+            dismissButton.backgroundColor = suggestionBg
+        } else {
+            backgroundColor = isDark ? UIColor(white: 0.12, alpha: 1) : .clear
+            for case let btn as UIButton in stack.arrangedSubviews {
+                btn.tintColor = isDark ? .white : .label
+            }
+            for btn in suggestionButtons {
+                btn.setTitleColor(isDark ? .white : .label, for: .normal)
+            }
+            dismissButton.setTitleColor(isDark ? .white : .label, for: .normal)
+            let suggestionBg = isDark
+                ? UIColor(white: 0.08, alpha: 1)
+                : UIColor(red: 0.82, green: 0.84, blue: 0.86, alpha: 1)
+            suggestionStack.backgroundColor = suggestionBg
+            dismissButton.backgroundColor = suggestionBg
         }
-        // suggestion 버튼 색상
-        for btn in suggestionButtons {
-            btn.setTitleColor(isDark ? .white : .label, for: .normal)
-        }
-        // dismiss 버튼 색상
-        dismissButton.setTitleColor(isDark ? .white : .label, for: .normal)
-        // suggestion 배경색 — 키보드 배경과 동일
-        let suggestionBg = isDark
-            ? UIColor(white: 0.08, alpha: 1)
-            : UIColor(red: 0.82, green: 0.84, blue: 0.86, alpha: 1)
-        suggestionStack.backgroundColor = suggestionBg
-        dismissButton.backgroundColor = suggestionBg
     }
 
     func showSuggestions(_ suggestions: [String]) {
@@ -272,6 +287,31 @@ class ToolbarView: UIView {
         onSuggestionDismiss?()
     }
 
+    // MARK: - Hit Test
+
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        guard !isHidden, bounds.contains(point) else { return nil }
+
+        // Suggestion mode: use default hit-testing
+        if !suggestionStack.isHidden {
+            return super.hitTest(point, with: event)
+        }
+
+        // Toolbar mode: route any touch to the nearest toolbar button
+        guard !stack.isHidden else { return nil }
+        let stackPoint = convert(point, to: stack)
+        var nearestButton: UIButton?
+        var nearestDistance: CGFloat = .greatestFiniteMagnitude
+        for case let btn as UIButton in stack.arrangedSubviews {
+            let dist = abs(stackPoint.x - btn.frame.midX)
+            if dist < nearestDistance {
+                nearestDistance = dist
+                nearestButton = btn
+            }
+        }
+        return nearestButton ?? super.hitTest(point, with: event)
+    }
+
     // MARK: - Actions
 
     @objc private func logoTapped() {
@@ -287,9 +327,7 @@ class ToolbarView: UIView {
     }
 
     @objc private func clipboardTapped() {
-        if let text = UIPasteboard.general.string {
-            onEmojiTap?(text)
-        }
+        onSavedPhrasesTap?()
     }
 
     @objc private func checklistTapped() {

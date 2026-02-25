@@ -4,21 +4,26 @@ class TranslationInputView: UIView {
 
     var onTextChanged: ((String) -> Void)?
     var onCloseTranslation: (() -> Void)?
+    var onHeightChanged: ((CGFloat) -> Void)?
 
     private var textBuffer: String = ""
 
+    private static let minHeight: CGFloat = 44
+
     // ═══════════════════════════════════════
-    // SINGLE LINE:  |텍스트       [counter] [X]
-    // When empty:   |번역할 텍스트 입력      [X]
+    // Multi-line: |텍스트          [counter] [X]
+    // When empty: |번역할 텍스트 입력         [X]
     // ═══════════════════════════════════════
 
     private let inputLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 15)
         label.textColor = .label
-        label.numberOfLines = 1
-        label.lineBreakMode = .byTruncatingTail
+        label.numberOfLines = 0
+        label.lineBreakMode = .byWordWrapping
         label.translatesAutoresizingMaskIntoConstraints = false
+        label.setContentHuggingPriority(.required, for: .vertical)
+        label.setContentCompressionResistancePriority(.required, for: .vertical)
         return label
     }()
 
@@ -44,7 +49,9 @@ class TranslationInputView: UIView {
         label.textColor = .tertiaryLabel
         label.textAlignment = .right
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.isHidden = true  // only show when typing
+        label.isHidden = true
+        label.setContentHuggingPriority(.required, for: .horizontal)
+        label.setContentCompressionResistancePriority(.required, for: .horizontal)
         return label
     }()
 
@@ -68,6 +75,8 @@ class TranslationInputView: UIView {
 
     private var cursorTimer: Timer?
     private var cursorLeading: NSLayoutConstraint?
+    private var cursorTop: NSLayoutConstraint?
+    private var lastNotifiedHeight: CGFloat = 0
 
     // MARK: - Init
 
@@ -98,10 +107,6 @@ class TranslationInputView: UIView {
         containerView.addSubview(counterLabel)
         containerView.addSubview(closeButton)
 
-        // Container — grey rounded rect with margins
-        // Right-side buttons: [counter] [X]
-        // Left-side: cursor + text input (flexible)
-
         NSLayoutConstraint.activate([
             // Container fills self with margins
             containerView.topAnchor.constraint(equalTo: topAnchor, constant: 4),
@@ -109,33 +114,36 @@ class TranslationInputView: UIView {
             containerView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
             containerView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -4),
 
-            // Close button — far right
-            closeButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            // Close button — top-right, fixed position
+            closeButton.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 7),
             closeButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -2),
             closeButton.widthAnchor.constraint(equalToConstant: 30),
             closeButton.heightAnchor.constraint(equalToConstant: 30),
 
-            // Counter (between text and close)
-            counterLabel.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            // Counter — top-right, next to close button
+            counterLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 12),
             counterLabel.trailingAnchor.constraint(equalTo: closeButton.leadingAnchor, constant: -4),
 
-            // Input label — left side, flexible
-            inputLabel.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            // Input label — fills left area, multi-line, no max height
+            inputLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 10),
             inputLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 10),
             inputLabel.trailingAnchor.constraint(lessThanOrEqualTo: counterLabel.leadingAnchor, constant: -6),
+            inputLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -10),
 
             // Placeholder
-            placeholderLabel.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            placeholderLabel.topAnchor.constraint(equalTo: inputLabel.topAnchor),
             placeholderLabel.leadingAnchor.constraint(equalTo: inputLabel.leadingAnchor),
 
-            // Cursor — thin bar aligned with text
+            // Cursor — thin bar
             cursorView.widthAnchor.constraint(equalToConstant: 1.5),
             cursorView.heightAnchor.constraint(equalToConstant: 18),
-            cursorView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
         ])
 
+        // Cursor positioned by leading (x) and top (y) relative to inputLabel
         cursorLeading = cursorView.leadingAnchor.constraint(equalTo: inputLabel.leadingAnchor)
         cursorLeading?.isActive = true
+        cursorTop = cursorView.topAnchor.constraint(equalTo: inputLabel.topAnchor)
+        cursorTop?.isActive = true
 
         // Actions
         closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
@@ -182,6 +190,7 @@ class TranslationInputView: UIView {
         placeholderLabel.isHidden = !text.isEmpty
         counterLabel.isHidden = text.isEmpty
         updateCounter(count: text.count)
+        notifyHeightChangeIfNeeded()
         updateCursorPosition()
     }
 
@@ -189,11 +198,45 @@ class TranslationInputView: UIView {
         placeholderLabel.text = text
     }
 
+    private var customTheme: KeyboardTheme?
+
+    func applyTheme(_ theme: KeyboardTheme?) {
+        customTheme = theme
+    }
+
     func updateAppearance(isDark: Bool) {
-        backgroundColor = .clear
-        containerView.backgroundColor = isDark ? UIColor(white: 0.18, alpha: 1) : UIColor(white: 0.95, alpha: 1)
-        closeButton.tintColor = isDark ? UIColor(white: 0.4, alpha: 1) : .tertiaryLabel
-        inputLabel.textColor = isDark ? .white : .label
+        if let theme = customTheme {
+            backgroundColor = theme.toolbarBackground
+            containerView.backgroundColor = theme.keyBackground
+            inputLabel.textColor = theme.keyTextColor
+            closeButton.tintColor = theme.keyTextColor.withAlphaComponent(0.4)
+        } else {
+            backgroundColor = .clear
+            containerView.backgroundColor = isDark ? UIColor(white: 0.18, alpha: 1) : UIColor(white: 0.95, alpha: 1)
+            closeButton.tintColor = isDark ? UIColor(white: 0.4, alpha: 1) : .tertiaryLabel
+            inputLabel.textColor = isDark ? .white : .label
+        }
+    }
+
+    /// Returns the ideal height based on current text content (no max limit)
+    func idealHeight() -> CGFloat {
+        let maxWidth = bounds.width - 8 * 2 - 10 - 6 - 40 - 30  // margins, padding, counter, close
+        guard maxWidth > 0 else { return TranslationInputView.minHeight }
+
+        let text = (inputLabel.text ?? "") as NSString
+        if text.length == 0 { return TranslationInputView.minHeight }
+
+        let boundingRect = text.boundingRect(
+            with: CGSize(width: maxWidth, height: .greatestFiniteMagnitude),
+            options: [.usesLineFragmentOrigin, .usesFontLeading],
+            attributes: [.font: inputLabel.font!],
+            context: nil
+        )
+
+        // Label height + vertical padding (top 10 + bottom 10) + container padding (top 4 + bottom 4)
+        let neededHeight = ceil(boundingRect.height) + 20 + 8
+
+        return max(neededHeight, TranslationInputView.minHeight)
     }
 
     // MARK: - Private
@@ -203,6 +246,7 @@ class TranslationInputView: UIView {
         placeholderLabel.isHidden = !textBuffer.isEmpty
         counterLabel.isHidden = textBuffer.isEmpty
         updateCounter(count: textBuffer.count)
+        notifyHeightChangeIfNeeded()
         updateCursorPosition()
     }
 
@@ -218,14 +262,59 @@ class TranslationInputView: UIView {
         }
     }
 
+    private func notifyHeightChangeIfNeeded() {
+        layoutIfNeeded()
+        let newHeight = idealHeight()
+        if abs(newHeight - lastNotifiedHeight) > 1 {
+            lastNotifiedHeight = newHeight
+            onHeightChanged?(newHeight)
+        }
+    }
+
     private func updateCursorPosition() {
         guard let text = inputLabel.text, !text.isEmpty else {
             cursorLeading?.constant = 0
+            cursorTop?.constant = 0
             return
         }
+
         inputLabel.layoutIfNeeded()
-        let size = (text as NSString).size(withAttributes: [.font: inputLabel.font!])
         let maxWidth = inputLabel.bounds.width
-        cursorLeading?.constant = min(size.width, maxWidth)
+        guard maxWidth > 0 else {
+            cursorLeading?.constant = 0
+            cursorTop?.constant = 0
+            return
+        }
+
+        // Use TextKit to find the exact position after the last glyph
+        let attributedText = NSAttributedString(string: text, attributes: [.font: inputLabel.font!])
+        let textStorage = NSTextStorage(attributedString: attributedText)
+        let layoutManager = NSLayoutManager()
+        let textContainer = NSTextContainer(size: CGSize(width: maxWidth, height: .greatestFiniteMagnitude))
+
+        textContainer.lineFragmentPadding = 0
+        layoutManager.addTextContainer(textContainer)
+        textStorage.addLayoutManager(layoutManager)
+
+        // Force full layout
+        layoutManager.ensureLayout(for: textContainer)
+
+        let numberOfGlyphs = layoutManager.numberOfGlyphs
+        guard numberOfGlyphs > 0 else {
+            cursorLeading?.constant = 0
+            cursorTop?.constant = 0
+            return
+        }
+
+        // Get the insertion point rect AFTER the last glyph
+        let lastGlyphIndex = numberOfGlyphs - 1
+        let lastGlyphRect = layoutManager.boundingRect(
+            forGlyphRange: NSRange(location: lastGlyphIndex, length: 1),
+            in: textContainer
+        )
+
+        // Cursor x = right edge of last glyph, y = top of last glyph line
+        cursorLeading?.constant = min(lastGlyphRect.maxX, maxWidth)
+        cursorTop?.constant = lastGlyphRect.origin.y
     }
 }

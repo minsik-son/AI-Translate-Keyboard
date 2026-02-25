@@ -25,14 +25,16 @@ class TranslationManager {
     private var lastTranslatedText: String = ""
     private var retryCount = 0
     private let maxRetries = 1
+    private var currentGeneration: Int = 0
 
     private var sourceLang: String = "ko"
     private var targetLang: String = "en"
 
     init() {
-        let config = URLSessionConfiguration.ephemeral
+        let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = AppConstants.API.timeout
         config.timeoutIntervalForResource = AppConstants.API.timeout
+        config.httpShouldUsePipelining = true
         self.session = URLSession(configuration: config)
     }
 
@@ -42,22 +44,19 @@ class TranslationManager {
     }
 
     func requestTranslation(text: String) {
-        // Cancel previous debounce
         debounceWorkItem?.cancel()
 
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        // Skip if same text
         guard !trimmed.isEmpty, trimmed != lastTranslatedText else { return }
 
-        // Check cache first
+        // Check cache first (instant, no debounce needed)
         if let cached = cache.get(text: trimmed, source: sourceLang, target: targetLang) {
+            currentGeneration += 1
             lastTranslatedText = trimmed
             delegate?.translationManager(self, didTranslate: cached, from: sourceLang, to: targetLang)
             return
         }
 
-        // Debounce
         let workItem = DispatchWorkItem { [weak self] in
             self?.performTranslation(text: trimmed)
         }
@@ -68,15 +67,17 @@ class TranslationManager {
     func cancelPending() {
         debounceWorkItem?.cancel()
         debounceWorkItem = nil
+        currentGeneration += 1
     }
 
     private func performTranslation(text: String) {
         delegate?.translationManagerDidStartTranslating(self)
+        currentGeneration += 1
         retryCount = 0
-        executeRequest(text: text)
+        executeRequest(text: text, generation: currentGeneration)
     }
 
-    private func executeRequest(text: String) {
+    private func executeRequest(text: String, generation: Int) {
         let urlString = AppConstants.API.baseURL + AppConstants.API.translateEndpoint
         guard let url = URL(string: urlString) else { return }
 
@@ -99,19 +100,22 @@ class TranslationManager {
 
         let task = session.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
-                self?.handleResponse(text: text, data: data, response: response, error: error)
+                self?.handleResponse(text: text, generation: generation, data: data, response: response, error: error)
             }
         }
         task.resume()
     }
 
-    private func handleResponse(text: String, data: Data?, response: URLResponse?, error: Error?) {
+    private func handleResponse(text: String, generation: Int, data: Data?, response: URLResponse?, error: Error?) {
+        // Discard stale responses — only process the latest generation
+        guard generation == currentGeneration else { return }
+
         if let error = error {
             let nsError = error as NSError
             if nsError.code == NSURLErrorTimedOut {
                 if retryCount < maxRetries {
                     retryCount += 1
-                    executeRequest(text: text)
+                    executeRequest(text: text, generation: generation)
                     return
                 }
                 delegate?.translationManager(self, didFailWithError: .timeout)
@@ -120,7 +124,7 @@ class TranslationManager {
             } else {
                 if retryCount < maxRetries {
                     retryCount += 1
-                    executeRequest(text: text)
+                    executeRequest(text: text, generation: generation)
                     return
                 }
                 delegate?.translationManager(self, didFailWithError: .networkError(error))
@@ -158,7 +162,6 @@ class TranslationManager {
             return
         }
 
-        // Cache the result
         cache.set(text: text, source: sourceLang, target: targetLang, translatedText: translatedText)
         lastTranslatedText = text
 

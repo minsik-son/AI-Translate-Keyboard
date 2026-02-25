@@ -20,6 +20,8 @@ enum AppConstants {
         static let appLanguage = "app_language"
         static let keyboardLayout = "keyboard_layout"
         static let hasCompletedOnboarding = "has_completed_onboarding"
+        static let savedPhrases = "saved_phrases"
+        static let keyboardTheme = "keyboard_theme"
     }
 
     enum API {
@@ -33,7 +35,7 @@ enum AppConstants {
         static let maxCharacters = 200
         static let warningCharacters = 150
         static let freeSessionsPerDay = 30
-        static let debounceDuration: TimeInterval = 0.8
+        static let debounceDuration: TimeInterval = 0.3
         static let cacheMaxItems = 100
     }
 }

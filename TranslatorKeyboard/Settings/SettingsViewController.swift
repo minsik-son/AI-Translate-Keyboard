@@ -101,6 +101,9 @@ class SettingsViewController: UITableViewController {
     // MARK: - UITableViewDelegate
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if indexPath.section == 0 && indexPath.row == 0 {
+            navigationController?.pushViewController(ThemeSelectionViewController(), animated: true)
+        }
         tableView.deselectRow(at: indexPath, animated: true)
     }
 

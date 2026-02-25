@@ -32,6 +32,7 @@ class KeyboardLayoutView: UIView {
     private var currentPage: KeyboardPage = .letters
     private var isShifted = false
     private var isDark = false
+    private var customTheme: KeyboardTheme?
 
     // Backspace long-press repeat
     private var backspaceTimer: Timer?
@@ -532,11 +533,21 @@ class KeyboardLayoutView: UIView {
         let isSpecial = specialKeys.contains(key)
 
         // Colors
-        if key == Self.returnKey {
+        if let theme = customTheme {
+            if key == Self.returnKey {
+                button.backgroundColor = returnKeyIsBlue ? UIColor.systemBlue : theme.specialKeyBackground
+                button.setTitleColor(returnKeyIsBlue ? .white : theme.keyTextColor, for: .normal)
+            } else if isSpecial {
+                button.backgroundColor = theme.specialKeyBackground
+                button.setTitleColor(theme.keyTextColor, for: .normal)
+            } else {
+                button.backgroundColor = theme.keyBackground
+                button.setTitleColor(theme.keyTextColor, for: .normal)
+            }
+        } else if key == Self.returnKey {
             button.backgroundColor = returnKeyIsBlue ? UIColor.systemBlue : (isDark ? UIColor(white: 0.37, alpha: 1) : UIColor(red: 0.76, green: 0.78, blue: 0.81, alpha: 1))
             button.setTitleColor(returnKeyIsBlue ? .white : (isDark ? .white : .black), for: .normal)
         } else if isSpecial {
-            // Lighter gray matching stock iOS keyboard special keys
             button.backgroundColor = isDark ? UIColor(white: 0.37, alpha: 1) : UIColor(red: 0.76, green: 0.78, blue: 0.81, alpha: 1)
             button.setTitleColor(isDark ? .white : .black, for: .normal)
         } else {
@@ -550,16 +561,20 @@ class KeyboardLayoutView: UIView {
             let config = UIImage.SymbolConfiguration(pointSize: 16, weight: isShifted ? .bold : .regular)
             let imgName = isShifted ? "shift.fill" : "shift"
             button.setImage(UIImage(systemName: imgName, withConfiguration: config), for: .normal)
-            button.tintColor = isDark ? .white : .black
+            button.tintColor = customTheme?.keyTextColor ?? (isDark ? .white : .black)
             if isShifted {
-                button.backgroundColor = isDark ? UIColor(white: 0.55, alpha: 1) : UIColor(white: 0.95, alpha: 1)
+                if customTheme != nil {
+                    button.backgroundColor = customTheme!.keyBackground
+                } else {
+                    button.backgroundColor = isDark ? UIColor(white: 0.55, alpha: 1) : UIColor(white: 0.95, alpha: 1)
+                }
             }
             button.setTitle(nil, for: .normal)
 
         case Self.backKey:
             let config = UIImage.SymbolConfiguration(pointSize: 16, weight: .regular)
             button.setImage(UIImage(systemName: "delete.left", withConfiguration: config), for: .normal)
-            button.tintColor = isDark ? .white : .black
+            button.tintColor = customTheme?.keyTextColor ?? (isDark ? .white : .black)
             button.setTitle(nil, for: .normal)
 
         case Self.returnKey:
@@ -572,7 +587,7 @@ class KeyboardLayoutView: UIView {
                 // Default/newline mode: show return arrow icon like stock keyboard
                 let config = UIImage.SymbolConfiguration(pointSize: 16, weight: .medium)
                 button.setImage(UIImage(systemName: "return.left", withConfiguration: config), for: .normal)
-                button.tintColor = isDark ? .white : .black
+                button.tintColor = customTheme?.keyTextColor ?? (isDark ? .white : .black)
                 button.setTitle(nil, for: .normal)
             }
 
@@ -584,13 +599,13 @@ class KeyboardLayoutView: UIView {
             // Globe icon with small "A" overlay
             let globeConfig = UIImage.SymbolConfiguration(pointSize: 14, weight: .regular)
             button.setImage(UIImage(systemName: "globe", withConfiguration: globeConfig), for: .normal)
-            button.tintColor = isDark ? .white : .black
+            button.tintColor = customTheme?.keyTextColor ?? (isDark ? .white : .black)
             button.setTitle(nil, for: .normal)
             // Add "A" label overlay
             let langLabel = UILabel()
             langLabel.text = "A"
             langLabel.font = .systemFont(ofSize: 9, weight: .bold)
-            langLabel.textColor = isDark ? .white : .black
+            langLabel.textColor = customTheme?.keyTextColor ?? (isDark ? .white : .black)
             langLabel.translatesAutoresizingMaskIntoConstraints = false
             button.addSubview(langLabel)
             NSLayoutConstraint.activate([
@@ -893,7 +908,14 @@ class KeyboardLayoutView: UIView {
     /// Brief background color flash — no transform, no animation delay, no coordinate disruption
     private func flashButton(_ button: UIButton) {
         let original = button.backgroundColor ?? .clear
-        button.backgroundColor = isDark ? UIColor(white: 0.6, alpha: 1) : UIColor(white: 0.75, alpha: 1)
+        let flashColor: UIColor
+        if let theme = customTheme {
+            // Slightly darken the theme key color for flash
+            flashColor = theme.keyBackground.withAlphaComponent(0.6)
+        } else {
+            flashColor = isDark ? UIColor(white: 0.6, alpha: 1) : UIColor(white: 0.75, alpha: 1)
+        }
+        button.backgroundColor = flashColor
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
             button.backgroundColor = original
         }
@@ -917,7 +939,11 @@ class KeyboardLayoutView: UIView {
                 sub.isHidden = true
             }
             // Uniform blank key color
-            button.backgroundColor = isDark ? UIColor(white: 0.30, alpha: 1) : UIColor(white: 0.88, alpha: 1)
+            if let theme = customTheme {
+                button.backgroundColor = theme.specialKeyBackground
+            } else {
+                button.backgroundColor = isDark ? UIColor(white: 0.30, alpha: 1) : UIColor(white: 0.88, alpha: 1)
+            }
             button.layer.shadowOpacity = 0
         }
 
@@ -988,9 +1014,17 @@ class KeyboardLayoutView: UIView {
 
     // MARK: - Public Methods
 
+    func applyTheme(_ theme: KeyboardTheme?) {
+        customTheme = theme
+    }
+
     func updateAppearance(isDark: Bool) {
         self.isDark = isDark
-        backgroundColor = isDark ? UIColor(white: 0.08, alpha: 1) : UIColor(red: 0.82, green: 0.84, blue: 0.86, alpha: 1)
+        if let theme = customTheme {
+            backgroundColor = theme.keyboardBackground
+        } else {
+            backgroundColor = isDark ? UIColor(white: 0.08, alpha: 1) : UIColor(red: 0.82, green: 0.84, blue: 0.86, alpha: 1)
+        }
         buildKeyboard()
     }
 
