@@ -13,6 +13,8 @@
 "settings.privacy" = "Privacy Policy";
 "settings.terms" = "Terms of Use";
 "settings.app_language" = "Idioma de la app";
+"settings.keyboard_language" = "Idioma del teclado";
+"settings.number_row" = "Fila de números";
 
 // === Onboarding ===
 "onboarding.welcome.subtitle" = "Un teclado para traducir en cualquier lugar";
@@ -36,6 +38,8 @@
 "onboarding.subscription.yearly" = "Anual";
 "onboarding.subscription.best_label" = "(BEST)";
 "onboarding.subscription.start_trial" = "Iniciar prueba gratuita";
+"onboarding.permission.success.title" = "¡Configuración completa!";
+"onboarding.permission.success.description" = "Tu teclado está listo para usar";
 "onboarding.cta.start" = "Comenzar";
 "onboarding.cta.go_settings" = "Ir a Ajustes";
 "onboarding.cta.next" = "Siguiente";
@@ -86,3 +90,20 @@
 "lang.de" = "Alemán";
 "lang.ru" = "Ruso";
 "lang.it" = "Italiano";
+
+// === Loading ===
+"language.loading" = "Cargando...";
+
+// === Correction & Phrase ===
+"correction.placeholder" = "Escribe el texto a corregir";
+"phrase.placeholder" = "Escribe la frase a guardar";
+"phrase.cancel" = "Cancelar";
+"phrase.add_title" = "Añadir frase";
+"phrase.save" = "Guardar";
+
+// === Tone ===
+"tone.none" = "Predeterminado";
+"tone.formal" = "Formal";
+"tone.casual" = "Informal";
+"tone.business" = "Negocios";
+"tone.friendly" = "Amigable";

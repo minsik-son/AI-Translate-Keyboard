@@ -36,6 +36,13 @@ class OnboardingViewController: UIViewController {
 
     private var hasReturnedFromSettings = false
 
+    // Permission page — for success state transition
+    private var permissionTitleLabel: UILabel?
+    private var permissionStepStack: UIStackView?
+    private var successIconView: UIImageView?
+    private var successTitleLabel: UILabel?
+    private var successDescriptionLabel: UILabel?
+
     // MARK: - Lifecycle
 
     override func viewDidLoad() {
@@ -192,6 +199,25 @@ class OnboardingViewController: UIViewController {
         let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier) ?? UserDefaults.standard
         defaults.set(true, forKey: "onboarding_returned_from_settings")
         updateCTAForCurrentPage()
+        showPermissionSuccess()
+    }
+
+    private func showPermissionSuccess() {
+        permissionTitleLabel?.isHidden = true
+        permissionStepStack?.isHidden = true
+
+        successIconView?.isHidden = false
+        successTitleLabel?.isHidden = false
+        successDescriptionLabel?.isHidden = false
+        successIconView?.alpha = 0
+        successTitleLabel?.alpha = 0
+        successDescriptionLabel?.alpha = 0
+
+        UIView.animate(withDuration: 0.4) {
+            self.successIconView?.alpha = 1
+            self.successTitleLabel?.alpha = 1
+            self.successDescriptionLabel?.alpha = 1
+        }
     }
 }
 
@@ -252,18 +278,18 @@ private extension OnboardingViewController {
         vc.view.backgroundColor = .systemBackground
 
         let titleLabel = UILabel()
-        titleLabel.text = "키보드 설정"
+        titleLabel.text = L("onboarding.permission.title")
         titleLabel.font = .systemFont(ofSize: 28, weight: .bold)
         titleLabel.textAlignment = .center
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
 
         let step1 = makeStepView(
             number: "1",
-            text: "설정 → 일반 → 키보드 → 키보드 추가에서\nTranslator Keyboard를 추가하세요"
+            text: L("onboarding.permission.step1")
         )
         let step2 = makeStepView(
             number: "2",
-            text: "'전체 접근 허용'을 켜주세요\n(번역 기능에 필요합니다)"
+            text: L("onboarding.permission.step2")
         )
 
         let stack = UIStackView(arrangedSubviews: [step1, step2])
@@ -271,8 +297,35 @@ private extension OnboardingViewController {
         stack.spacing = 20
         stack.translatesAutoresizingMaskIntoConstraints = false
 
+        // Success state UI (initially hidden)
+        let sIconView = UIImageView()
+        sIconView.image = UIImage(systemName: "checkmark.circle.fill")
+        sIconView.tintColor = .systemGreen
+        sIconView.contentMode = .scaleAspectFit
+        sIconView.translatesAutoresizingMaskIntoConstraints = false
+        sIconView.isHidden = true
+
+        let sTitleLabel = UILabel()
+        sTitleLabel.text = L("onboarding.permission.success.title")
+        sTitleLabel.font = .systemFont(ofSize: 28, weight: .bold)
+        sTitleLabel.textAlignment = .center
+        sTitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        sTitleLabel.isHidden = true
+
+        let sDescLabel = UILabel()
+        sDescLabel.text = L("onboarding.permission.success.description")
+        sDescLabel.font = .systemFont(ofSize: 17)
+        sDescLabel.textColor = .secondaryLabel
+        sDescLabel.textAlignment = .center
+        sDescLabel.numberOfLines = 0
+        sDescLabel.translatesAutoresizingMaskIntoConstraints = false
+        sDescLabel.isHidden = true
+
         vc.view.addSubview(titleLabel)
         vc.view.addSubview(stack)
+        vc.view.addSubview(sIconView)
+        vc.view.addSubview(sTitleLabel)
+        vc.view.addSubview(sDescLabel)
 
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: vc.view.safeAreaLayoutGuide.topAnchor, constant: 60),
@@ -282,7 +335,27 @@ private extension OnboardingViewController {
             stack.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 40),
             stack.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 32),
             stack.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor, constant: -32),
+
+            sIconView.centerXAnchor.constraint(equalTo: vc.view.centerXAnchor),
+            sIconView.centerYAnchor.constraint(equalTo: vc.view.centerYAnchor, constant: -80),
+            sIconView.widthAnchor.constraint(equalToConstant: 80),
+            sIconView.heightAnchor.constraint(equalToConstant: 80),
+
+            sTitleLabel.topAnchor.constraint(equalTo: sIconView.bottomAnchor, constant: 24),
+            sTitleLabel.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 24),
+            sTitleLabel.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor, constant: -24),
+
+            sDescLabel.topAnchor.constraint(equalTo: sTitleLabel.bottomAnchor, constant: 8),
+            sDescLabel.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 24),
+            sDescLabel.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor, constant: -24),
         ])
+
+        // Store references for success state transition
+        permissionTitleLabel = titleLabel
+        permissionStepStack = stack
+        successIconView = sIconView
+        successTitleLabel = sTitleLabel
+        successDescriptionLabel = sDescLabel
 
         registerForegroundObserver()
 

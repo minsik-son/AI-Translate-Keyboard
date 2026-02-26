@@ -13,6 +13,8 @@
 "settings.privacy" = "Политика конфиденциальности";
 "settings.terms" = "Условия использования";
 "settings.app_language" = "Язык приложения";
+"settings.keyboard_language" = "Язык клавиатуры";
+"settings.number_row" = "Числовой ряд";
 
 // === Onboarding ===
 "onboarding.welcome.subtitle" = "Переводите где угодно с клавиатуры";
@@ -36,6 +38,8 @@
 "onboarding.subscription.yearly" = "Ежегодно";
 "onboarding.subscription.best_label" = "(ЛУЧШИЙ)";
 "onboarding.subscription.start_trial" = "Начать бесплатный период";
+"onboarding.permission.success.title" = "Настройка завершена!";
+"onboarding.permission.success.description" = "Клавиатура готова к использованию";
 "onboarding.cta.start" = "Начать";
 "onboarding.cta.go_settings" = "Перейти в настройки";
 "onboarding.cta.next" = "Далее";
@@ -86,3 +90,20 @@
 "lang.de" = "Немецкий";
 "lang.ru" = "Русский";
 "lang.it" = "Итальянский";
+
+// === Loading ===
+"language.loading" = "Загрузка...";
+
+// === Correction & Phrase ===
+"correction.placeholder" = "Введите текст для исправления";
+"phrase.placeholder" = "Введите фразу для сохранения";
+"phrase.cancel" = "Отмена";
+"phrase.add_title" = "Добавить фразу";
+"phrase.save" = "Сохранить";
+
+// === Tone ===
+"tone.none" = "По умолчанию";
+"tone.formal" = "Формальный";
+"tone.casual" = "Разговорный";
+"tone.business" = "Деловой";
+"tone.friendly" = "Дружеский";

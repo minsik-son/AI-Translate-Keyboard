@@ -1,8 +1,41 @@
 import UIKit
 
-enum KeyboardLanguage {
-    case english
-    case korean
+enum KeyboardLanguage: String, CaseIterable {
+    case english = "en"
+    case korean = "ko"
+    case spanish = "es"
+    case french = "fr"
+    case german = "de"
+    case italian = "it"
+    case russian = "ru"
+
+    var displayName: String {
+        switch self {
+        case .english: return "English"
+        case .korean: return "한국어"
+        case .spanish: return "Español"
+        case .french: return "Français"
+        case .german: return "Deutsch"
+        case .italian: return "Italiano"
+        case .russian: return "Русский"
+        }
+    }
+
+    var shortLabel: String {
+        switch self {
+        case .english: return "A"
+        case .korean: return "한"
+        case .spanish: return "ES"
+        case .french: return "FR"
+        case .german: return "DE"
+        case .italian: return "IT"
+        case .russian: return "RU"
+        }
+    }
+
+    var isLatinBased: Bool {
+        return self != .korean && self != .russian
+    }
 }
 
 enum KeyboardPage {
@@ -30,6 +63,10 @@ class KeyboardLayoutView: UIView {
 
     var showNumberRow: Bool = true {
         didSet { if oldValue != showNumberRow { buildKeyboard() } }
+    }
+
+    var pairedLanguage: KeyboardLanguage = .korean {
+        didSet { if oldValue != pairedLanguage { buildKeyboard() } }
     }
 
     private var currentLanguage: KeyboardLanguage = .english
@@ -140,6 +177,22 @@ class KeyboardLayoutView: UIView {
         ["+=♥", "__GLOBE_A__", " ", ".", "\u{23CE}"]
     ]
 
+    // ── Russian ЙЦУКЕН layouts ──
+
+    private let russianRows: [[String]] = [
+        ["й", "ц", "у", "к", "е", "н", "г", "ш", "щ", "з", "х"],
+        ["ф", "ы", "в", "а", "п", "р", "о", "л", "д", "ж", "э"],
+        ["\u{21E7}", "я", "ч", "с", "м", "и", "т", "ь", "б", "ю", "\u{232B}"],
+        ["+=♥", "__GLOBE_A__", " ", ".", "\u{23CE}"]
+    ]
+
+    private let russianShiftRows: [[String]] = [
+        ["Й", "Ц", "У", "К", "Е", "Н", "Г", "Ш", "Щ", "З", "Х"],
+        ["Ф", "Ы", "В", "А", "П", "Р", "О", "Л", "Д", "Ж", "Э"],
+        ["\u{21E7}", "Я", "Ч", "С", "М", "И", "Т", "Ь", "Б", "Ю", "\u{232B}"],
+        ["+=♥", "__GLOBE_A__", " ", ".", "\u{23CE}"]
+    ]
+
     // ── Symbol layouts ──
 
     private let symbolRows1: [[String]] = [
@@ -208,11 +261,14 @@ class KeyboardLayoutView: UIView {
         switch currentPage {
         case .letters:
             let letterRows: [[String]]
-            switch (currentLanguage, isShifted) {
-            case (.english, false): letterRows = englishRows
-            case (.english, true):  letterRows = englishShiftRows
-            case (.korean, false):  letterRows = koreanRows
-            case (.korean, true):   letterRows = koreanShiftRows
+            switch currentLanguage {
+            case .korean:
+                letterRows = isShifted ? koreanShiftRows : koreanRows
+            case .russian:
+                letterRows = isShifted ? russianShiftRows : russianRows
+            default:
+                // English, Spanish, French, German, Italian all use QWERTY
+                letterRows = isShifted ? englishShiftRows : englishRows
             }
             return showNumberRow ? [numberRow] + letterRows : letterRows
         case .symbols1:
@@ -220,6 +276,15 @@ class KeyboardLayoutView: UIView {
         case .symbols2:
             return showNumberRow ? [numberRow] + symbolRows2 : symbolRows2
         }
+    }
+
+    /// Number of keys in the first letter row — used as reference width for mixed row keys.
+    /// English/Korean = 10, Russian = 11.
+    private var referenceKeyCount: CGFloat {
+        let rows = currentRows()
+        let letterRowIndex = showNumberRow ? 1 : 0
+        guard letterRowIndex < rows.count else { return 10 }
+        return CGFloat(rows[letterRowIndex].count)
     }
 
     // MARK: - Build Keyboard
@@ -286,9 +351,10 @@ class KeyboardLayoutView: UIView {
     // MARK: - Row 0 & 1: Equal width keys
 
     private func buildEqualRow(container: UIView, keys: [String], rowIndex: Int) {
-        // In letters page: row 0 = number row (10 keys), row 1 = first letter row (10 keys),
-        // row 2 = second letter row (9 keys, needs indent)
-        let needsIndent = (keys.count == 9 && currentPage == .letters)
+        // In letters page: indent rows with fewer keys than the reference row (first letter row).
+        // English/Korean: row 2 has 9 keys vs 10 → indent. Russian: rows 1,2 both 11 → no indent.
+        let refCount = Int(referenceKeyCount)
+        let needsIndent = (keys.count < refCount && currentPage == .letters && rowIndex > (showNumberRow ? 0 : -1))
 
         var previousButton: UIButton?
         let firstButton = createKeyButton(keys[0], rowIndex: rowIndex)
@@ -352,14 +418,14 @@ class KeyboardLayoutView: UIView {
 
             guard let shiftBtn = leftWideBtn, let backspaceBtn = rightWideBtn else { return }
 
-            // Each letter key width = container.width * (1/10) - 9*spacing/10
-            // This produces the same width as keys in the 10-key row above
+            // Each letter key width matches keys in the reference row above
             let keySpacing = Layout.keySpacingH
+            let n = referenceKeyCount
             for btn in letterButtons {
                 btn.widthAnchor.constraint(
                     equalTo: container.widthAnchor,
-                    multiplier: 1.0 / 10.0,
-                    constant: -9.0 * keySpacing / 10.0
+                    multiplier: 1.0 / n,
+                    constant: -(n - 1) * keySpacing / n
                 ).isActive = true
             }
 
@@ -600,14 +666,14 @@ class KeyboardLayoutView: UIView {
             button.titleLabel?.font = .systemFont(ofSize: 13, weight: .medium)
 
         case Self.globeLangKey:
-            // Globe icon with small "A" overlay
+            // Globe icon with language label overlay
             let globeConfig = UIImage.SymbolConfiguration(pointSize: 14, weight: .regular)
             button.setImage(UIImage(systemName: "globe", withConfiguration: globeConfig), for: .normal)
             button.tintColor = customTheme?.keyTextColor ?? (isDark ? .white : .black)
             button.setTitle(nil, for: .normal)
-            // Add "A" label overlay
+            // Dynamic language label: show the "other" language's short label
             let langLabel = UILabel()
-            langLabel.text = "A"
+            langLabel.text = (currentLanguage == .english) ? pairedLanguage.shortLabel : "A"
             langLabel.font = .systemFont(ofSize: 9, weight: .bold)
             langLabel.textColor = customTheme?.keyTextColor ?? (isDark ? .white : .black)
             langLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -634,7 +700,12 @@ class KeyboardLayoutView: UIView {
             button.titleLabel?.font = .systemFont(ofSize: Layout.specialFontSize, weight: .medium)
 
         case " ":
-            let spaceTitle = (currentLanguage == .korean && currentPage == .letters) ? L("keyboard.space") : ""
+            let spaceTitle: String
+            if currentPage == .letters {
+                spaceTitle = currentLanguage.displayName
+            } else {
+                spaceTitle = ""
+            }
             button.setTitle(spaceTitle, for: .normal)
             button.titleLabel?.font = .systemFont(ofSize: Layout.spaceFontSize)
 
@@ -663,6 +734,13 @@ class KeyboardLayoutView: UIView {
     private var spaceTrackingTouch: UITouch?
     private var spaceLongPressTimer: Timer?
     private var spaceDidEnterTrackpad = false
+
+    /// Tracking state for accent long-press popup
+    private var accentTrackingTouch: UITouch?
+    private var accentLongPressTimer: Timer?
+    private var accentPopupView: AccentPopupView?
+    private var accentBaseKey: String?
+    private var accentSourceButton: UIButton?
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches {
@@ -709,6 +787,21 @@ class KeyboardLayoutView: UIView {
                 continue
             }
 
+            // ── Accent-capable keys: track for potential long-press ──
+            let accentAlternatives = AccentMap.accents(for: currentLanguage)[key] ?? []
+            if !accentAlternatives.isEmpty {
+                accentTrackingTouch = touch
+                accentBaseKey = key
+                accentSourceButton = button
+                flashButton(button)
+                handleKeyAction(key)  // Immediately type the base character
+
+                accentLongPressTimer = Timer.scheduledTimer(withTimeInterval: 0.4, repeats: false) { [weak self] _ in
+                    self?.showAccentPopup(accents: accentAlternatives, sourceButton: button)
+                }
+                continue
+            }
+
             // ── All other keys: handle immediately ──
             flashButton(button)
             handleKeyAction(key)
@@ -716,6 +809,12 @@ class KeyboardLayoutView: UIView {
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        // Accent popup selection tracking
+        if let tracked = accentTrackingTouch, touches.contains(tracked), accentPopupView != nil {
+            let loc = tracked.location(in: self)
+            accentPopupView?.updateSelection(at: loc)
+        }
+
         // Space bar trackpad cursor movement — accumulate only; CADisplayLink fires moves
         if let tracked = spaceTrackingTouch, touches.contains(tracked) {
             if isTrackpadMode {
@@ -766,6 +865,19 @@ class KeyboardLayoutView: UIView {
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches {
+            // Accent popup
+            if touch === accentTrackingTouch {
+                accentLongPressTimer?.invalidate()
+                accentLongPressTimer = nil
+                if let popup = accentPopupView, let selected = popup.selectedCharacter {
+                    onKeyTap?(Self.backKey)
+                    onKeyTap?(selected)
+                }
+                hideAccentPopup()
+                accentTrackingTouch = nil
+                accentBaseKey = nil
+                accentSourceButton = nil
+            }
             // Space bar
             if touch === spaceTrackingTouch {
                 spaceLongPressTimer?.invalidate()
@@ -791,6 +903,14 @@ class KeyboardLayoutView: UIView {
 
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches {
+            if touch === accentTrackingTouch {
+                accentLongPressTimer?.invalidate()
+                accentLongPressTimer = nil
+                hideAccentPopup()
+                accentTrackingTouch = nil
+                accentBaseKey = nil
+                accentSourceButton = nil
+            }
             if touch === spaceTrackingTouch {
                 spaceLongPressTimer?.invalidate()
                 spaceLongPressTimer = nil
@@ -831,13 +951,13 @@ class KeyboardLayoutView: UIView {
             onLanguageChanged?(.english)
 
         case Self.globeLangKey:
-            // Toggle between Korean and English
-            if currentLanguage == .korean {
+            // Toggle between paired language and English
+            if currentLanguage == .english {
+                currentLanguage = pairedLanguage
+                onLanguageChanged?(pairedLanguage)
+            } else {
                 currentLanguage = .english
                 onLanguageChanged?(.english)
-            } else {
-                currentLanguage = .korean
-                onLanguageChanged?(.korean)
             }
             isShifted = false
             currentPage = .letters
@@ -923,6 +1043,23 @@ class KeyboardLayoutView: UIView {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
             button.backgroundColor = original
         }
+    }
+
+    // MARK: - Accent Popup
+
+    private func showAccentPopup(accents: [String], sourceButton: UIButton) {
+        hideAccentPopup()
+        guard let sv = sourceButton.superview else { return }
+        let sourceFrame = sv.convert(sourceButton.frame, to: self)
+        let popup = AccentPopupView()
+        popup.configure(accents: accents, sourceFrame: sourceFrame, in: self)
+        addSubview(popup)
+        accentPopupView = popup
+    }
+
+    private func hideAccentPopup() {
+        accentPopupView?.removeFromSuperview()
+        accentPopupView = nil
     }
 
     private func enterTrackpadMode() {

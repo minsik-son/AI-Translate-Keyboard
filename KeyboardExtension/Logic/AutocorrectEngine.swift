@@ -7,6 +7,11 @@ final class AutocorrectEngine {
         switch language {
         case .english: return "en_US"
         case .korean: return "ko"
+        case .spanish: return "es"
+        case .french: return "fr"
+        case .german: return "de"
+        case .italian: return "it"
+        case .russian: return "ru"
         }
     }
 

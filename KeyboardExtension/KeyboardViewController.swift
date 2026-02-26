@@ -120,7 +120,10 @@ class KeyboardViewController: UIInputViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        LocalizationManager.shared.reload()
+        reloadLocalizedStrings()
         loadNumberRowSetting()
+        loadKeyboardLanguageSetting()
         setupHeightConstraint()
         textProxyManager.updateProxy(textDocumentProxy)
         updateReturnKeyAppearance()
@@ -129,10 +132,31 @@ class KeyboardViewController: UIInputViewController {
         toolbarView.hideSuggestions()
     }
 
+    private func reloadLocalizedStrings() {
+        translationInputView.setPlaceholder(L("translation.placeholder"))
+        correctionInputView.setPlaceholder(L("correction.placeholder"))
+        phraseInputView.setPlaceholder(L("phrase.placeholder"))
+        phraseInputHeaderView.reloadLocalizedStrings()
+        updateLanguageLabels()
+        if currentMode == .correctionMode {
+            correctionLanguageBar.updateToneName(currentToneStyle.displayName)
+        }
+    }
+
     private func loadNumberRowSetting() {
         let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier)
         let show = defaults?.object(forKey: AppConstants.UserDefaultsKeys.showNumberRow) == nil ? true : (defaults?.bool(forKey: AppConstants.UserDefaultsKeys.showNumberRow) ?? true)
         keyboardLayoutView.showNumberRow = show
+    }
+
+    private func loadKeyboardLanguageSetting() {
+        let code = AppGroupManager.shared.string(forKey: AppConstants.UserDefaultsKeys.primaryKeyboardLanguage) ?? "ko"
+        let lang = KeyboardLanguage(rawValue: code) ?? .korean
+        keyboardLayoutView.pairedLanguage = lang
+        let current = keyboardLayoutView.getCurrentLanguage()
+        if current != .english && current != lang {
+            keyboardLayoutView.setLanguage(lang)
+        }
     }
 
     override func textDidChange(_ textInput: UITextInput?) {
@@ -433,6 +457,7 @@ class KeyboardViewController: UIInputViewController {
         // Tone Picker
         tonePickerView.onToneSelected = { [weak self] tone in
             self?.currentToneStyle = tone
+            AppGroupManager.shared.set(tone.rawValue, forKey: AppConstants.UserDefaultsKeys.toneStyle)
             self?.correctionLanguageBar.updateToneName(tone.displayName)
             self?.correctionManager.setTone(tone)
             self?.hideTonePicker()
@@ -443,7 +468,7 @@ class KeyboardViewController: UIInputViewController {
         }
 
         // Correction Input — close button + dynamic height
-        correctionInputView.setPlaceholder("교정할 텍스트를 입력하세요")
+        correctionInputView.setPlaceholder(L("correction.placeholder"))
         correctionInputView.onCloseTranslation = { [weak self] in
             self?.exitCorrectionMode()
         }
@@ -469,7 +494,7 @@ class KeyboardViewController: UIInputViewController {
         phraseInputHeaderView.onSave = { [weak self] in
             self?.saveNewPhrase()
         }
-        phraseInputView.setPlaceholder("저장할 문구를 입력하세요")
+        phraseInputView.setPlaceholder(L("phrase.placeholder"))
         phraseInputView.onHeightChanged = { [weak self] newHeight in
             self?.phraseInputHeightConstraint?.constant = newHeight
             self?.updateHeight(for: .phraseInputMode, animated: true)
@@ -481,8 +506,7 @@ class KeyboardViewController: UIInputViewController {
         }
         keyboardLayoutView.onLanguageChanged = { [weak self] lang in
             self?.commitDefaultComposing()
-            let code: String = (lang == .korean) ? "korean" : "english"
-            AppGroupManager.shared.set(code, forKey: AppConstants.UserDefaultsKeys.keyboardLayout)
+            AppGroupManager.shared.set(lang.rawValue, forKey: AppConstants.UserDefaultsKeys.keyboardLayout)
         }
         keyboardLayoutView.onCursorMove = { [weak self] horizontal, vertical in
             self?.handleCursorMove(horizontal: horizontal, vertical: vertical)
@@ -525,11 +549,20 @@ class KeyboardViewController: UIInputViewController {
         if let targetLang = AppGroupManager.shared.string(forKey: AppConstants.UserDefaultsKeys.targetLanguage) {
             targetLanguageCode = targetLang
         }
+        correctionLanguageCode = sourceLanguageCode
         translationManager.setLanguages(source: sourceLanguageCode, target: targetLanguageCode)
         updateLanguageLabels()
 
+        // Restore keyboard language from keyboardLayout key (supports both old "korean"/"english" and new rawValue format)
         if let savedLang = AppGroupManager.shared.string(forKey: AppConstants.UserDefaultsKeys.keyboardLayout) {
-            let lang: KeyboardLanguage = (savedLang == "korean") ? .korean : .english
+            let lang: KeyboardLanguage
+            if let parsed = KeyboardLanguage(rawValue: savedLang) {
+                lang = parsed
+            } else if savedLang == "korean" {
+                lang = .korean
+            } else {
+                lang = .english
+            }
             keyboardLayoutView.setLanguage(lang)
         }
     }
@@ -661,9 +694,14 @@ class KeyboardViewController: UIInputViewController {
         let langName = languageDisplayName(for: correctionLanguageCode)
         correctionLanguageBar.updateLanguageName(langName)
         correctionManager.setLanguage(correctionLanguageCode)
-        currentToneStyle = .none
-        correctionLanguageBar.updateToneName("기본")
-        correctionManager.setTone(.none)
+        if let savedTone = AppGroupManager.shared.string(forKey: AppConstants.UserDefaultsKeys.toneStyle),
+           let tone = ToneStyle(rawValue: savedTone) {
+            currentToneStyle = tone
+        } else {
+            currentToneStyle = .none
+        }
+        correctionLanguageBar.updateToneName(currentToneStyle.displayName)
+        correctionManager.setTone(currentToneStyle)
         switchMode(to: .correctionMode)
     }
 
@@ -677,7 +715,6 @@ class KeyboardViewController: UIInputViewController {
         defaultModeComposingLength = 0
         correctionInputHeightConstraint?.constant = Heights.translationInput
         hideTonePicker()
-        currentToneStyle = .none
         hideLanguagePicker()
         switchMode(to: .defaultMode)
     }
@@ -1056,7 +1093,12 @@ class KeyboardViewController: UIInputViewController {
         let screenWidth = UIScreen.main.bounds.width
         let textWidth = screenWidth * 0.85  // ~85% of screen for typical text view margins
         let lang = keyboardLayoutView.getCurrentLanguage()
-        let avgCharWidth: CGFloat = (lang == .korean) ? 17 : 9
+        let avgCharWidth: CGFloat
+        switch lang {
+        case .korean: avgCharWidth = 17
+        case .russian: avgCharWidth = 12
+        default: avgCharWidth = 9
+        }
         return max(10, Int(textWidth / avgCharWidth))
     }
 

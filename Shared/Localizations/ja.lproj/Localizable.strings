@@ -13,6 +13,8 @@
 "settings.privacy" = "Privacy Policy";
 "settings.terms" = "Terms of Use";
 "settings.app_language" = "アプリの言語";
+"settings.keyboard_language" = "キーボード言語";
+"settings.number_row" = "数字行";
 
 // === Onboarding ===
 "onboarding.welcome.subtitle" = "どこでも翻訳できるキーボード";
@@ -36,6 +38,8 @@
 "onboarding.subscription.yearly" = "年額";
 "onboarding.subscription.best_label" = "(BEST)";
 "onboarding.subscription.start_trial" = "無料体験を始める";
+"onboarding.permission.success.title" = "設定完了！";
+"onboarding.permission.success.description" = "キーボードの準備ができました";
 "onboarding.cta.start" = "はじめる";
 "onboarding.cta.go_settings" = "設定へ移動";
 "onboarding.cta.next" = "次へ";
@@ -86,3 +90,20 @@
 "lang.de" = "ドイツ語";
 "lang.ru" = "ロシア語";
 "lang.it" = "イタリア語";
+
+// === Loading ===
+"language.loading" = "読み込み中...";
+
+// === Correction & Phrase ===
+"correction.placeholder" = "校正するテキストを入力してください";
+"phrase.placeholder" = "保存するフレーズを入力してください";
+"phrase.cancel" = "キャンセル";
+"phrase.add_title" = "フレーズ追加";
+"phrase.save" = "保存";
+
+// === Tone ===
+"tone.none" = "デフォルト";
+"tone.formal" = "敬語";
+"tone.casual" = "カジュアル";
+"tone.business" = "ビジネス";
+"tone.friendly" = "フレンドリー";

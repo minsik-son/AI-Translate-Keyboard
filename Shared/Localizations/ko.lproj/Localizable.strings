@@ -13,6 +13,8 @@
 "settings.privacy" = "Privacy Policy";
 "settings.terms" = "Terms of Use";
 "settings.app_language" = "앱 언어";
+"settings.keyboard_language" = "키보드 언어";
+"settings.number_row" = "숫자 줄";
 
 // === Onboarding ===
 "onboarding.welcome.subtitle" = "어디서든 번역하는 키보드";
@@ -36,6 +38,8 @@
 "onboarding.subscription.yearly" = "연간 구독";
 "onboarding.subscription.best_label" = "(BEST)";
 "onboarding.subscription.start_trial" = "무료 체험 시작";
+"onboarding.permission.success.title" = "설정 완료!";
+"onboarding.permission.success.description" = "키보드를 사용할 준비가 되었습니다";
 "onboarding.cta.start" = "시작하기";
 "onboarding.cta.go_settings" = "설정으로 이동";
 "onboarding.cta.next" = "다음";
@@ -86,3 +90,20 @@
 "lang.de" = "독일어";
 "lang.ru" = "러시아어";
 "lang.it" = "이탈리아어";
+
+// === Loading ===
+"language.loading" = "로딩 중...";
+
+// === Correction & Phrase ===
+"correction.placeholder" = "교정할 텍스트를 입력하세요";
+"phrase.placeholder" = "저장할 문구를 입력하세요";
+"phrase.cancel" = "취소";
+"phrase.add_title" = "문구 추가";
+"phrase.save" = "저장";
+
+// === Tone ===
+"tone.none" = "기본";
+"tone.formal" = "존댓말";
+"tone.casual" = "반말";
+"tone.business" = "비즈니스";
+"tone.friendly" = "친근한";

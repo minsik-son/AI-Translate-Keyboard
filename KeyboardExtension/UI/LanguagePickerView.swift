@@ -24,21 +24,23 @@ class LanguagePickerView: UIView {
     private var selectedTargetCode: String = "en"
     private var isSingleLanguageMode = false
 
-    static let supportedLanguages: [LanguageItem] = [
-        LanguageItem(code: "ko", displayName: "한국어"),
-        LanguageItem(code: "en", displayName: "영어"),
-        LanguageItem(code: "ja", displayName: "일본어"),
-        LanguageItem(code: "zh-CN", displayName: "중국어(간체)"),
-        LanguageItem(code: "zh-TW", displayName: "중국어(번체)"),
-        LanguageItem(code: "vi", displayName: "베트남어"),
-        LanguageItem(code: "th", displayName: "태국어"),
-        LanguageItem(code: "id", displayName: "인도네시아어"),
-        LanguageItem(code: "es", displayName: "스페인어"),
-        LanguageItem(code: "fr", displayName: "프랑스어"),
-        LanguageItem(code: "de", displayName: "독일어"),
-        LanguageItem(code: "ru", displayName: "러시아어"),
-        LanguageItem(code: "it", displayName: "이탈리아어"),
-    ]
+    static var supportedLanguages: [LanguageItem] {
+        [
+            LanguageItem(code: "ko", displayName: L("lang.ko")),
+            LanguageItem(code: "en", displayName: L("lang.en")),
+            LanguageItem(code: "ja", displayName: L("lang.ja")),
+            LanguageItem(code: "zh-CN", displayName: L("lang.zh_cn")),
+            LanguageItem(code: "zh-TW", displayName: L("lang.zh_tw")),
+            LanguageItem(code: "vi", displayName: L("lang.vi")),
+            LanguageItem(code: "th", displayName: L("lang.th")),
+            LanguageItem(code: "id", displayName: L("lang.id")),
+            LanguageItem(code: "es", displayName: L("lang.es")),
+            LanguageItem(code: "fr", displayName: L("lang.fr")),
+            LanguageItem(code: "de", displayName: L("lang.de")),
+            LanguageItem(code: "ru", displayName: L("lang.ru")),
+            LanguageItem(code: "it", displayName: L("lang.it")),
+        ]
+    }
 
     // MARK: - UI Elements
 
@@ -50,7 +52,7 @@ class LanguagePickerView: UIView {
 
     private let sourceTabButton: UIButton = {
         let btn = UIButton(type: .system)
-        btn.setTitle("입력언어", for: .normal)
+        btn.setTitle(L("langpicker.source_tab"), for: .normal)
         btn.titleLabel?.font = .systemFont(ofSize: 15, weight: .semibold)
         btn.translatesAutoresizingMaskIntoConstraints = false
         return btn
@@ -58,7 +60,7 @@ class LanguagePickerView: UIView {
 
     private let targetTabButton: UIButton = {
         let btn = UIButton(type: .system)
-        btn.setTitle("번역언어", for: .normal)
+        btn.setTitle(L("langpicker.target_tab"), for: .normal)
         btn.titleLabel?.font = .systemFont(ofSize: 15, weight: .semibold)
         btn.translatesAutoresizingMaskIntoConstraints = false
         return btn

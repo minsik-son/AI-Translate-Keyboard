@@ -36,7 +36,7 @@ class TranslationInputView: UIView {
 
     private let placeholderLabel: UILabel = {
         let label = UILabel()
-        label.text = "번역할 텍스트를 입력하세요"
+        label.text = L("translation.placeholder")
         label.font = .systemFont(ofSize: 15)
         label.textColor = UIColor.placeholderText.withAlphaComponent(0.5)
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -214,11 +214,13 @@ class TranslationInputView: UIView {
             containerView.backgroundColor = theme.keyBackground
             inputLabel.textColor = theme.keyTextColor
             closeButton.tintColor = theme.keyTextColor.withAlphaComponent(0.4)
+            placeholderLabel.textColor = theme.keyTextColor.withAlphaComponent(0.4)
         } else {
             backgroundColor = .clear
             containerView.backgroundColor = isDark ? UIColor(white: 0.18, alpha: 1) : UIColor(white: 0.95, alpha: 1)
             closeButton.tintColor = isDark ? UIColor(white: 0.4, alpha: 1) : .tertiaryLabel
             inputLabel.textColor = isDark ? .white : .label
+            placeholderLabel.textColor = isDark ? UIColor(white: 0.6, alpha: 1) : UIColor.placeholderText.withAlphaComponent(0.5)
         }
     }
 

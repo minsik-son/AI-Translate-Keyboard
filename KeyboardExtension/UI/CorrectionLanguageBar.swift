@@ -63,7 +63,7 @@ class CorrectionLanguageBar: UIView {
 
         tonePill.layer.cornerRadius = pillHeight / 2
         tonePill.contentEdgeInsets = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
-        tonePill.setTitle("기본", for: .normal)
+        tonePill.setTitle(L("tone.none"), for: .normal)
 
         languagePill.addTarget(self, action: #selector(pillTapped), for: .touchUpInside)
         tonePill.addTarget(self, action: #selector(tonePillTapped), for: .touchUpInside)

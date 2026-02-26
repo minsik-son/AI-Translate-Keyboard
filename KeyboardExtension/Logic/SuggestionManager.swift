@@ -36,11 +36,7 @@ final class SuggestionManager {
         }
 
         // No current word (after space) → prediction
-        let langCode: String
-        switch language {
-        case .english: langCode = "en"
-        case .korean: langCode = "ko"
-        }
+        let langCode = language.rawValue
         predictionEngine.loadModel(for: langCode)
 
         let words = extractContextWords(from: context)

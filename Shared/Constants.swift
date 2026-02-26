@@ -23,6 +23,8 @@ enum AppConstants {
         static let savedPhrases = "saved_phrases"
         static let keyboardTheme = "keyboard_theme"
         static let showNumberRow = "show_number_row"
+        static let toneStyle = "tone_style"
+        static let primaryKeyboardLanguage = "primary_keyboard_language"
     }
 
     enum API {

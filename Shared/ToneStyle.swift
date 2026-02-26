@@ -9,21 +9,11 @@ enum ToneStyle: String, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .none: return "기본"
-        case .formal: return "존댓말"
-        case .casual: return "반말"
-        case .business: return "비즈니스"
-        case .friendly: return "친근한"
-        }
-    }
-
-    var displayNameEN: String {
-        switch self {
-        case .none: return "Default"
-        case .formal: return "Formal"
-        case .casual: return "Casual"
-        case .business: return "Business"
-        case .friendly: return "Friendly"
+        case .none: return L("tone.none")
+        case .formal: return L("tone.formal")
+        case .casual: return L("tone.casual")
+        case .business: return L("tone.business")
+        case .friendly: return L("tone.friendly")
         }
     }
 }

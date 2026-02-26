@@ -7,6 +7,16 @@ enum AppLanguage: String, CaseIterable {
     case zhHans = "zh-Hans"
     case ru = "ru"
     case es = "es"
+    case fr = "fr"
+    case de = "de"
+    case it = "it"
+
+    var translationLanguageCode: String {
+        switch self {
+        case .zhHans: return "zh-CN"
+        default: return rawValue
+        }
+    }
 
     var displayName: String {
         switch self {
@@ -16,6 +26,9 @@ enum AppLanguage: String, CaseIterable {
         case .zhHans: return "中文(简体)"
         case .ru: return "Русский"
         case .es: return "Español"
+        case .fr: return "Français"
+        case .de: return "Deutsch"
+        case .it: return "Italiano"
         }
     }
 }

@@ -16,28 +16,30 @@ class SettingsViewController: UITableViewController {
         let accessory: AccessoryType
     }
 
-    private let sections: [(title: String?, items: [SettingsItem])] = [
-        (
-            title: "키보드 설정",
-            items: [
-                SettingsItem(title: "키보드 테마", iconName: "paintbrush.fill", iconBackgroundColor: .purple, accessory: .chevron),
-                SettingsItem(title: "언어", iconName: "globe", iconBackgroundColor: .systemBlue, accessory: .chevron),
-                SettingsItem(title: "레이아웃", iconName: "keyboard", iconBackgroundColor: .systemTeal, accessory: .chevron),
-                SettingsItem(title: "자동완성", iconName: "text.badge.checkmark", iconBackgroundColor: .systemGreen, accessory: .toggle(key: AppConstants.UserDefaultsKeys.autoComplete)),
-                SettingsItem(title: "자동 대문자", iconName: "textformat.size.larger", iconBackgroundColor: .systemOrange, accessory: .toggle(key: AppConstants.UserDefaultsKeys.autoCapitalize)),
-                SettingsItem(title: "햅틱", iconName: "hand.tap", iconBackgroundColor: .systemIndigo, accessory: .toggle(key: AppConstants.UserDefaultsKeys.hapticFeedback)),
-            ]
-        ),
-        (
-            title: "About & Support",
-            items: [
-                SettingsItem(title: "Rate Us", iconName: "star.fill", iconBackgroundColor: .systemYellow, accessory: .chevron),
-                SettingsItem(title: "FAQ & Support", iconName: "questionmark.circle", iconBackgroundColor: .systemBlue, accessory: .chevron),
-                SettingsItem(title: "Privacy Policy", iconName: "hand.raised.fill", iconBackgroundColor: .systemGreen, accessory: .chevron),
-                SettingsItem(title: "Terms of Use", iconName: "doc.text", iconBackgroundColor: .systemGray, accessory: .chevron),
-            ]
-        ),
-    ]
+    private var sections: [(title: String?, items: [SettingsItem])] {
+        [
+            (
+                title: L("settings.section.keyboard"),
+                items: [
+                    SettingsItem(title: L("settings.keyboard_theme"), iconName: "paintbrush.fill", iconBackgroundColor: .purple, accessory: .chevron),
+                    SettingsItem(title: L("settings.language"), iconName: "globe", iconBackgroundColor: .systemBlue, accessory: .chevron),
+                    SettingsItem(title: L("settings.layout"), iconName: "keyboard", iconBackgroundColor: .systemTeal, accessory: .chevron),
+                    SettingsItem(title: L("settings.autocomplete"), iconName: "text.badge.checkmark", iconBackgroundColor: .systemGreen, accessory: .toggle(key: AppConstants.UserDefaultsKeys.autoComplete)),
+                    SettingsItem(title: L("settings.auto_capitalize"), iconName: "textformat.size.larger", iconBackgroundColor: .systemOrange, accessory: .toggle(key: AppConstants.UserDefaultsKeys.autoCapitalize)),
+                    SettingsItem(title: L("settings.haptic"), iconName: "hand.tap", iconBackgroundColor: .systemIndigo, accessory: .toggle(key: AppConstants.UserDefaultsKeys.hapticFeedback)),
+                ]
+            ),
+            (
+                title: L("settings.section.about"),
+                items: [
+                    SettingsItem(title: L("settings.rate_us"), iconName: "star.fill", iconBackgroundColor: .systemYellow, accessory: .chevron),
+                    SettingsItem(title: L("settings.faq"), iconName: "questionmark.circle", iconBackgroundColor: .systemBlue, accessory: .chevron),
+                    SettingsItem(title: L("settings.privacy"), iconName: "hand.raised.fill", iconBackgroundColor: .systemGreen, accessory: .chevron),
+                    SettingsItem(title: L("settings.terms"), iconName: "doc.text", iconBackgroundColor: .systemGray, accessory: .chevron),
+                ]
+            ),
+        ]
+    }
 
     // MARK: - Lifecycle
 
@@ -51,9 +53,15 @@ class SettingsViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "설정"
+        title = L("settings.title")
         navigationController?.navigationBar.prefersLargeTitles = true
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "SettingsCell")
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        title = L("settings.title")
+        tableView.reloadData()
     }
 
     // MARK: - UITableViewDataSource

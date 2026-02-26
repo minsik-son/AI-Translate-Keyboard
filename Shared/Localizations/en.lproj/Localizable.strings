@@ -13,6 +13,8 @@
 "settings.privacy" = "Privacy Policy";
 "settings.terms" = "Terms of Use";
 "settings.app_language" = "App Language";
+"settings.keyboard_language" = "Keyboard Language";
+"settings.number_row" = "Number Row";
 
 // === Onboarding ===
 "onboarding.welcome.subtitle" = "Translate anywhere with your keyboard";
@@ -36,6 +38,8 @@
 "onboarding.subscription.yearly" = "Yearly";
 "onboarding.subscription.best_label" = "(BEST)";
 "onboarding.subscription.start_trial" = "Start Free Trial";
+"onboarding.permission.success.title" = "Setup Complete!";
+"onboarding.permission.success.description" = "Your keyboard is ready to use";
 "onboarding.cta.start" = "Get Started";
 "onboarding.cta.go_settings" = "Go to Settings";
 "onboarding.cta.next" = "Next";
@@ -86,3 +90,20 @@
 "lang.de" = "German";
 "lang.ru" = "Russian";
 "lang.it" = "Italian";
+
+// === Loading ===
+"language.loading" = "Loading...";
+
+// === Correction & Phrase ===
+"correction.placeholder" = "Enter text to correct";
+"phrase.placeholder" = "Enter phrase to save";
+"phrase.cancel" = "Cancel";
+"phrase.add_title" = "Add Phrase";
+"phrase.save" = "Save";
+
+// === Tone ===
+"tone.none" = "Default";
+"tone.formal" = "Formal";
+"tone.casual" = "Casual";
+"tone.business" = "Business";
+"tone.friendly" = "Friendly";

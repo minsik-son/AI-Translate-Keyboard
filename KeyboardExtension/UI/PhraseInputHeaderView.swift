@@ -7,7 +7,7 @@ class PhraseInputHeaderView: UIView {
 
     private let cancelButton: UIButton = {
         let btn = UIButton(type: .system)
-        btn.setTitle("취소", for: .normal)
+        btn.setTitle(L("phrase.cancel"), for: .normal)
         btn.titleLabel?.font = .systemFont(ofSize: 16)
         btn.translatesAutoresizingMaskIntoConstraints = false
         return btn
@@ -15,7 +15,7 @@ class PhraseInputHeaderView: UIView {
 
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "문구 추가"
+        label.text = L("phrase.add_title")
         label.font = .systemFont(ofSize: 16, weight: .medium)
         label.textColor = .label
         label.textAlignment = .center
@@ -25,7 +25,7 @@ class PhraseInputHeaderView: UIView {
 
     private let saveButton: UIButton = {
         let btn = UIButton(type: .system)
-        btn.setTitle("저장", for: .normal)
+        btn.setTitle(L("phrase.save"), for: .normal)
         btn.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
         btn.translatesAutoresizingMaskIntoConstraints = false
         return btn
@@ -72,6 +72,12 @@ class PhraseInputHeaderView: UIView {
     @objc private func saveTapped() { onSave?() }
 
     // MARK: - Public
+
+    func reloadLocalizedStrings() {
+        cancelButton.setTitle(L("phrase.cancel"), for: .normal)
+        titleLabel.text = L("phrase.add_title")
+        saveButton.setTitle(L("phrase.save"), for: .normal)
+    }
 
     private var customTheme: KeyboardTheme?
 

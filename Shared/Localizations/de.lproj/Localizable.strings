@@ -1,0 +1,109 @@
+// === Settings ===
+"settings.title" = "Einstellungen";
+"settings.section.keyboard" = "Tastatureinstellungen";
+"settings.keyboard_theme" = "Tastaturdesign";
+"settings.language" = "Sprache";
+"settings.layout" = "Layout";
+"settings.autocomplete" = "Autovervollständigung";
+"settings.auto_capitalize" = "Automatische Großschreibung";
+"settings.haptic" = "Haptisches Feedback";
+"settings.section.about" = "Über uns & Support";
+"settings.rate_us" = "Bewerten Sie uns";
+"settings.faq" = "FAQ & Support";
+"settings.privacy" = "Datenschutzrichtlinie";
+"settings.terms" = "Nutzungsbedingungen";
+"settings.app_language" = "App-Sprache";
+"settings.keyboard_language" = "Tastatursprache";
+"settings.number_row" = "Zahlenreihe";
+
+// === Onboarding ===
+"onboarding.welcome.subtitle" = "Übersetzen Sie überall mit Ihrer Tastatur";
+"onboarding.permission.title" = "Tastatur-Einrichtung";
+"onboarding.permission.step1" = "Gehen Sie zu Einstellungen → Allgemein → Tastatur → Tastatur hinzufügen\nund fügen Sie Translator Keyboard hinzu";
+"onboarding.permission.step2" = "Aktivieren Sie 'Vollzugriff erlauben'\n(Erforderlich für die Übersetzung)";
+"onboarding.feature.translate.title" = "Echtzeit-Übersetzung";
+"onboarding.feature.translate.description" = "Übersetzen Sie direkt von Ihrer Tastatur\nSehen Sie Ergebnisse sofort";
+"onboarding.feature.multilang.title" = "Mehrsprachige Unterstützung";
+"onboarding.feature.multilang.description" = "Unterstützt verschiedene Sprachen\neinschließlich Koreanisch und Englisch";
+"onboarding.feature.smart.title" = "Intelligente Funktionen";
+"onboarding.feature.smart.description" = "Trackpad-Cursorbewegung, Designänderungen\nund weitere praktische Funktionen";
+"onboarding.subscription.restore" = "Wiederherstellen";
+"onboarding.subscription.title" = "Auf Pro upgraden";
+"onboarding.subscription.benefit.unlimited" = "Unbegrenzte Übersetzung";
+"onboarding.subscription.benefit.quality" = "Hochwertige Übersetzung";
+"onboarding.subscription.benefit.no_ads" = "Keine Werbung";
+"onboarding.subscription.benefit.themes" = "Premium-Designs";
+"onboarding.subscription.trial_badge" = "  7 Tage kostenlos testen  ";
+"onboarding.subscription.monthly" = "Monatlich";
+"onboarding.subscription.yearly" = "Jährlich";
+"onboarding.subscription.best_label" = "(BESTE)";
+"onboarding.subscription.start_trial" = "Kostenlose Testversion starten";
+"onboarding.permission.success.title" = "Einrichtung abgeschlossen!";
+"onboarding.permission.success.description" = "Ihre Tastatur ist einsatzbereit";
+"onboarding.cta.start" = "Loslegen";
+"onboarding.cta.go_settings" = "Zu den Einstellungen";
+"onboarding.cta.next" = "Weiter";
+
+// === Keyboard Errors & Status ===
+"keyboard.error.full_access" = "Bitte erlauben Sie den Vollzugriff";
+"keyboard.error.session_limit" = "Sie haben alle Übersetzungen für heute verbraucht";
+"keyboard.error.max_chars" = "Maximal %d Zeichen erlaubt";
+"keyboard.error.timeout" = "Übersetzung abgelaufen";
+"keyboard.error.offline" = "Sie sind offline";
+"keyboard.error.rate_limited" = "Bitte versuchen Sie es später erneut";
+"keyboard.error.translate_failed" = "Übersetzung fehlgeschlagen";
+"keyboard.status.translating" = "Übersetze...";
+"keyboard.error.correct_failed" = "Korrektur fehlgeschlagen";
+"keyboard.status.correcting" = "Korrigiere...";
+
+// === Return Key Labels ===
+"keyboard.return.go" = "Los";
+"keyboard.return.search" = "Suchen";
+"keyboard.return.send" = "Senden";
+"keyboard.return.done" = "Fertig";
+"keyboard.return.next" = "Weiter";
+"keyboard.return.join" = "Beitreten";
+"keyboard.return.route" = "Route";
+"keyboard.return.emergency" = "Notfall";
+"keyboard.return.continue" = "Fortfahren";
+"keyboard.return.newline" = "Eingabe";
+
+// === Keyboard UI ===
+"keyboard.space" = "Leertaste";
+
+// === Translation Input ===
+"translation.placeholder" = "Text zum Übersetzen eingeben";
+
+// === Language Picker ===
+"langpicker.source_tab" = "Quelle";
+"langpicker.target_tab" = "Ziel";
+"lang.ko" = "Koreanisch";
+"lang.en" = "Englisch";
+"lang.ja" = "Japanisch";
+"lang.zh_cn" = "Chinesisch (vereinfacht)";
+"lang.zh_tw" = "Chinesisch (traditionell)";
+"lang.vi" = "Vietnamesisch";
+"lang.th" = "Thailändisch";
+"lang.id" = "Indonesisch";
+"lang.es" = "Spanisch";
+"lang.fr" = "Französisch";
+"lang.de" = "Deutsch";
+"lang.ru" = "Russisch";
+"lang.it" = "Italienisch";
+
+// === Loading ===
+"language.loading" = "Laden...";
+
+// === Correction & Phrase ===
+"correction.placeholder" = "Text zur Korrektur eingeben";
+"phrase.placeholder" = "Phrase zum Speichern eingeben";
+"phrase.cancel" = "Abbrechen";
+"phrase.add_title" = "Phrase hinzufügen";
+"phrase.save" = "Speichern";
+
+// === Tone ===
+"tone.none" = "Standard";
+"tone.formal" = "Formell";
+"tone.casual" = "Umgangssprachlich";
+"tone.business" = "Geschäftlich";
+"tone.friendly" = "Freundlich";

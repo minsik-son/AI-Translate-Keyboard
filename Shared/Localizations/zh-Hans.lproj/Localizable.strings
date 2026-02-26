@@ -13,6 +13,8 @@
 "settings.privacy" = "Privacy Policy";
 "settings.terms" = "Terms of Use";
 "settings.app_language" = "应用语言";
+"settings.keyboard_language" = "键盘语言";
+"settings.number_row" = "数字行";
 
 // === Onboarding ===
 "onboarding.welcome.subtitle" = "随时随地翻译的键盘";
@@ -36,6 +38,8 @@
 "onboarding.subscription.yearly" = "年度订阅";
 "onboarding.subscription.best_label" = "(BEST)";
 "onboarding.subscription.start_trial" = "开始免费试用";
+"onboarding.permission.success.title" = "设置完成！";
+"onboarding.permission.success.description" = "键盘已准备就绪";
 "onboarding.cta.start" = "开始使用";
 "onboarding.cta.go_settings" = "前往设置";
 "onboarding.cta.next" = "下一步";
@@ -86,3 +90,20 @@
 "lang.de" = "德语";
 "lang.ru" = "俄语";
 "lang.it" = "意大利语";
+
+// === Loading ===
+"language.loading" = "加载中...";
+
+// === Correction & Phrase ===
+"correction.placeholder" = "请输入要校正的文本";
+"phrase.placeholder" = "请输入要保存的短语";
+"phrase.cancel" = "取消";
+"phrase.add_title" = "添加短语";
+"phrase.save" = "保存";
+
+// === Tone ===
+"tone.none" = "默认";
+"tone.formal" = "正式";
+"tone.casual" = "随意";
+"tone.business" = "商务";
+"tone.friendly" = "友好";
