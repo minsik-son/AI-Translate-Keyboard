@@ -5,6 +5,7 @@ enum AppLanguage: String, CaseIterable {
     case ko = "ko"
     case ja = "ja"
     case zhHans = "zh-Hans"
+    case ru = "ru"
     case es = "es"
 
     var displayName: String {
@@ -12,7 +13,8 @@ enum AppLanguage: String, CaseIterable {
         case .en: return "English"
         case .ko: return "한국어"
         case .ja: return "日本語"
-        case .zhHans: return "简体中文"
+        case .zhHans: return "中文(简体)"
+        case .ru: return "Русский"
         case .es: return "Español"
         }
     }

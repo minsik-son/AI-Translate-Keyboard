@@ -1,0 +1,88 @@
+// === Settings ===
+"settings.title" = "Настройки";
+"settings.section.keyboard" = "Настройки клавиатуры";
+"settings.keyboard_theme" = "Тема клавиатуры";
+"settings.language" = "Язык";
+"settings.layout" = "Раскладка";
+"settings.autocomplete" = "Автозаполнение";
+"settings.auto_capitalize" = "Авто заглавные";
+"settings.haptic" = "Вибрация";
+"settings.section.about" = "О приложении";
+"settings.rate_us" = "Оценить";
+"settings.faq" = "FAQ и поддержка";
+"settings.privacy" = "Политика конфиденциальности";
+"settings.terms" = "Условия использования";
+"settings.app_language" = "Язык приложения";
+
+// === Onboarding ===
+"onboarding.welcome.subtitle" = "Переводите где угодно с клавиатуры";
+"onboarding.permission.title" = "Настройка клавиатуры";
+"onboarding.permission.step1" = "Перейдите в Настройки → Основные → Клавиатура → Добавить клавиатуру\nи добавьте Translator Keyboard";
+"onboarding.permission.step2" = "Включите «Полный доступ»\n(Необходим для перевода)";
+"onboarding.feature.translate.title" = "Перевод в реальном времени";
+"onboarding.feature.translate.description" = "Переводите прямо с клавиатуры\nРезультаты появляются мгновенно";
+"onboarding.feature.multilang.title" = "Многоязычная поддержка";
+"onboarding.feature.multilang.description" = "Поддержка различных языков\nвключая корейский и английский";
+"onboarding.feature.smart.title" = "Умные функции";
+"onboarding.feature.smart.description" = "Курсор-трекпад, смена темы\nи другие удобные функции";
+"onboarding.subscription.restore" = "Восстановить";
+"onboarding.subscription.title" = "Обновить до Pro";
+"onboarding.subscription.benefit.unlimited" = "Безлимитный перевод";
+"onboarding.subscription.benefit.quality" = "Высокое качество перевода";
+"onboarding.subscription.benefit.no_ads" = "Без рекламы";
+"onboarding.subscription.benefit.themes" = "Премиум темы";
+"onboarding.subscription.trial_badge" = "  7 дней бесплатно  ";
+"onboarding.subscription.monthly" = "Ежемесячно";
+"onboarding.subscription.yearly" = "Ежегодно";
+"onboarding.subscription.best_label" = "(ЛУЧШИЙ)";
+"onboarding.subscription.start_trial" = "Начать бесплатный период";
+"onboarding.cta.start" = "Начать";
+"onboarding.cta.go_settings" = "Перейти в настройки";
+"onboarding.cta.next" = "Далее";
+
+// === Keyboard Errors & Status ===
+"keyboard.error.full_access" = "Пожалуйста, разрешите полный доступ";
+"keyboard.error.session_limit" = "Использованы все переводы на сегодня";
+"keyboard.error.max_chars" = "Максимум %d символов";
+"keyboard.error.timeout" = "Время перевода истекло";
+"keyboard.error.offline" = "Нет подключения к интернету";
+"keyboard.error.rate_limited" = "Попробуйте позже";
+"keyboard.error.translate_failed" = "Ошибка перевода";
+"keyboard.status.translating" = "Перевод...";
+"keyboard.error.correct_failed" = "Ошибка исправления";
+"keyboard.status.correcting" = "Исправление...";
+
+// === Return Key Labels ===
+"keyboard.return.go" = "Перейти";
+"keyboard.return.search" = "Поиск";
+"keyboard.return.send" = "Отправить";
+"keyboard.return.done" = "Готово";
+"keyboard.return.next" = "Далее";
+"keyboard.return.join" = "Войти";
+"keyboard.return.route" = "Маршрут";
+"keyboard.return.emergency" = "Экстренный";
+"keyboard.return.continue" = "Продолжить";
+"keyboard.return.newline" = "ввод";
+
+// === Keyboard UI ===
+"keyboard.space" = "пробел";
+
+// === Translation Input ===
+"translation.placeholder" = "Введите текст для перевода";
+
+// === Language Picker ===
+"langpicker.source_tab" = "Исходный";
+"langpicker.target_tab" = "Целевой";
+"lang.ko" = "Корейский";
+"lang.en" = "Английский";
+"lang.ja" = "Японский";
+"lang.zh_cn" = "Китайский (упрощ.)";
+"lang.zh_tw" = "Китайский (традиц.)";
+"lang.vi" = "Вьетнамский";
+"lang.th" = "Тайский";
+"lang.id" = "Индонезийский";
+"lang.es" = "Испанский";
+"lang.fr" = "Французский";
+"lang.de" = "Немецкий";
+"lang.ru" = "Русский";
+"lang.it" = "Итальянский";

@@ -59,6 +59,8 @@
 		CC33DD44EE5500080003 /* KeyboardTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB22CC33DD44EE5500070002 /* KeyboardTheme.swift */; };
 		DD11EE22FF33001100220002 /* ToneStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD11EE22FF33001100220001 /* ToneStyle.swift */; };
 		DD11EE22FF33001100220004 /* TonePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD11EE22FF33001100220003 /* TonePickerView.swift */; };
+		EE11FF22003344550066AA03 /* LanguageSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE11FF22003344550066AA01 /* LanguageSettingsViewController.swift */; };
+		EE11FF22003344550066AA04 /* LayoutSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE11FF22003344550066AA02 /* LayoutSettingsViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -134,6 +136,8 @@
 		CC33DD44EE5500080002 /* ThemeSelectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeSelectionViewController.swift; sourceTree = "<group>"; };
 		DD11EE22FF33001100220001 /* ToneStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToneStyle.swift; sourceTree = "<group>"; };
 		DD11EE22FF33001100220003 /* TonePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TonePickerView.swift; sourceTree = "<group>"; };
+		EE11FF22003344550066AA01 /* LanguageSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageSettingsViewController.swift; sourceTree = "<group>"; };
+		EE11FF22003344550066AA02 /* LayoutSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutSettingsViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -149,6 +153,8 @@
 		296F73430F09678354EBCEC9 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				EE11FF22003344550066AA01 /* LanguageSettingsViewController.swift */,
+				EE11FF22003344550066AA02 /* LayoutSettingsViewController.swift */,
 				6EE5340DD9626EF86A34FB07 /* SettingsViewController.swift */,
 				CC33DD44EE5500080002 /* ThemeSelectionViewController.swift */,
 			);
@@ -369,6 +375,11 @@
 			knownRegions = (
 				Base,
 				en,
+				ko,
+				ja,
+				es,
+				"zh-Hans",
+				ru,
 			);
 			mainGroup = 92E5E26A9636677CC0F735FC;
 			minimizedProjectReferenceProxies = 1;
@@ -454,6 +465,8 @@
 				93A28AD89882938CABFFC72D /* ThemeStoreViewController.swift in Sources */,
 				CC33DD44EE5500080001 /* ThemeSelectionViewController.swift in Sources */,
 				CC33DD44EE5500080003 /* KeyboardTheme.swift in Sources */,
+				EE11FF22003344550066AA03 /* LanguageSettingsViewController.swift in Sources */,
+				EE11FF22003344550066AA04 /* LayoutSettingsViewController.swift in Sources */,
 				DCD3592930A0D79C8DE0C43C /* TranslationCache.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

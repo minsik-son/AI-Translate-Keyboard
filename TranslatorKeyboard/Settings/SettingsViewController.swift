@@ -101,8 +101,17 @@ class SettingsViewController: UITableViewController {
     // MARK: - UITableViewDelegate
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if indexPath.section == 0 && indexPath.row == 0 {
-            navigationController?.pushViewController(ThemeSelectionViewController(), animated: true)
+        if indexPath.section == 0 {
+            switch indexPath.row {
+            case 0:
+                navigationController?.pushViewController(ThemeSelectionViewController(), animated: true)
+            case 1:
+                navigationController?.pushViewController(LanguageSettingsViewController(), animated: true)
+            case 2:
+                navigationController?.pushViewController(LayoutSettingsViewController(), animated: true)
+            default:
+                break
+            }
         }
         tableView.deselectRow(at: indexPath, animated: true)
     }

@@ -22,6 +22,7 @@ enum AppConstants {
         static let hasCompletedOnboarding = "has_completed_onboarding"
         static let savedPhrases = "saved_phrases"
         static let keyboardTheme = "keyboard_theme"
+        static let showNumberRow = "show_number_row"
     }
 
     enum API {

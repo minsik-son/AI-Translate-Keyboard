@@ -128,7 +128,6 @@ class TranslationInputView: UIView {
             inputLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 10),
             inputLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 10),
             inputLabel.trailingAnchor.constraint(lessThanOrEqualTo: counterLabel.leadingAnchor, constant: -6),
-            inputLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -10),
 
             // Placeholder
             placeholderLabel.topAnchor.constraint(equalTo: inputLabel.topAnchor),
@@ -138,6 +137,11 @@ class TranslationInputView: UIView {
             cursorView.widthAnchor.constraint(equalToConstant: 1.5),
             cursorView.heightAnchor.constraint(equalToConstant: 18),
         ])
+
+        // Low-priority bottom constraint — label sizes by content hugging, text stays at top
+        let bottomConstraint = inputLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -10)
+        bottomConstraint.priority = .defaultLow
+        bottomConstraint.isActive = true
 
         // Cursor positioned by leading (x) and top (y) relative to inputLabel
         cursorLeading = cursorView.leadingAnchor.constraint(equalTo: inputLabel.leadingAnchor)
@@ -218,9 +222,14 @@ class TranslationInputView: UIView {
         }
     }
 
+    /// Width used for text layout calculations (must match idealHeight and updateCursorPosition)
+    private var textLayoutWidth: CGFloat {
+        return bounds.width - 8 * 2 - 10 - 6 - 40 - 30  // margins, padding, counter, close
+    }
+
     /// Returns the ideal height based on current text content (no max limit)
     func idealHeight() -> CGFloat {
-        let maxWidth = bounds.width - 8 * 2 - 10 - 6 - 40 - 30  // margins, padding, counter, close
+        let maxWidth = textLayoutWidth
         guard maxWidth > 0 else { return TranslationInputView.minHeight }
 
         let text = (inputLabel.text ?? "") as NSString
@@ -278,43 +287,58 @@ class TranslationInputView: UIView {
             return
         }
 
-        inputLabel.layoutIfNeeded()
-        let maxWidth = inputLabel.bounds.width
+        let maxWidth = textLayoutWidth
         guard maxWidth > 0 else {
             cursorLeading?.constant = 0
             cursorTop?.constant = 0
             return
         }
 
-        // Use TextKit to find the exact position after the last glyph
-        let attributedText = NSAttributedString(string: text, attributes: [.font: inputLabel.font!])
+        let font = inputLabel.font!
+        let attrs: [NSAttributedString.Key: Any] = [.font: font]
+        let lineHeight = ceil(font.lineHeight)
+
+        // Text ends with \n — cursor goes to the beginning of the next empty line
+        if text.hasSuffix("\n") {
+            let measureText = text + " "
+            let rect = (measureText as NSString).boundingRect(
+                with: CGSize(width: maxWidth, height: .greatestFiniteMagnitude),
+                options: [.usesLineFragmentOrigin, .usesFontLeading],
+                attributes: attrs, context: nil
+            )
+            cursorLeading?.constant = 0
+            cursorTop?.constant = max(0, ceil(rect.height) - lineHeight)
+            return
+        }
+
+        // Y: boundingRect (matches idealHeight measurement)
+        let fullRect = (text as NSString).boundingRect(
+            with: CGSize(width: maxWidth, height: .greatestFiniteMagnitude),
+            options: [.usesLineFragmentOrigin, .usesFontLeading],
+            attributes: attrs, context: nil
+        )
+        cursorTop?.constant = max(0, ceil(fullRect.height) - lineHeight)
+
+        // X: TextKit for accurate last-glyph position (handles soft-wrap)
+        let attributedText = NSAttributedString(string: text, attributes: attrs)
         let textStorage = NSTextStorage(attributedString: attributedText)
         let layoutManager = NSLayoutManager()
         let textContainer = NSTextContainer(size: CGSize(width: maxWidth, height: .greatestFiniteMagnitude))
-
         textContainer.lineFragmentPadding = 0
         layoutManager.addTextContainer(textContainer)
         textStorage.addLayoutManager(layoutManager)
-
-        // Force full layout
         layoutManager.ensureLayout(for: textContainer)
 
         let numberOfGlyphs = layoutManager.numberOfGlyphs
         guard numberOfGlyphs > 0 else {
             cursorLeading?.constant = 0
-            cursorTop?.constant = 0
             return
         }
-
-        // Get the insertion point rect AFTER the last glyph
         let lastGlyphIndex = numberOfGlyphs - 1
         let lastGlyphRect = layoutManager.boundingRect(
             forGlyphRange: NSRange(location: lastGlyphIndex, length: 1),
             in: textContainer
         )
-
-        // Cursor x = right edge of last glyph, y = top of last glyph line
         cursorLeading?.constant = min(lastGlyphRect.maxX, maxWidth)
-        cursorTop?.constant = lastGlyphRect.origin.y
     }
 }

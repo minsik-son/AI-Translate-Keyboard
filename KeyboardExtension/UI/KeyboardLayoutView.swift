@@ -28,6 +28,10 @@ class KeyboardLayoutView: UIView {
         didSet { if oldValue != returnKeyIsBlue { buildKeyboard() } }
     }
 
+    var showNumberRow: Bool = true {
+        didSet { if oldValue != showNumberRow { buildKeyboard() } }
+    }
+
     private var currentLanguage: KeyboardLanguage = .english
     private var currentPage: KeyboardPage = .letters
     private var isShifted = false
@@ -210,11 +214,11 @@ class KeyboardLayoutView: UIView {
             case (.korean, false):  letterRows = koreanRows
             case (.korean, true):   letterRows = koreanShiftRows
             }
-            return [numberRow] + letterRows
+            return showNumberRow ? [numberRow] + letterRows : letterRows
         case .symbols1:
-            return [numberRow] + symbolRows1
+            return showNumberRow ? [numberRow] + symbolRows1 : symbolRows1
         case .symbols2:
-            return [numberRow] + symbolRows2
+            return showNumberRow ? [numberRow] + symbolRows2 : symbolRows2
         }
     }
 
@@ -227,7 +231,7 @@ class KeyboardLayoutView: UIView {
 
         let rows = currentRows()
         let totalRows = rows.count
-        let isNumberRow = true  // All pages have number row at index 0
+        let isNumberRow = showNumberRow
         var previousRowView: UIView?
 
         for (rowIndex, rowKeys) in rows.enumerated() {

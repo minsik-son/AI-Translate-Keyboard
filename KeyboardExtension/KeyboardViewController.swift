@@ -98,11 +98,13 @@ class KeyboardViewController: UIInputViewController {
         static let toolbar: CGFloat = 40
         static let translationLanguageBar: CGFloat = 44
         static let translationInput: CGFloat = 44
-        static let topPadding: CGFloat = 4
-        // Toolbar 40 + key area 270 + topPadding 4 = 314pt total.
-        static let totalDefault: CGFloat = 314
-        static let totalTranslation: CGFloat = 362   // topPadding 4 + langBar 44 + input 44 + key area 270
-        static let totalCorrection: CGFloat = 362    // topPadding 4 + langBar 44 + input 44 + key area 270
+        static let topPadding: CGFloat = 8
+    }
+
+    private var keyAreaHeight: CGFloat {
+        let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier)
+        let showNumberRow = defaults?.object(forKey: AppConstants.UserDefaultsKeys.showNumberRow) == nil ? true : (defaults?.bool(forKey: AppConstants.UserDefaultsKeys.showNumberRow) ?? true)
+        return showNumberRow ? 270 : 222
     }
 
     // MARK: - Lifecycle
@@ -118,12 +120,19 @@ class KeyboardViewController: UIInputViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        loadNumberRowSetting()
         setupHeightConstraint()
         textProxyManager.updateProxy(textDocumentProxy)
         updateReturnKeyAppearance()
         checkAutoCapitalize()
         hasUserTypedSinceAppeared = false
         toolbarView.hideSuggestions()
+    }
+
+    private func loadNumberRowSetting() {
+        let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier)
+        let show = defaults?.object(forKey: AppConstants.UserDefaultsKeys.showNumberRow) == nil ? true : (defaults?.bool(forKey: AppConstants.UserDefaultsKeys.showNumberRow) ?? true)
+        keyboardLayoutView.showNumberRow = show
     }
 
     override func textDidChange(_ textInput: UITextInput?) {
@@ -173,26 +182,28 @@ class KeyboardViewController: UIInputViewController {
         guard heightConstraint == nil, let inputView = self.inputView else { return }
         // DO NOT set translatesAutoresizingMaskIntoConstraints = false on inputView
         // iOS system manages the keyboard extension's inputView width via autoresizing masks
-        heightConstraint = inputView.heightAnchor.constraint(equalToConstant: Heights.totalDefault)
+        let totalDefault = Heights.topPadding + Heights.toolbar + keyAreaHeight
+        heightConstraint = inputView.heightAnchor.constraint(equalToConstant: totalDefault)
         heightConstraint?.priority = .defaultHigh
         heightConstraint?.isActive = true
     }
 
     private func updateHeight(for mode: KeyboardMode, animated: Bool = true) {
+        let keyArea = keyAreaHeight
         let newHeight: CGFloat
         switch mode {
         case .defaultMode:
-            newHeight = Heights.totalDefault
+            newHeight = Heights.topPadding + Heights.toolbar + keyArea
         case .translationMode:
             let inputH = translationInputHeightConstraint?.constant ?? Heights.translationInput
-            newHeight = Heights.topPadding + Heights.translationLanguageBar + inputH + 270  // padding + langBar + input + keyArea
+            newHeight = Heights.topPadding + Heights.translationLanguageBar + inputH + keyArea
         case .correctionMode:
             let inputH = correctionInputHeightConstraint?.constant ?? Heights.translationInput
             let toneH = tonePickerHeightConstraint?.constant ?? 0
-            newHeight = Heights.topPadding + Heights.translationLanguageBar + toneH + inputH + 270
+            newHeight = Heights.topPadding + Heights.translationLanguageBar + toneH + inputH + keyArea
         case .phraseInputMode:
             let inputH = phraseInputHeightConstraint?.constant ?? Heights.translationInput
-            newHeight = Heights.topPadding + Heights.translationLanguageBar + inputH + 270
+            newHeight = Heights.topPadding + Heights.translationLanguageBar + inputH + keyArea
         }
 
         heightConstraint?.constant = newHeight

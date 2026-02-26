@@ -156,6 +156,8 @@ class TextInputHandler: TextInputHandling {
     }
 
     func handleNewline() {
+        let lineCount = buffer.components(separatedBy: "\n").count
+        guard lineCount < 10 else { return }
         commitComposing()
         buffer.append("\n")
         delegate?.textInputHandler(self, didUpdateBuffer: buffer)
