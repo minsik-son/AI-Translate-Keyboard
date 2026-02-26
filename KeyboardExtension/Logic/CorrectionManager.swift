@@ -19,6 +19,7 @@ class CorrectionManager {
     private var currentGeneration: Int = 0
 
     private var languageCode: String = "ko"
+    private var toneStyle: ToneStyle = .none
 
     init() {
         let config = URLSessionConfiguration.default
@@ -32,13 +33,17 @@ class CorrectionManager {
         self.languageCode = code
     }
 
+    func setTone(_ tone: ToneStyle) {
+        self.toneStyle = tone
+    }
+
     func requestCorrection(text: String) {
         debounceWorkItem?.cancel()
 
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, trimmed != lastCorrectedText else { return }
 
-        if let cached = cache.get(text: trimmed, source: "correct", target: languageCode) {
+        if let cached = cache.get(text: trimmed, source: "correct_\(toneStyle.rawValue)", target: languageCode) {
             currentGeneration += 1
             lastCorrectedText = trimmed
             delegate?.correctionManager(self, didCorrect: cached, language: languageCode)
@@ -84,6 +89,7 @@ class CorrectionManager {
         let body: [String: Any] = [
             "text": text,
             "language": languageCode,
+            "tone": toneStyle.rawValue,
             "tier": tier,
             "deviceId": deviceId
         ]
@@ -150,7 +156,7 @@ class CorrectionManager {
             return
         }
 
-        cache.set(text: text, source: "correct", target: languageCode, translatedText: correctedText)
+        cache.set(text: text, source: "correct_\(toneStyle.rawValue)", target: languageCode, translatedText: correctedText)
         lastCorrectedText = text
 
         delegate?.correctionManager(self, didCorrect: correctedText, language: languageCode)

@@ -86,6 +86,12 @@ class KeyboardViewController: UIInputViewController {
     private var correctionLanguageCode: String = "ko"
     private var isLanguagePickerVisible = false
 
+    // Tone state
+    private var currentToneStyle: ToneStyle = .none
+    private lazy var tonePickerView = TonePickerView()
+    private var isTonePickerVisible = false
+    private var tonePickerHeightConstraint: NSLayoutConstraint?
+
     // MARK: - Layout Constants
 
     private struct Heights {
@@ -182,7 +188,8 @@ class KeyboardViewController: UIInputViewController {
             newHeight = Heights.topPadding + Heights.translationLanguageBar + inputH + 270  // padding + langBar + input + keyArea
         case .correctionMode:
             let inputH = correctionInputHeightConstraint?.constant ?? Heights.translationInput
-            newHeight = Heights.topPadding + Heights.translationLanguageBar + inputH + 270
+            let toneH = tonePickerHeightConstraint?.constant ?? 0
+            newHeight = Heights.topPadding + Heights.translationLanguageBar + toneH + inputH + 270
         case .phraseInputMode:
             let inputH = phraseInputHeightConstraint?.constant ?? Heights.translationInput
             newHeight = Heights.topPadding + Heights.translationLanguageBar + inputH + 270
@@ -217,11 +224,12 @@ class KeyboardViewController: UIInputViewController {
 
         // Add main views — toolbar, translationLanguageBar+translationInput, correctionLanguageBar+correctionInput
         // occupy the SAME top position. Only one group is visible at a time.
-        [toolbarView, translationLanguageBar, translationInputView, correctionLanguageBar, correctionInputView, phraseInputHeaderView, phraseInputView, keyboardLayoutView, emojiKeyboardView].forEach {
+        [toolbarView, translationLanguageBar, translationInputView, correctionLanguageBar, tonePickerView, correctionInputView, phraseInputHeaderView, phraseInputView, keyboardLayoutView, emojiKeyboardView].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             inputView.addSubview($0)
         }
         emojiKeyboardView.isHidden = true
+        tonePickerView.isHidden = true
         phraseInputHeaderView.isHidden = true
         phraseInputView.isHidden = true
 
@@ -258,8 +266,13 @@ class KeyboardViewController: UIInputViewController {
             correctionLanguageBar.trailingAnchor.constraint(equalTo: inputView.trailingAnchor),
             correctionLanguageBar.heightAnchor.constraint(equalToConstant: Heights.translationLanguageBar),
 
-            // Correction Input — below correction language bar
-            correctionInputView.topAnchor.constraint(equalTo: correctionLanguageBar.bottomAnchor),
+            // Tone Picker — below correction language bar
+            tonePickerView.topAnchor.constraint(equalTo: correctionLanguageBar.bottomAnchor),
+            tonePickerView.leadingAnchor.constraint(equalTo: inputView.leadingAnchor),
+            tonePickerView.trailingAnchor.constraint(equalTo: inputView.trailingAnchor),
+
+            // Correction Input — below tone picker
+            correctionInputView.topAnchor.constraint(equalTo: tonePickerView.bottomAnchor),
             correctionInputView.leadingAnchor.constraint(equalTo: inputView.leadingAnchor),
             correctionInputView.trailingAnchor.constraint(equalTo: inputView.trailingAnchor),
 
@@ -302,6 +315,8 @@ class KeyboardViewController: UIInputViewController {
         translationInputHeightConstraint?.isActive = true
         correctionInputHeightConstraint = correctionInputView.heightAnchor.constraint(equalToConstant: Heights.translationInput)
         correctionInputHeightConstraint?.isActive = true
+        tonePickerHeightConstraint = tonePickerView.heightAnchor.constraint(equalToConstant: 0)
+        tonePickerHeightConstraint?.isActive = true
 
         // Dynamic height for phrase input
         phraseInputHeightConstraint = phraseInputView.heightAnchor.constraint(equalToConstant: Heights.translationInput)
@@ -322,6 +337,7 @@ class KeyboardViewController: UIInputViewController {
         translationInputView.isHidden = true
         correctionLanguageBar.isHidden = true
         correctionInputView.isHidden = true
+        tonePickerView.isHidden = true
         phraseInputHeaderView.isHidden = true
         phraseInputView.isHidden = true
 
@@ -398,6 +414,21 @@ class KeyboardViewController: UIInputViewController {
         // Correction Language Bar
         correctionLanguageBar.onLanguageTap = { [weak self] in
             self?.showCorrectionLanguagePicker()
+        }
+        correctionLanguageBar.onToneTap = { [weak self] in
+            self?.toggleTonePicker()
+        }
+
+        // Tone Picker
+        tonePickerView.onToneSelected = { [weak self] tone in
+            self?.currentToneStyle = tone
+            self?.correctionLanguageBar.updateToneName(tone.displayName)
+            self?.correctionManager.setTone(tone)
+            self?.hideTonePicker()
+            if let text = self?.correctionTextInputHandler.fullText, !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                self?.correctionManager.reset()
+                self?.correctionManager.requestCorrection(text: text)
+            }
         }
 
         // Correction Input — close button + dynamic height
@@ -619,6 +650,9 @@ class KeyboardViewController: UIInputViewController {
         let langName = languageDisplayName(for: correctionLanguageCode)
         correctionLanguageBar.updateLanguageName(langName)
         correctionManager.setLanguage(correctionLanguageCode)
+        currentToneStyle = .none
+        correctionLanguageBar.updateToneName("기본")
+        correctionManager.setTone(.none)
         switchMode(to: .correctionMode)
     }
 
@@ -631,6 +665,8 @@ class KeyboardViewController: UIInputViewController {
         defaultTextInputHandler.clear()
         defaultModeComposingLength = 0
         correctionInputHeightConstraint?.constant = Heights.translationInput
+        hideTonePicker()
+        currentToneStyle = .none
         hideLanguagePicker()
         switchMode(to: .defaultMode)
     }
@@ -710,6 +746,30 @@ class KeyboardViewController: UIInputViewController {
                 phraseTextInputHandler.handleKey(char, isKorean: isKorean)
             }
         }
+    }
+
+    private func toggleTonePicker() {
+        if isTonePickerVisible {
+            hideTonePicker()
+        } else {
+            showTonePicker()
+        }
+    }
+
+    private func showTonePicker() {
+        isTonePickerVisible = true
+        tonePickerView.selectTone(currentToneStyle)
+        tonePickerHeightConstraint?.constant = 38
+        tonePickerView.show()
+        updateHeight(for: .correctionMode, animated: true)
+    }
+
+    private func hideTonePicker() {
+        guard isTonePickerVisible else { return }
+        isTonePickerVisible = false
+        tonePickerView.hide()
+        tonePickerHeightConstraint?.constant = 0
+        updateHeight(for: .correctionMode, animated: true)
     }
 
     private func showCorrectionLanguagePicker() {
@@ -917,7 +977,7 @@ class KeyboardViewController: UIInputViewController {
             textInputHandler.handleBackspace()
 
         case KeyboardLayoutView.returnKey:
-            textInputHandler.commitComposing()
+            textInputHandler.handleNewline()
 
         case " ":
             textInputHandler.handleSpace()
@@ -942,7 +1002,7 @@ class KeyboardViewController: UIInputViewController {
             correctionTextInputHandler.handleBackspace()
 
         case KeyboardLayoutView.returnKey:
-            correctionTextInputHandler.commitComposing()
+            correctionTextInputHandler.handleNewline()
 
         case " ":
             correctionTextInputHandler.handleSpace()
@@ -1250,6 +1310,8 @@ class KeyboardViewController: UIInputViewController {
         correctionLanguageBar.updateAppearance(isDark: isDark)
         correctionInputView.applyTheme(theme)
         correctionInputView.updateAppearance(isDark: isDark)
+        tonePickerView.applyTheme(theme)
+        tonePickerView.updateAppearance(isDark: isDark)
         savedPhrasesView.updateAppearance(isDark: isDark)
         phraseInputHeaderView.applyTheme(theme)
         phraseInputHeaderView.updateAppearance(isDark: isDark)

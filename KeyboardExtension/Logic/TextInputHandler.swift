@@ -15,6 +15,7 @@ protocol TextInputHandling: AnyObject {
     func handleKey(_ key: Character, isKorean: Bool)
     func handleBackspace()
     func handleSpace()
+    func handleNewline()
     func clear()
     func commitComposing()
 }
@@ -151,6 +152,12 @@ class TextInputHandler: TextInputHandling {
     func handleSpace() {
         commitComposing()
         buffer.append(" ")
+        delegate?.textInputHandler(self, didUpdateBuffer: buffer)
+    }
+
+    func handleNewline() {
+        commitComposing()
+        buffer.append("\n")
         delegate?.textInputHandler(self, didUpdateBuffer: buffer)
     }
 
