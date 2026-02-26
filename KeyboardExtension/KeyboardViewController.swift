@@ -22,6 +22,7 @@ class KeyboardViewController: UIInputViewController {
     private lazy var emojiKeyboardView = EmojiKeyboardView()
     private lazy var languagePickerView = LanguagePickerView()
     private lazy var savedPhrasesView = SavedPhrasesView()
+    private lazy var clipboardHistoryView = ClipboardHistoryView()
     private lazy var phraseInputHeaderView = PhraseInputHeaderView()
     private lazy var phraseInputView = TranslationInputView()
     private var isEmojiMode = false
@@ -130,6 +131,7 @@ class KeyboardViewController: UIInputViewController {
         checkAutoCapitalize()
         hasUserTypedSinceAppeared = false
         toolbarView.hideSuggestions()
+        checkClipboardForNewContent()
     }
 
     private func reloadLocalizedStrings() {
@@ -277,6 +279,10 @@ class KeyboardViewController: UIInputViewController {
         savedPhrasesView.isHidden = true
         inputView.addSubview(savedPhrasesView)
 
+        clipboardHistoryView.translatesAutoresizingMaskIntoConstraints = false
+        clipboardHistoryView.isHidden = true
+        inputView.addSubview(clipboardHistoryView)
+
         NSLayoutConstraint.activate([
             // Toolbar — pinned to top with padding
             toolbarView.topAnchor.constraint(equalTo: inputView.topAnchor, constant: Heights.topPadding),
@@ -343,6 +349,12 @@ class KeyboardViewController: UIInputViewController {
             savedPhrasesView.leadingAnchor.constraint(equalTo: inputView.leadingAnchor),
             savedPhrasesView.trailingAnchor.constraint(equalTo: inputView.trailingAnchor),
             savedPhrasesView.bottomAnchor.constraint(equalTo: inputView.bottomAnchor),
+
+            // Clipboard History - overlays the whole keyboard
+            clipboardHistoryView.topAnchor.constraint(equalTo: inputView.topAnchor),
+            clipboardHistoryView.leadingAnchor.constraint(equalTo: inputView.leadingAnchor),
+            clipboardHistoryView.trailingAnchor.constraint(equalTo: inputView.trailingAnchor),
+            clipboardHistoryView.bottomAnchor.constraint(equalTo: inputView.bottomAnchor),
         ])
 
         // Dynamic height constraints for input views (min height, can grow)
@@ -420,6 +432,9 @@ class KeyboardViewController: UIInputViewController {
         toolbarView.onSavedPhrasesTap = { [weak self] in
             self?.showSavedPhrases()
         }
+        toolbarView.onClipboardTap = { [weak self] in
+            self?.toggleClipboardHistory()
+        }
         toolbarView.onSuggestionTap = { [weak self] suggestion in
             self?.applySuggestion(suggestion)
         }
@@ -485,6 +500,15 @@ class KeyboardViewController: UIInputViewController {
         }
         savedPhrasesView.onDismiss = { [weak self] in
             self?.hideSavedPhrases()
+        }
+
+        // Clipboard history overlay
+        clipboardHistoryView.onItemSelected = { [weak self] text in
+            self?.textDocumentProxy.insertText(text)
+            self?.hideClipboardHistory()
+        }
+        clipboardHistoryView.onDismiss = { [weak self] in
+            self?.hideClipboardHistory()
         }
 
         // Phrase input mode
@@ -737,6 +761,52 @@ class KeyboardViewController: UIInputViewController {
         }) { _ in
             self.savedPhrasesView.isHidden = true
         }
+    }
+
+    // MARK: - Clipboard History
+
+    private func toggleClipboardHistory() {
+        if clipboardHistoryView.isHidden {
+            showClipboardHistory()
+        } else {
+            hideClipboardHistory()
+        }
+    }
+
+    private func showClipboardHistory() {
+        guard hasFullAccess() else {
+            showStatusMessage(L("keyboard.error.full_access"))
+            return
+        }
+        clipboardHistoryView.reloadData()
+        clipboardHistoryView.isHidden = false
+        clipboardHistoryView.alpha = 0
+        inputView?.bringSubviewToFront(clipboardHistoryView)
+        inputView?.bringSubviewToFront(toastLabel)
+        UIView.animate(withDuration: 0.2) {
+            self.clipboardHistoryView.alpha = 1
+        }
+    }
+
+    private func hideClipboardHistory() {
+        UIView.animate(withDuration: 0.15, animations: {
+            self.clipboardHistoryView.alpha = 0
+        }) { _ in
+            self.clipboardHistoryView.isHidden = true
+        }
+    }
+
+    private func checkClipboardForNewContent() {
+        guard hasFullAccess() else { return }
+        guard UIPasteboard.general.hasStrings else { return }
+        guard let text = UIPasteboard.general.string else { return }
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+
+        let existing = ClipboardHistoryManager.shared.getItems()
+        if existing.first?.text == trimmed { return }
+
+        ClipboardHistoryManager.shared.addItem(trimmed)
     }
 
     private func insertPhrase(_ phrase: String) {
@@ -1366,6 +1436,7 @@ class KeyboardViewController: UIInputViewController {
         tonePickerView.applyTheme(theme)
         tonePickerView.updateAppearance(isDark: isDark)
         savedPhrasesView.updateAppearance(isDark: isDark)
+        clipboardHistoryView.updateAppearance(isDark: isDark)
         phraseInputHeaderView.applyTheme(theme)
         phraseInputHeaderView.updateAppearance(isDark: isDark)
         phraseInputView.applyTheme(theme)

@@ -103,7 +103,21 @@
 
 // === Tone ===
 "tone.none" = "Predeterminado";
-"tone.formal" = "Formal";
 "tone.casual" = "Informal";
-"tone.business" = "Negocios";
-"tone.friendly" = "Amigable";
+"tone.formal" = "Formal";
+"tone.polished" = "Pulido";
+
+// === Clipboard ===
+"clipboard.title" = "Portapapeles";
+"clipboard.delete_all" = "Eliminar todo";
+"clipboard.empty.title" = "No hay elementos copiados";
+"clipboard.empty.subtitle" = "El texto copiado se guardará automáticamente aquí";
+"clipboard.time.just_now" = "Ahora mismo";
+"clipboard.time.minutes_ago" = "Hace %d min";
+"clipboard.time.hours_ago" = "Hace %d h";
+"clipboard.time.yesterday" = "Ayer";
+"clipboard.time.days_ago" = "Hace %d días";
+"clipboard.onboarding.title" = "Función de portapapeles";
+"clipboard.onboarding.body" = "El texto copiado se guarda automáticamente.\nTodos los datos se almacenan solo en el dispositivo\ny nunca se envían a un servidor.";
+"clipboard.onboarding.paste_notice" = "iOS puede mostrar una notificación de 'pegar'.\nConsulta la guía en la app para desactivarla.";
+"clipboard.onboarding.confirm" = "OK";

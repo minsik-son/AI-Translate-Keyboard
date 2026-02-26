@@ -103,7 +103,21 @@
 
 // === Tone ===
 "tone.none" = "默认";
-"tone.formal" = "正式";
 "tone.casual" = "随意";
-"tone.business" = "商务";
-"tone.friendly" = "友好";
+"tone.formal" = "正式";
+"tone.polished" = "精修";
+
+// === Clipboard ===
+"clipboard.title" = "剪贴板";
+"clipboard.delete_all" = "全部删除";
+"clipboard.empty.title" = "没有复制的项目";
+"clipboard.empty.subtitle" = "复制的文本将自动保存在这里";
+"clipboard.time.just_now" = "刚刚";
+"clipboard.time.minutes_ago" = "%d分钟前";
+"clipboard.time.hours_ago" = "%d小时前";
+"clipboard.time.yesterday" = "昨天";
+"clipboard.time.days_ago" = "%d天前";
+"clipboard.onboarding.title" = "剪贴板功能";
+"clipboard.onboarding.body" = "自动保存复制的文本。\n所有数据仅存储在设备上\n不会发送到服务器。";
+"clipboard.onboarding.paste_notice" = "iOS可能会显示'粘贴'通知。\n请参阅应用内指南了解如何关闭。";
+"clipboard.onboarding.confirm" = "确定";

@@ -103,7 +103,21 @@
 
 // === Tone ===
 "tone.none" = "기본";
-"tone.formal" = "존댓말";
 "tone.casual" = "반말";
-"tone.business" = "비즈니스";
-"tone.friendly" = "친근한";
+"tone.formal" = "존댓말";
+"tone.polished" = "정자체";
+
+// === Clipboard ===
+"clipboard.title" = "클립보드";
+"clipboard.delete_all" = "전체삭제";
+"clipboard.empty.title" = "복사한 항목이 없습니다";
+"clipboard.empty.subtitle" = "텍스트를 복사하면 여기에 자동으로 저장됩니다";
+"clipboard.time.just_now" = "방금 전";
+"clipboard.time.minutes_ago" = "%d분 전";
+"clipboard.time.hours_ago" = "%d시간 전";
+"clipboard.time.yesterday" = "어제";
+"clipboard.time.days_ago" = "%d일 전";
+"clipboard.onboarding.title" = "클립보드 기능 안내";
+"clipboard.onboarding.body" = "복사한 텍스트를 자동으로 저장합니다.\n모든 데이터는 기기에만 저장되며\n서버로 전송되지 않습니다.";
+"clipboard.onboarding.paste_notice" = "iOS 정책상 '붙여넣기 허용' 알림이\n나타날 수 있습니다.\n해제 방법은 앱의 '알림 해제 가이드'를\n참고해주세요.";
+"clipboard.onboarding.confirm" = "확인";

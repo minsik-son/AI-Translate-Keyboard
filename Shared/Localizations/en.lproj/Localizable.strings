@@ -103,7 +103,21 @@
 
 // === Tone ===
 "tone.none" = "Default";
-"tone.formal" = "Formal";
 "tone.casual" = "Casual";
-"tone.business" = "Business";
-"tone.friendly" = "Friendly";
+"tone.formal" = "Formal";
+"tone.polished" = "Polished";
+
+// === Clipboard ===
+"clipboard.title" = "Clipboard";
+"clipboard.delete_all" = "Delete All";
+"clipboard.empty.title" = "No copied items";
+"clipboard.empty.subtitle" = "Copied text will be automatically saved here";
+"clipboard.time.just_now" = "Just now";
+"clipboard.time.minutes_ago" = "%d min ago";
+"clipboard.time.hours_ago" = "%d hr ago";
+"clipboard.time.yesterday" = "Yesterday";
+"clipboard.time.days_ago" = "%d days ago";
+"clipboard.onboarding.title" = "Clipboard Feature";
+"clipboard.onboarding.body" = "Copied text is automatically saved.\nAll data is stored on-device only\nand never sent to a server.";
+"clipboard.onboarding.paste_notice" = "iOS may show a 'paste' notification.\nSee the guide in the app to disable it.";
+"clipboard.onboarding.confirm" = "OK";

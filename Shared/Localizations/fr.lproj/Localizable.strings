@@ -103,7 +103,21 @@
 
 // === Tone ===
 "tone.none" = "Par défaut";
-"tone.formal" = "Formel";
 "tone.casual" = "Familier";
-"tone.business" = "Professionnel";
-"tone.friendly" = "Amical";
+"tone.formal" = "Formel";
+"tone.polished" = "Soigné";
+
+// === Clipboard ===
+"clipboard.title" = "Presse-papiers";
+"clipboard.delete_all" = "Tout supprimer";
+"clipboard.empty.title" = "Aucun élément copié";
+"clipboard.empty.subtitle" = "Le texte copié sera automatiquement enregistré ici";
+"clipboard.time.just_now" = "À l'instant";
+"clipboard.time.minutes_ago" = "Il y a %d min";
+"clipboard.time.hours_ago" = "Il y a %d h";
+"clipboard.time.yesterday" = "Hier";
+"clipboard.time.days_ago" = "Il y a %d jours";
+"clipboard.onboarding.title" = "Fonction presse-papiers";
+"clipboard.onboarding.body" = "Le texte copié est automatiquement enregistré.\nToutes les données sont stockées uniquement sur l'appareil\net ne sont jamais envoyées à un serveur.";
+"clipboard.onboarding.paste_notice" = "iOS peut afficher une notification de collage.\nConsultez le guide dans l'app pour la désactiver.";
+"clipboard.onboarding.confirm" = "OK";

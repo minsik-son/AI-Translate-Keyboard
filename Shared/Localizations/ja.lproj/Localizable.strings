@@ -103,7 +103,21 @@
 
 // === Tone ===
 "tone.none" = "デフォルト";
-"tone.formal" = "敬語";
 "tone.casual" = "カジュアル";
-"tone.business" = "ビジネス";
-"tone.friendly" = "フレンドリー";
+"tone.formal" = "敬語";
+"tone.polished" = "整文";
+
+// === Clipboard ===
+"clipboard.title" = "クリップボード";
+"clipboard.delete_all" = "すべて削除";
+"clipboard.empty.title" = "コピーした項目がありません";
+"clipboard.empty.subtitle" = "コピーしたテキストは自動的にここに保存されます";
+"clipboard.time.just_now" = "たった今";
+"clipboard.time.minutes_ago" = "%d分前";
+"clipboard.time.hours_ago" = "%d時間前";
+"clipboard.time.yesterday" = "昨日";
+"clipboard.time.days_ago" = "%d日前";
+"clipboard.onboarding.title" = "クリップボード機能";
+"clipboard.onboarding.body" = "コピーしたテキストを自動的に保存します。\nすべてのデータは端末内にのみ保存され\nサーバーには送信されません。";
+"clipboard.onboarding.paste_notice" = "iOSの仕様により「ペースト許可」通知が\n表示される場合があります。\n無効化する方法はアプリ内ガイドを\nご参照ください。";
+"clipboard.onboarding.confirm" = "OK";

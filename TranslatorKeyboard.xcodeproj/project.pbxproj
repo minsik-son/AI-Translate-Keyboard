@@ -65,6 +65,10 @@
 		FF11AA22BB33CC44DD550003 /* AccentPopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF11AA22BB33CC44DD550004 /* AccentPopupView.swift */; };
 		AA22BB33CC44DD55EE660001 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = AA22BB33CC44DD55EE660010 /* Localizable.strings */; };
 		AA22BB33CC44DD55EE660002 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = AA22BB33CC44DD55EE660010 /* Localizable.strings */; };
+		CB01AA11BB22CC33DD440001 /* ClipboardItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB01AA11BB22CC33DD440010 /* ClipboardItem.swift */; };
+		CB01AA11BB22CC33DD440002 /* ClipboardItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB01AA11BB22CC33DD440010 /* ClipboardItem.swift */; };
+		CB01AA11BB22CC33DD440003 /* ClipboardHistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB01AA11BB22CC33DD440011 /* ClipboardHistoryManager.swift */; };
+		CB01AA11BB22CC33DD440004 /* ClipboardHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB01AA11BB22CC33DD440012 /* ClipboardHistoryView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -153,6 +157,9 @@
 		AA22BB33CC44DD55EE660017 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		AA22BB33CC44DD55EE660018 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
 		AA22BB33CC44DD55EE660019 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/Localizable.strings; sourceTree = "<group>"; };
+		CB01AA11BB22CC33DD440010 /* ClipboardItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardItem.swift; sourceTree = "<group>"; };
+		CB01AA11BB22CC33DD440011 /* ClipboardHistoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardHistoryManager.swift; sourceTree = "<group>"; };
+		CB01AA11BB22CC33DD440012 /* ClipboardHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardHistoryView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -222,6 +229,7 @@
 			isa = PBXGroup;
 			children = (
 				1FCBC8FB5D66C494D8A053A0 /* AutocorrectEngine.swift */,
+				CB01AA11BB22CC33DD440011 /* ClipboardHistoryManager.swift */,
 				D466482591CD18ACB2300B2B /* ContextBuffer.swift */,
 				B2C3D4E5F6070819203BCDEG /* CorrectionManager.swift */,
 				8A02361E8E6D336E632AD205 /* HangulComposer.swift */,
@@ -240,6 +248,7 @@
 			children = (
 				FF11AA22BB33CC44DD550002 /* AccentMap.swift */,
 				FF11AA22BB33CC44DD550004 /* AccentPopupView.swift */,
+				CB01AA11BB22CC33DD440012 /* ClipboardHistoryView.swift */,
 				A1B2C3D4E5F607081920ABCE /* CorrectionLanguageBar.swift */,
 				03D7ABAFB25DE60E52119088 /* EmojiKeyboardView.swift */,
 				2074DF00A0D06308149CC621 /* KeyboardLayoutView.swift */,
@@ -272,6 +281,7 @@
 			isa = PBXGroup;
 			children = (
 				6FE78200C931753ED4B82721 /* AppGroupManager.swift */,
+				CB01AA11BB22CC33DD440010 /* ClipboardItem.swift */,
 				C2CDFC8B502F230107E052E7 /* Constants.swift */,
 				BF1D1F3F9CA9F69A67054C25 /* LocalizationManager.swift */,
 				AA22BB33CC44DD55EE660020 /* Localizations */,
@@ -470,6 +480,9 @@
 			files = (
 				FF11AA22BB33CC44DD550001 /* AccentMap.swift in Sources */,
 				FF11AA22BB33CC44DD550003 /* AccentPopupView.swift in Sources */,
+				CB01AA11BB22CC33DD440001 /* ClipboardItem.swift in Sources */,
+				CB01AA11BB22CC33DD440003 /* ClipboardHistoryManager.swift in Sources */,
+				CB01AA11BB22CC33DD440004 /* ClipboardHistoryView.swift in Sources */,
 				1D98277DFBD46B145B1AEA14 /* AppGroupManager.swift in Sources */,
 				88DD1D3326500D609D9E2862 /* AutocorrectEngine.swift in Sources */,
 				13E2BA2EAF38109D37866AEE /* Constants.swift in Sources */,
@@ -509,6 +522,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1F142C55559956B546EB2E1C /* AdManager.swift in Sources */,
+				CB01AA11BB22CC33DD440002 /* ClipboardItem.swift in Sources */,
 				E3E121B856F4EDFFEA9FD6A3 /* AppDelegate.swift in Sources */,
 				A82858BCBAD76DAC46CD2457 /* AppGroupManager.swift in Sources */,
 				35ABC70391C60A9068DF38AD /* Constants.swift in Sources */,

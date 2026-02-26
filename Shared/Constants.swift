@@ -25,6 +25,8 @@ enum AppConstants {
         static let showNumberRow = "show_number_row"
         static let toneStyle = "tone_style"
         static let primaryKeyboardLanguage = "primary_keyboard_language"
+        static let clipboardHistory = "clipboard_history"
+        static let clipboardOnboardingShown = "clipboard_onboarding_shown"
     }
 
     enum API {

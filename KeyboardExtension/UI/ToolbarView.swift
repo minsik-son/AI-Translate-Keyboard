@@ -10,6 +10,7 @@ class ToolbarView: UIView {
     var onEmojiKeyboardToggle: (() -> Void)?
     var onSettingsTap: (() -> Void)?
     var onSavedPhrasesTap: (() -> Void)?
+    var onClipboardTap: (() -> Void)?
     var onSuggestionTap: ((String) -> Void)?
     var onSuggestionDismiss: (() -> Void)?
 
@@ -24,7 +25,7 @@ class ToolbarView: UIView {
     private let toolbarItems: [ToolbarItem] = [
         ToolbarItem(iconName: "t.circle", action: #selector(logoTapped), tag: 0),
         ToolbarItem(iconName: "face.smiling", action: #selector(emojiButtonTapped), tag: 1),
-        ToolbarItem(iconName: "text.bubble", action: #selector(emoticonTapped), tag: 2),
+        ToolbarItem(iconName: "doc.on.clipboard", action: #selector(clipboardHistoryTapped), tag: 2),
         ToolbarItem(iconName: "bookmark", action: #selector(clipboardTapped), tag: 3),
         ToolbarItem(iconName: "checkmark.circle", action: #selector(checklistTapped), tag: 4),
         ToolbarItem(iconName: "globe", action: #selector(translateTapped), tag: 5),
@@ -322,8 +323,8 @@ class ToolbarView: UIView {
         onEmojiKeyboardToggle?()
     }
 
-    @objc private func emoticonTapped() {
-        // Emoticon panel — no-op for now
+    @objc private func clipboardHistoryTapped() {
+        onClipboardTap?()
     }
 
     @objc private func clipboardTapped() {

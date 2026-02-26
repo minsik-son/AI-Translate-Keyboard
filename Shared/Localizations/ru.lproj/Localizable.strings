@@ -103,7 +103,21 @@
 
 // === Tone ===
 "tone.none" = "По умолчанию";
-"tone.formal" = "Формальный";
 "tone.casual" = "Разговорный";
-"tone.business" = "Деловой";
-"tone.friendly" = "Дружеский";
+"tone.formal" = "Формальный";
+"tone.polished" = "Точный";
+
+// === Clipboard ===
+"clipboard.title" = "Буфер обмена";
+"clipboard.delete_all" = "Удалить все";
+"clipboard.empty.title" = "Нет скопированных элементов";
+"clipboard.empty.subtitle" = "Скопированный текст будет автоматически сохранён здесь";
+"clipboard.time.just_now" = "Только что";
+"clipboard.time.minutes_ago" = "%d мин. назад";
+"clipboard.time.hours_ago" = "%d ч. назад";
+"clipboard.time.yesterday" = "Вчера";
+"clipboard.time.days_ago" = "%d дн. назад";
+"clipboard.onboarding.title" = "Функция буфера обмена";
+"clipboard.onboarding.body" = "Скопированный текст сохраняется автоматически.\nВсе данные хранятся только на устройстве\nи не отправляются на сервер.";
+"clipboard.onboarding.paste_notice" = "iOS может показать уведомление о вставке.\nСм. руководство в приложении для отключения.";
+"clipboard.onboarding.confirm" = "OK";

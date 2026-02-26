@@ -103,7 +103,21 @@
 
 // === Tone ===
 "tone.none" = "Predefinito";
-"tone.formal" = "Formale";
 "tone.casual" = "Informale";
-"tone.business" = "Business";
-"tone.friendly" = "Amichevole";
+"tone.formal" = "Formale";
+"tone.polished" = "Rifinito";
+
+// === Clipboard ===
+"clipboard.title" = "Appunti";
+"clipboard.delete_all" = "Elimina tutto";
+"clipboard.empty.title" = "Nessun elemento copiato";
+"clipboard.empty.subtitle" = "Il testo copiato verrà salvato automaticamente qui";
+"clipboard.time.just_now" = "Proprio ora";
+"clipboard.time.minutes_ago" = "%d min fa";
+"clipboard.time.hours_ago" = "%d ore fa";
+"clipboard.time.yesterday" = "Ieri";
+"clipboard.time.days_ago" = "%d giorni fa";
+"clipboard.onboarding.title" = "Funzione appunti";
+"clipboard.onboarding.body" = "Il testo copiato viene salvato automaticamente.\nTutti i dati sono memorizzati solo sul dispositivo\ne non vengono mai inviati a un server.";
+"clipboard.onboarding.paste_notice" = "iOS potrebbe mostrare una notifica di incolla.\nConsulta la guida nell'app per disattivarla.";
+"clipboard.onboarding.confirm" = "OK";

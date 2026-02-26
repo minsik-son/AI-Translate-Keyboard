@@ -103,7 +103,21 @@
 
 // === Tone ===
 "tone.none" = "Standard";
-"tone.formal" = "Formell";
 "tone.casual" = "Umgangssprachlich";
-"tone.business" = "Geschäftlich";
-"tone.friendly" = "Freundlich";
+"tone.formal" = "Formell";
+"tone.polished" = "Feinschliff";
+
+// === Clipboard ===
+"clipboard.title" = "Zwischenablage";
+"clipboard.delete_all" = "Alle löschen";
+"clipboard.empty.title" = "Keine kopierten Elemente";
+"clipboard.empty.subtitle" = "Kopierter Text wird automatisch hier gespeichert";
+"clipboard.time.just_now" = "Gerade eben";
+"clipboard.time.minutes_ago" = "Vor %d Min.";
+"clipboard.time.hours_ago" = "Vor %d Std.";
+"clipboard.time.yesterday" = "Gestern";
+"clipboard.time.days_ago" = "Vor %d Tagen";
+"clipboard.onboarding.title" = "Zwischenablage-Funktion";
+"clipboard.onboarding.body" = "Kopierter Text wird automatisch gespeichert.\nAlle Daten werden nur auf dem Gerät gespeichert\nund nie an einen Server gesendet.";
+"clipboard.onboarding.paste_notice" = "iOS zeigt möglicherweise eine Einfüge-Benachrichtigung an.\nSiehe die Anleitung in der App zum Deaktivieren.";
+"clipboard.onboarding.confirm" = "OK";
