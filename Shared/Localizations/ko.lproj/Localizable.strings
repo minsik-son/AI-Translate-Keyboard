@@ -145,6 +145,20 @@
 "tab.theme" = "테마";
 "tab.settings" = "설정";
 
+// === Keyboard Themes ===
+"theme.default" = "기본";
+"theme.pastel_red" = "파스텔 레드";
+"theme.pastel_orange" = "파스텔 오렌지";
+"theme.pastel_yellow" = "파스텔 옐로우";
+"theme.pastel_green" = "파스텔 그린";
+"theme.pastel_blue" = "파스텔 블루";
+"theme.pastel_indigo" = "파스텔 인디고";
+"theme.pastel_violet" = "파스텔 바이올렛";
+"theme.dark_navy" = "네이비";
+"theme.dark_charcoal" = "차콜";
+"theme.dark_forest" = "다크 그린";
+"theme.dark_burgundy" = "버건디";
+
 // === Home ===
 "home.greeting.morning" = "Good morning";
 "home.greeting.afternoon" = "Good afternoon";

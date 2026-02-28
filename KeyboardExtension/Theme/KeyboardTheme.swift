@@ -153,6 +153,10 @@ extension KeyboardTheme {
 
     static let allThemes: [KeyboardTheme] = [defaultLight] + allPastelThemes + allDarkThemes
 
+    var localizedDisplayName: String {
+        L("theme.\(id)")
+    }
+
     /// Returns the currently selected custom theme, or nil if "default" (use isDark logic).
     static func currentTheme() -> KeyboardTheme? {
         let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier)

@@ -20,6 +20,18 @@ class HistoryViewController: UIViewController {
         setupFilterBar()
         setupTableView()
         setupEmptyState()
+        NotificationCenter.default.addObserver(self, selector: #selector(handleLanguageChange), name: .languageDidChange, object: nil)
+    }
+
+    @objc private func handleLanguageChange() {
+        title = L("history.title")
+        let filterTitles = [L("history.filter.all"), L("history.filter.translate"), L("history.filter.correct"), L("history.filter.clipboard")]
+        for (i, view) in filterStack.arrangedSubviews.enumerated() {
+            if let btn = view as? UIButton, i < filterTitles.count {
+                btn.setTitle(filterTitles[i], for: .normal)
+            }
+        }
+        emptyLabel.text = L("history.empty")
     }
 
     override func viewWillAppear(_ animated: Bool) {

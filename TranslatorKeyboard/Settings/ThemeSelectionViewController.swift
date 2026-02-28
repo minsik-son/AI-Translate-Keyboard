@@ -35,6 +35,12 @@ class ThemeSelectionViewController: UIViewController {
         ])
 
         selectedThemeId = AppGroupManager.shared.string(forKey: AppConstants.UserDefaultsKeys.keyboardTheme) ?? "default"
+        NotificationCenter.default.addObserver(self, selector: #selector(handleLanguageChange), name: .languageDidChange, object: nil)
+    }
+
+    @objc private func handleLanguageChange() {
+        title = L("settings.keyboard_theme")
+        collectionView.reloadData()
     }
 }
 
@@ -244,7 +250,7 @@ private class ThemeCell: UICollectionViewCell {
             lastRow.last?.backgroundColor = theme.specialKeyBackground
         }
 
-        nameLabel.text = theme.displayName
+        nameLabel.text = theme.localizedDisplayName
         nameLabel.textColor = AppColors.text
 
         // Color palette dots

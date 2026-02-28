@@ -1,5 +1,9 @@
 import Foundation
 
+extension Notification.Name {
+    static let languageDidChange = Notification.Name("languageDidChange")
+}
+
 enum AppLanguage: String, CaseIterable {
     case en = "en"
     case ko = "ko"
@@ -48,6 +52,7 @@ final class LocalizationManager {
         set {
             AppGroupManager.shared.set(newValue.rawValue, forKey: AppConstants.UserDefaultsKeys.appLanguage)
             loadBundle()
+            NotificationCenter.default.post(name: .languageDidChange, object: nil)
         }
     }
 

@@ -6,6 +6,14 @@ class TabBarController: UITabBarController {
         super.viewDidLoad()
         setupTabs()
         setupAppearance()
+        NotificationCenter.default.addObserver(self, selector: #selector(handleLanguageChange), name: .languageDidChange, object: nil)
+    }
+
+    @objc private func handleLanguageChange() {
+        let titles = [L("tab.home"), L("tab.ai_writer"), L("tab.history"), L("tab.theme"), L("tab.settings")]
+        for (i, nav) in (viewControllers ?? []).enumerated() where i < titles.count {
+            nav.tabBarItem.title = titles[i]
+        }
     }
 
     private func setupTabs() {

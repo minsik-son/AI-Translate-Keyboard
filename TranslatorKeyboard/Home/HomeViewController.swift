@@ -14,6 +14,7 @@ class HomeViewController: UIViewController {
         setupScrollView()
         buildContent()
         NotificationCenter.default.addObserver(self, selector: #selector(handleHistoryChange), name: .historyDidChange, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleLanguageChange), name: .languageDidChange, object: nil)
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -319,6 +320,13 @@ class HomeViewController: UIViewController {
     }
 
     @objc private func handleHistoryChange() {
+        refreshStats()
+    }
+
+    @objc private func handleLanguageChange() {
+        contentStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        reportCard.subviews.forEach { $0.removeFromSuperview() }
+        buildContent()
         refreshStats()
     }
 
