@@ -145,6 +145,20 @@
 "tab.theme" = "主题";
 "tab.settings" = "设置";
 
+// === Keyboard Themes ===
+"theme.default" = "默认";
+"theme.pastel_red" = "柔粉红";
+"theme.pastel_orange" = "柔橙色";
+"theme.pastel_yellow" = "柔黄色";
+"theme.pastel_green" = "柔绿色";
+"theme.pastel_blue" = "柔蓝色";
+"theme.pastel_indigo" = "柔靛蓝";
+"theme.pastel_violet" = "柔紫色";
+"theme.dark_navy" = "海军蓝";
+"theme.dark_charcoal" = "炭灰";
+"theme.dark_forest" = "暗绿";
+"theme.dark_burgundy" = "酒红";
+
 // === Home ===
 "home.greeting.morning" = "早上好";
 "home.greeting.afternoon" = "下午好";

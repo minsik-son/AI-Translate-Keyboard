@@ -145,6 +145,20 @@
 "tab.theme" = "テーマ";
 "tab.settings" = "設定";
 
+// === Keyboard Themes ===
+"theme.default" = "デフォルト";
+"theme.pastel_red" = "パステルレッド";
+"theme.pastel_orange" = "パステルオレンジ";
+"theme.pastel_yellow" = "パステルイエロー";
+"theme.pastel_green" = "パステルグリーン";
+"theme.pastel_blue" = "パステルブルー";
+"theme.pastel_indigo" = "パステルインディゴ";
+"theme.pastel_violet" = "パステルバイオレット";
+"theme.dark_navy" = "ネイビー";
+"theme.dark_charcoal" = "チャコール";
+"theme.dark_forest" = "ダークグリーン";
+"theme.dark_burgundy" = "バーガンディ";
+
 // === Home ===
 "home.greeting.morning" = "おはようございます";
 "home.greeting.afternoon" = "こんにちは";

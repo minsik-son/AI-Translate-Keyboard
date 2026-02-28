@@ -145,6 +145,20 @@
 "tab.theme" = "Тема";
 "tab.settings" = "Настройки";
 
+// === Keyboard Themes ===
+"theme.default" = "По умолчанию";
+"theme.pastel_red" = "Пастельный красный";
+"theme.pastel_orange" = "Пастельный оранжевый";
+"theme.pastel_yellow" = "Пастельный жёлтый";
+"theme.pastel_green" = "Пастельный зелёный";
+"theme.pastel_blue" = "Пастельный голубой";
+"theme.pastel_indigo" = "Пастельный индиго";
+"theme.pastel_violet" = "Пастельный фиолетовый";
+"theme.dark_navy" = "Тёмно-синий";
+"theme.dark_charcoal" = "Угольный";
+"theme.dark_forest" = "Тёмно-зелёный";
+"theme.dark_burgundy" = "Бордовый";
+
 // === Home ===
 "home.greeting.morning" = "Доброе утро";
 "home.greeting.afternoon" = "Добрый день";

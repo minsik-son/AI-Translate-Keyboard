@@ -145,6 +145,20 @@
 "tab.theme" = "Thème";
 "tab.settings" = "Paramètres";
 
+// === Keyboard Themes ===
+"theme.default" = "Par défaut";
+"theme.pastel_red" = "Rouge pastel";
+"theme.pastel_orange" = "Orange pastel";
+"theme.pastel_yellow" = "Jaune pastel";
+"theme.pastel_green" = "Vert pastel";
+"theme.pastel_blue" = "Bleu pastel";
+"theme.pastel_indigo" = "Indigo pastel";
+"theme.pastel_violet" = "Violet pastel";
+"theme.dark_navy" = "Bleu marine";
+"theme.dark_charcoal" = "Charbon";
+"theme.dark_forest" = "Vert foncé";
+"theme.dark_burgundy" = "Bordeaux";
+
 // === Home ===
 "home.greeting.morning" = "Bonjour";
 "home.greeting.afternoon" = "Bon après-midi";
