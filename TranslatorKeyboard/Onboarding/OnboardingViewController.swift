@@ -14,7 +14,7 @@ class OnboardingViewController: UIViewController {
 
     private let pageControl: UIPageControl = {
         let pc = UIPageControl()
-        pc.numberOfPages = 6
+        pc.numberOfPages = 5
         pc.currentPage = 0
         pc.currentPageIndicatorTintColor = .systemBlue
         pc.pageIndicatorTintColor = .systemGray4
@@ -34,14 +34,14 @@ class OnboardingViewController: UIViewController {
         return btn
     }()
 
-    private var hasReturnedFromSettings = false
+    // Setup page state
+    private var hasVisitedSettings = false
 
-    // Permission page — for success state transition
-    private var permissionTitleLabel: UILabel?
-    private var permissionStepStack: UIStackView?
-    private var successIconView: UIImageView?
-    private var successTitleLabel: UILabel?
-    private var successDescriptionLabel: UILabel?
+    // Verification page state
+    private var pollingTimer: Timer?
+    private var timeoutTimer: Timer?
+    private var verificationStatusLabel: UILabel!
+    private var verificationPassed = false
 
     // MARK: - Lifecycle
 
@@ -59,12 +59,11 @@ class OnboardingViewController: UIViewController {
 
     private func buildPages() {
         pages = [
-            makeWelcomePage(),
-            makePermissionPage(),
-            makeFeaturePage(icon: "textformat", title: "실시간 번역", description: "키보드에서 바로 번역하세요\n입력하면서 즉시 결과를 확인할 수 있습니다"),
-            makeFeaturePage(icon: "globe", title: "다국어 지원", description: "한국어, 영어를 포함한\n다양한 언어를 지원합니다"),
-            makeFeaturePage(icon: "hand.draw", title: "스마트 기능", description: "트랙패드 커서 이동, 테마 변경 등\n편리한 기능을 제공합니다"),
-            makeSubscriptionPage()
+            makeWelcomePage(),           // 0
+            makeSetupPage(),             // 1
+            makeVerificationPage(),      // 2
+            makeFeaturesPage(),          // 3
+            makeSubscriptionPage()       // 4
         ]
     }
 
@@ -113,36 +112,46 @@ class OnboardingViewController: UIViewController {
 
     private func restoreProgress() {
         let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier) ?? UserDefaults.standard
-        let savedIndex = defaults.integer(forKey: "onboarding_current_page")
-        hasReturnedFromSettings = defaults.bool(forKey: "onboarding_returned_from_settings")
+        let savedIndex = min(defaults.integer(forKey: "onboarding_current_page"), pages.count - 1)
+
         if savedIndex > 0, savedIndex < pages.count {
             currentIndex = savedIndex
             pageViewController.setViewControllers([pages[savedIndex]], direction: .forward, animated: false)
             pageControl.currentPage = savedIndex
-            updateCTAForCurrentPage()
         }
+
+        hasVisitedSettings = defaults.bool(forKey: "onboarding_returned_from_settings")
+        updateCTAForCurrentPage()
     }
 
     // MARK: - Navigation
 
     @objc private func ctaTapped() {
-        if currentIndex == 1 && !hasReturnedFromSettings {
-            // 권한 설정 페이지: 설정 앱 열기
-            let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier) ?? UserDefaults.standard
-            defaults.set(true, forKey: "onboarding_returned_from_settings")
-            if let url = URL(string: UIApplication.openSettingsURLString) {
-                UIApplication.shared.open(url)
+        switch currentIndex {
+        case 1:
+            if !hasVisitedSettings {
+                hasVisitedSettings = true
+                let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier) ?? UserDefaults.standard
+                defaults.set(true, forKey: "onboarding_returned_from_settings")
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+                return
+            } else {
+                goToPage(2)
+                return
+            }
+        case 2:
+            if verificationPassed {
+                goToPage(3)
             }
             return
-        }
-
-        if currentIndex == 5 {
-            // 구독 페이지 CTA → 온보딩 완료
+        case 4:
             completeOnboarding()
             return
+        default:
+            goToPage(currentIndex + 1)
         }
-
-        goToPage(currentIndex + 1)
     }
 
     private func goToPage(_ index: Int) {
@@ -154,21 +163,34 @@ class OnboardingViewController: UIViewController {
         updateCTAForCurrentPage()
         let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier) ?? UserDefaults.standard
         defaults.set(index, forKey: "onboarding_current_page")
+
+        if index == 2 {
+            startPolling()
+        }
     }
 
     private func updateCTAForCurrentPage() {
-        // 구독 페이지에서는 CTA/pageControl 숨김 (구독 페이지 자체 UI 사용)
-        let isSubscriptionPage = currentIndex == 5
+        let isSubscriptionPage = currentIndex == 4
         ctaButton.isHidden = isSubscriptionPage
         pageControl.isHidden = isSubscriptionPage
 
         switch currentIndex {
         case 0:
-            ctaButton.setTitle("시작하기", for: .normal)
+            ctaButton.setTitle(L("onboarding.cta.start"), for: .normal)
+            ctaButton.isEnabled = true
+            ctaButton.backgroundColor = .systemBlue
         case 1:
-            ctaButton.setTitle(hasReturnedFromSettings ? "다음" : "설정으로 이동", for: .normal)
-        case 2, 3, 4:
-            ctaButton.setTitle("다음", for: .normal)
+            ctaButton.setTitle(hasVisitedSettings ? L("onboarding.cta.done_settings") : L("onboarding.cta.go_settings"), for: .normal)
+            ctaButton.isEnabled = true
+            ctaButton.backgroundColor = .systemBlue
+        case 2:
+            ctaButton.setTitle(L("onboarding.cta.next"), for: .normal)
+            ctaButton.isEnabled = verificationPassed
+            ctaButton.backgroundColor = verificationPassed ? .systemBlue : .systemGray4
+        case 3:
+            ctaButton.setTitle(L("onboarding.cta.next"), for: .normal)
+            ctaButton.isEnabled = true
+            ctaButton.backgroundColor = .systemBlue
         default:
             break
         }
@@ -182,42 +204,169 @@ class OnboardingViewController: UIViewController {
         dismiss(animated: true)
     }
 
-    // MARK: - Foreground Notification (권한 설정 복귀 감지)
+    // MARK: - Keyboard Detection
 
     private func registerForegroundObserver() {
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(appWillEnterForeground),
-            name: UIApplication.willEnterForegroundNotification,
+            selector: #selector(appDidBecomeActive),
+            name: UIApplication.didBecomeActiveNotification,
             object: nil
         )
     }
 
-    @objc private func appWillEnterForeground() {
-        guard currentIndex == 1 else { return }
-        hasReturnedFromSettings = true
-        let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier) ?? UserDefaults.standard
-        defaults.set(true, forKey: "onboarding_returned_from_settings")
+    @objc private func appDidBecomeActive() {
+        guard currentIndex == 1, hasVisitedSettings else { return }
         updateCTAForCurrentPage()
-        showPermissionSuccess()
     }
 
-    private func showPermissionSuccess() {
-        permissionTitleLabel?.isHidden = true
-        permissionStepStack?.isHidden = true
+    // MARK: - Verification Polling
 
-        successIconView?.isHidden = false
-        successTitleLabel?.isHidden = false
-        successDescriptionLabel?.isHidden = false
-        successIconView?.alpha = 0
-        successTitleLabel?.alpha = 0
-        successDescriptionLabel?.alpha = 0
+    private func startPolling() {
+        stopPolling()
+        verificationPassed = false
+        updateCTAForCurrentPage()
 
-        UIView.animate(withDuration: 0.4) {
-            self.successIconView?.alpha = 1
-            self.successTitleLabel?.alpha = 1
-            self.successDescriptionLabel?.alpha = 1
+        AppGroupManager.shared.removeObject(forKey: AppConstants.UserDefaultsKeys.keyboardFullAccessEnabled)
+
+        verificationStatusLabel?.text = L("onboarding.verify.instruction")
+        verificationStatusLabel?.textColor = .secondaryLabel
+
+        pollingTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+            self?.checkKeyboardStatus()
         }
+
+        timeoutTimer = Timer.scheduledTimer(withTimeInterval: 15.0, repeats: false) { [weak self] _ in
+            self?.handleTimeout()
+        }
+    }
+
+    private func stopPolling() {
+        pollingTimer?.invalidate()
+        pollingTimer = nil
+        timeoutTimer?.invalidate()
+        timeoutTimer = nil
+    }
+
+    private func checkKeyboardStatus() {
+        let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier)
+        guard let value = defaults?.object(forKey: AppConstants.UserDefaultsKeys.keyboardFullAccessEnabled) as? Bool else {
+            return
+        }
+
+        if value {
+            showVerificationSuccess()
+        } else {
+            showFullAccessRequired()
+        }
+    }
+
+    private func showVerificationSuccess() {
+        stopPolling()
+        verificationPassed = true
+        verificationStatusLabel?.text = L("onboarding.verify.success")
+        verificationStatusLabel?.textColor = .systemGreen
+        updateCTAForCurrentPage()
+    }
+
+    private func showFullAccessRequired() {
+        stopPolling()
+
+        guard let page = pages[safe: 2] else { return }
+
+        // Remove existing extra views
+        for subview in page.view.subviews where subview.tag == 901 || subview.tag == 902 {
+            subview.removeFromSuperview()
+        }
+
+        verificationStatusLabel?.text = L("onboarding.verify.no_full_access")
+        verificationStatusLabel?.textColor = .systemOrange
+
+        let descLabel = UILabel()
+        descLabel.text = L("onboarding.verify.full_access_desc")
+        descLabel.font = .systemFont(ofSize: 14)
+        descLabel.textColor = .secondaryLabel
+        descLabel.textAlignment = .center
+        descLabel.numberOfLines = 0
+        descLabel.translatesAutoresizingMaskIntoConstraints = false
+        descLabel.tag = 901
+
+        let settingsButton = UIButton(type: .system)
+        settingsButton.setTitle(L("onboarding.verify.go_settings"), for: .normal)
+        settingsButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
+        settingsButton.translatesAutoresizingMaskIntoConstraints = false
+        settingsButton.tag = 902
+        settingsButton.addTarget(self, action: #selector(openSettingsFromVerification), for: .touchUpInside)
+
+        page.view.addSubview(descLabel)
+        page.view.addSubview(settingsButton)
+
+        NSLayoutConstraint.activate([
+            descLabel.topAnchor.constraint(equalTo: verificationStatusLabel.bottomAnchor, constant: 8),
+            descLabel.leadingAnchor.constraint(equalTo: page.view.leadingAnchor, constant: 32),
+            descLabel.trailingAnchor.constraint(equalTo: page.view.trailingAnchor, constant: -32),
+
+            settingsButton.topAnchor.constraint(equalTo: descLabel.bottomAnchor, constant: 16),
+            settingsButton.centerXAnchor.constraint(equalTo: page.view.centerXAnchor),
+        ])
+    }
+
+    private func handleTimeout() {
+        stopPolling()
+
+        guard let page = pages[safe: 2] else { return }
+
+        // Remove existing extra views
+        for subview in page.view.subviews where subview.tag == 901 || subview.tag == 902 {
+            subview.removeFromSuperview()
+        }
+
+        verificationStatusLabel?.text = L("onboarding.verify.timeout")
+        verificationStatusLabel?.textColor = .systemRed
+
+        let descLabel = UILabel()
+        descLabel.text = L("onboarding.verify.timeout_desc")
+        descLabel.font = .systemFont(ofSize: 14)
+        descLabel.textColor = .secondaryLabel
+        descLabel.textAlignment = .center
+        descLabel.numberOfLines = 0
+        descLabel.translatesAutoresizingMaskIntoConstraints = false
+        descLabel.tag = 901
+
+        let retryButton = UIButton(type: .system)
+        retryButton.setTitle(L("onboarding.verify.retry"), for: .normal)
+        retryButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
+        retryButton.translatesAutoresizingMaskIntoConstraints = false
+        retryButton.tag = 902
+        retryButton.addTarget(self, action: #selector(retryFromSetup), for: .touchUpInside)
+
+        page.view.addSubview(descLabel)
+        page.view.addSubview(retryButton)
+
+        NSLayoutConstraint.activate([
+            descLabel.topAnchor.constraint(equalTo: verificationStatusLabel.bottomAnchor, constant: 8),
+            descLabel.leadingAnchor.constraint(equalTo: page.view.leadingAnchor, constant: 32),
+            descLabel.trailingAnchor.constraint(equalTo: page.view.trailingAnchor, constant: -32),
+
+            retryButton.topAnchor.constraint(equalTo: descLabel.bottomAnchor, constant: 16),
+            retryButton.centerXAnchor.constraint(equalTo: page.view.centerXAnchor),
+        ])
+    }
+
+    @objc private func openSettingsFromVerification() {
+        if let url = URL(string: UIApplication.openSettingsURLString) {
+            UIApplication.shared.open(url)
+        }
+    }
+
+    @objc private func retryFromSetup() {
+        // Clean up extra views from verification page
+        if let page = pages[safe: 2] {
+            for subview in page.view.subviews where subview.tag == 901 || subview.tag == 902 {
+                subview.removeFromSuperview()
+            }
+        }
+        goToPage(1)
     }
 }
 
@@ -241,7 +390,7 @@ private extension OnboardingViewController {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
 
         let subtitleLabel = UILabel()
-        subtitleLabel.text = "어디서든 번역하는 키보드"
+        subtitleLabel.text = L("onboarding.welcome.subtitle")
         subtitleLabel.font = .systemFont(ofSize: 17)
         subtitleLabel.textColor = .secondaryLabel
         subtitleLabel.textAlignment = .center
@@ -270,99 +419,111 @@ private extension OnboardingViewController {
     }
 }
 
-// MARK: - Permission Page
+// MARK: - Setup Page (Keyboard + Full Access + Trust)
 
 private extension OnboardingViewController {
-    func makePermissionPage() -> UIViewController {
+    func makeSetupPage() -> UIViewController {
         let vc = UIViewController()
         vc.view.backgroundColor = .systemBackground
 
+        // Title
         let titleLabel = UILabel()
         titleLabel.text = L("onboarding.permission.title")
         titleLabel.font = .systemFont(ofSize: 28, weight: .bold)
         titleLabel.textAlignment = .center
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        let step1 = makeStepView(
-            number: "1",
-            text: L("onboarding.permission.step1")
-        )
-        let step2 = makeStepView(
-            number: "2",
-            text: L("onboarding.permission.step2")
-        )
+        // Trust header with lock icon
+        let trustHeaderStack = UIStackView()
+        trustHeaderStack.axis = .horizontal
+        trustHeaderStack.spacing = 6
+        trustHeaderStack.alignment = .center
+        trustHeaderStack.translatesAutoresizingMaskIntoConstraints = false
 
-        let stack = UIStackView(arrangedSubviews: [step1, step2])
-        stack.axis = .vertical
-        stack.spacing = 20
-        stack.translatesAutoresizingMaskIntoConstraints = false
+        let lockIcon = UIImageView()
+        lockIcon.image = UIImage(systemName: "lock.shield.fill")
+        lockIcon.tintColor = .secondaryLabel
+        lockIcon.contentMode = .scaleAspectFit
+        lockIcon.translatesAutoresizingMaskIntoConstraints = false
 
-        // Success state UI (initially hidden)
-        let sIconView = UIImageView()
-        sIconView.image = UIImage(systemName: "checkmark.circle.fill")
-        sIconView.tintColor = .systemGreen
-        sIconView.contentMode = .scaleAspectFit
-        sIconView.translatesAutoresizingMaskIntoConstraints = false
-        sIconView.isHidden = true
+        let trustHeaderLabel = UILabel()
+        trustHeaderLabel.text = L("onboarding.trust.title")
+        trustHeaderLabel.font = .systemFont(ofSize: 15, weight: .semibold)
+        trustHeaderLabel.textColor = .secondaryLabel
+        trustHeaderLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        let sTitleLabel = UILabel()
-        sTitleLabel.text = L("onboarding.permission.success.title")
-        sTitleLabel.font = .systemFont(ofSize: 28, weight: .bold)
-        sTitleLabel.textAlignment = .center
-        sTitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        sTitleLabel.isHidden = true
+        trustHeaderStack.addArrangedSubview(lockIcon)
+        trustHeaderStack.addArrangedSubview(trustHeaderLabel)
 
-        let sDescLabel = UILabel()
-        sDescLabel.text = L("onboarding.permission.success.description")
-        sDescLabel.font = .systemFont(ofSize: 17)
-        sDescLabel.textColor = .secondaryLabel
-        sDescLabel.textAlignment = .center
-        sDescLabel.numberOfLines = 0
-        sDescLabel.translatesAutoresizingMaskIntoConstraints = false
-        sDescLabel.isHidden = true
+        NSLayoutConstraint.activate([
+            lockIcon.widthAnchor.constraint(equalToConstant: 18),
+            lockIcon.heightAnchor.constraint(equalToConstant: 18),
+        ])
+
+        // Trust items
+        let trustItems = [
+            L("onboarding.trust.no_passwords"),
+            L("onboarding.trust.no_storage"),
+            L("onboarding.trust.ai_only"),
+        ]
+
+        let trustStack = UIStackView()
+        trustStack.axis = .vertical
+        trustStack.spacing = 12
+        trustStack.translatesAutoresizingMaskIntoConstraints = false
+
+        for item in trustItems {
+            let row = makeTrustRow(text: item)
+            trustStack.addArrangedSubview(row)
+        }
+
+        // Divider
+        let divider = UIView()
+        divider.backgroundColor = .separator
+        divider.translatesAutoresizingMaskIntoConstraints = false
+
+        // Steps
+        let step1View = makeSetupStepView(number: "1", text: L("onboarding.permission.step1"))
+        let step2View = makeSetupStepView(number: "2", text: L("onboarding.permission.step2"))
+
+        let stepStack = UIStackView(arrangedSubviews: [step1View, step2View])
+        stepStack.axis = .vertical
+        stepStack.spacing = 20
+        stepStack.translatesAutoresizingMaskIntoConstraints = false
 
         vc.view.addSubview(titleLabel)
-        vc.view.addSubview(stack)
-        vc.view.addSubview(sIconView)
-        vc.view.addSubview(sTitleLabel)
-        vc.view.addSubview(sDescLabel)
+        vc.view.addSubview(trustHeaderStack)
+        vc.view.addSubview(trustStack)
+        vc.view.addSubview(divider)
+        vc.view.addSubview(stepStack)
 
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: vc.view.safeAreaLayoutGuide.topAnchor, constant: 60),
             titleLabel.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 24),
             titleLabel.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor, constant: -24),
 
-            stack.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 40),
-            stack.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 32),
-            stack.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor, constant: -32),
+            trustHeaderStack.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 32),
+            trustHeaderStack.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 32),
 
-            sIconView.centerXAnchor.constraint(equalTo: vc.view.centerXAnchor),
-            sIconView.centerYAnchor.constraint(equalTo: vc.view.centerYAnchor, constant: -80),
-            sIconView.widthAnchor.constraint(equalToConstant: 80),
-            sIconView.heightAnchor.constraint(equalToConstant: 80),
+            trustStack.topAnchor.constraint(equalTo: trustHeaderStack.bottomAnchor, constant: 16),
+            trustStack.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 32),
+            trustStack.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor, constant: -32),
 
-            sTitleLabel.topAnchor.constraint(equalTo: sIconView.bottomAnchor, constant: 24),
-            sTitleLabel.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 24),
-            sTitleLabel.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor, constant: -24),
+            divider.topAnchor.constraint(equalTo: trustStack.bottomAnchor, constant: 28),
+            divider.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 32),
+            divider.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor, constant: -32),
+            divider.heightAnchor.constraint(equalToConstant: 0.5),
 
-            sDescLabel.topAnchor.constraint(equalTo: sTitleLabel.bottomAnchor, constant: 8),
-            sDescLabel.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 24),
-            sDescLabel.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor, constant: -24),
+            stepStack.topAnchor.constraint(equalTo: divider.bottomAnchor, constant: 28),
+            stepStack.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 32),
+            stepStack.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor, constant: -32),
         ])
 
-        // Store references for success state transition
-        permissionTitleLabel = titleLabel
-        permissionStepStack = stack
-        successIconView = sIconView
-        successTitleLabel = sTitleLabel
-        successDescriptionLabel = sDescLabel
-
         registerForegroundObserver()
-
         return vc
     }
 
-    func makeStepView(number: String, text: String) -> UIView {
+    func makeSetupStepView(number: String, text: String) -> UIView {
         let container = UIView()
         container.translatesAutoresizingMaskIntoConstraints = false
 
@@ -400,14 +561,163 @@ private extension OnboardingViewController {
 
         return container
     }
+
+    func makeTrustRow(text: String) -> UIView {
+        let container = UIView()
+        container.translatesAutoresizingMaskIntoConstraints = false
+
+        let checkmark = UIImageView()
+        checkmark.image = UIImage(systemName: "checkmark.circle.fill")
+        checkmark.tintColor = .systemGreen
+        checkmark.contentMode = .scaleAspectFit
+        checkmark.translatesAutoresizingMaskIntoConstraints = false
+
+        let label = UILabel()
+        label.text = text
+        label.font = .systemFont(ofSize: 15)
+        label.textColor = .label
+        label.numberOfLines = 0
+        label.translatesAutoresizingMaskIntoConstraints = false
+
+        container.addSubview(checkmark)
+        container.addSubview(label)
+
+        NSLayoutConstraint.activate([
+            checkmark.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            checkmark.topAnchor.constraint(equalTo: container.topAnchor, constant: 2),
+            checkmark.widthAnchor.constraint(equalToConstant: 24),
+            checkmark.heightAnchor.constraint(equalToConstant: 24),
+
+            label.leadingAnchor.constraint(equalTo: checkmark.trailingAnchor, constant: 12),
+            label.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            label.topAnchor.constraint(equalTo: container.topAnchor),
+            label.bottomAnchor.constraint(equalTo: container.bottomAnchor),
+        ])
+
+        return container
+    }
 }
 
-// MARK: - Feature Page
+// MARK: - Verification Page
 
 private extension OnboardingViewController {
-    func makeFeaturePage(icon: String, title: String, description: String) -> UIViewController {
+    func makeVerificationPage() -> UIViewController {
         let vc = UIViewController()
         vc.view.backgroundColor = .systemBackground
+
+        let titleLabel = UILabel()
+        titleLabel.text = L("onboarding.verify.title")
+        titleLabel.font = .systemFont(ofSize: 28, weight: .bold)
+        titleLabel.textAlignment = .center
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        let instructionLabel = UILabel()
+        instructionLabel.text = L("onboarding.verify.instruction")
+        instructionLabel.font = .systemFont(ofSize: 16)
+        instructionLabel.textColor = .secondaryLabel
+        instructionLabel.textAlignment = .center
+        instructionLabel.numberOfLines = 0
+        instructionLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        let textField = UITextField()
+        textField.placeholder = L("onboarding.verify.placeholder")
+        textField.borderStyle = .roundedRect
+        textField.backgroundColor = .secondarySystemBackground
+        textField.font = .systemFont(ofSize: 17)
+        textField.textAlignment = .center
+        textField.autocorrectionType = .no
+        textField.autocapitalizationType = .none
+        textField.translatesAutoresizingMaskIntoConstraints = false
+
+        let statusLabel = UILabel()
+        statusLabel.text = L("onboarding.verify.instruction")
+        statusLabel.font = .systemFont(ofSize: 15)
+        statusLabel.textColor = .secondaryLabel
+        statusLabel.textAlignment = .center
+        statusLabel.numberOfLines = 0
+        statusLabel.translatesAutoresizingMaskIntoConstraints = false
+        self.verificationStatusLabel = statusLabel
+
+        let tapGesture = UITapGestureRecognizer(target: textField, action: #selector(UIResponder.resignFirstResponder))
+        tapGesture.cancelsTouchesInView = false
+        vc.view.addGestureRecognizer(tapGesture)
+
+        vc.view.addSubview(titleLabel)
+        vc.view.addSubview(instructionLabel)
+        vc.view.addSubview(textField)
+        vc.view.addSubview(statusLabel)
+
+        NSLayoutConstraint.activate([
+            titleLabel.topAnchor.constraint(equalTo: vc.view.safeAreaLayoutGuide.topAnchor, constant: 60),
+            titleLabel.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 24),
+            titleLabel.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor, constant: -24),
+
+            instructionLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 16),
+            instructionLabel.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 32),
+            instructionLabel.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor, constant: -32),
+
+            textField.topAnchor.constraint(equalTo: instructionLabel.bottomAnchor, constant: 32),
+            textField.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 32),
+            textField.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor, constant: -32),
+            textField.heightAnchor.constraint(equalToConstant: 48),
+
+            statusLabel.topAnchor.constraint(equalTo: textField.bottomAnchor, constant: 24),
+            statusLabel.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 32),
+            statusLabel.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor, constant: -32),
+        ])
+
+        return vc
+    }
+}
+
+// MARK: - Features Page (Consolidated)
+
+private extension OnboardingViewController {
+    func makeFeaturesPage() -> UIViewController {
+        let vc = UIViewController()
+        vc.view.backgroundColor = .systemBackground
+
+        let titleLabel = UILabel()
+        titleLabel.text = L("onboarding.features.title")
+        titleLabel.font = .systemFont(ofSize: 28, weight: .bold)
+        titleLabel.textAlignment = .center
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        let features: [(icon: String, title: String, description: String)] = [
+            ("textformat", L("onboarding.features.translate"), L("onboarding.features.translate_desc")),
+            ("pencil.and.outline", L("onboarding.features.correct"), L("onboarding.features.correct_desc")),
+            ("doc.on.clipboard", L("onboarding.features.clipboard"), L("onboarding.features.clipboard_desc")),
+        ]
+
+        let featureStack = UIStackView()
+        featureStack.axis = .vertical
+        featureStack.spacing = 28
+        featureStack.translatesAutoresizingMaskIntoConstraints = false
+
+        for feature in features {
+            let row = makeFeatureRow(icon: feature.icon, title: feature.title, description: feature.description)
+            featureStack.addArrangedSubview(row)
+        }
+
+        vc.view.addSubview(titleLabel)
+        vc.view.addSubview(featureStack)
+
+        NSLayoutConstraint.activate([
+            titleLabel.topAnchor.constraint(equalTo: vc.view.safeAreaLayoutGuide.topAnchor, constant: 60),
+            titleLabel.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 24),
+            titleLabel.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor, constant: -24),
+
+            featureStack.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 40),
+            featureStack.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 32),
+            featureStack.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor, constant: -32),
+        ])
+
+        return vc
+    }
+
+    func makeFeatureRow(icon: String, title: String, description: String) -> UIView {
+        let container = UIView()
+        container.translatesAutoresizingMaskIntoConstraints = false
 
         let iconView = UIImageView()
         iconView.image = UIImage(systemName: icon)
@@ -417,38 +727,38 @@ private extension OnboardingViewController {
 
         let titleLabel = UILabel()
         titleLabel.text = title
-        titleLabel.font = .systemFont(ofSize: 28, weight: .bold)
-        titleLabel.textAlignment = .center
+        titleLabel.font = .systemFont(ofSize: 17, weight: .semibold)
+        titleLabel.textColor = .label
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
 
         let descLabel = UILabel()
         descLabel.text = description
-        descLabel.font = .systemFont(ofSize: 16)
+        descLabel.font = .systemFont(ofSize: 14)
         descLabel.textColor = .secondaryLabel
-        descLabel.textAlignment = .center
         descLabel.numberOfLines = 0
         descLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        vc.view.addSubview(iconView)
-        vc.view.addSubview(titleLabel)
-        vc.view.addSubview(descLabel)
+        container.addSubview(iconView)
+        container.addSubview(titleLabel)
+        container.addSubview(descLabel)
 
         NSLayoutConstraint.activate([
-            iconView.centerXAnchor.constraint(equalTo: vc.view.centerXAnchor),
-            iconView.centerYAnchor.constraint(equalTo: vc.view.centerYAnchor, constant: -80),
-            iconView.widthAnchor.constraint(equalToConstant: 80),
-            iconView.heightAnchor.constraint(equalToConstant: 80),
+            iconView.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            iconView.topAnchor.constraint(equalTo: container.topAnchor, constant: 2),
+            iconView.widthAnchor.constraint(equalToConstant: 32),
+            iconView.heightAnchor.constraint(equalToConstant: 32),
 
-            titleLabel.topAnchor.constraint(equalTo: iconView.bottomAnchor, constant: 24),
-            titleLabel.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 24),
-            titleLabel.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor, constant: -24),
+            titleLabel.leadingAnchor.constraint(equalTo: iconView.trailingAnchor, constant: 16),
+            titleLabel.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            titleLabel.topAnchor.constraint(equalTo: container.topAnchor),
 
-            descLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 12),
-            descLabel.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 24),
-            descLabel.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor, constant: -24),
+            descLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
+            descLabel.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            descLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
+            descLabel.bottomAnchor.constraint(equalTo: container.bottomAnchor),
         ])
 
-        return vc
+        return container
     }
 }
 
@@ -459,7 +769,6 @@ private extension OnboardingViewController {
         let vc = UIViewController()
         vc.view.backgroundColor = .systemBackground
 
-        // 상단 닫기 / 복원 버튼
         let closeButton = UIButton(type: .system)
         closeButton.setImage(UIImage(systemName: "xmark"), for: .normal)
         closeButton.tintColor = .label
@@ -467,23 +776,21 @@ private extension OnboardingViewController {
         closeButton.addTarget(self, action: #selector(subscriptionCloseTapped), for: .touchUpInside)
 
         let restoreButton = UIButton(type: .system)
-        restoreButton.setTitle("복원", for: .normal)
+        restoreButton.setTitle(L("onboarding.subscription.restore"), for: .normal)
         restoreButton.titleLabel?.font = .systemFont(ofSize: 15)
         restoreButton.translatesAutoresizingMaskIntoConstraints = false
 
-        // 타이틀
         let titleLabel = UILabel()
-        titleLabel.text = "Pro로 업그레이드"
+        titleLabel.text = L("onboarding.subscription.title")
         titleLabel.font = .systemFont(ofSize: 28, weight: .bold)
         titleLabel.textAlignment = .center
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        // 혜택 목록
         let benefits = [
-            ("checkmark.circle.fill", "무제한 번역"),
-            ("sparkles", "고품질 번역"),
-            ("nosign", "광고 없음"),
-            ("paintpalette.fill", "프리미엄 테마"),
+            ("checkmark.circle.fill", L("onboarding.subscription.benefit.unlimited")),
+            ("sparkles", L("onboarding.subscription.benefit.quality")),
+            ("nosign", L("onboarding.subscription.benefit.no_ads")),
+            ("paintpalette.fill", L("onboarding.subscription.benefit.themes")),
         ]
 
         let benefitStack = UIStackView()
@@ -496,9 +803,8 @@ private extension OnboardingViewController {
             benefitStack.addArrangedSubview(row)
         }
 
-        // 무료 체험 배지
         let trialBadge = UILabel()
-        trialBadge.text = "  7일 무료 체험  "
+        trialBadge.text = L("onboarding.subscription.trial_badge")
         trialBadge.font = .systemFont(ofSize: 14, weight: .semibold)
         trialBadge.textColor = .systemBlue
         trialBadge.backgroundColor = .systemBlue.withAlphaComponent(0.12)
@@ -507,9 +813,8 @@ private extension OnboardingViewController {
         trialBadge.textAlignment = .center
         trialBadge.translatesAutoresizingMaskIntoConstraints = false
 
-        // 구독 카드
-        let monthlyCard = makeSubscriptionCard(price: "$9.99/월", subtitle: "월간 구독", isBest: false)
-        let yearlyCard = makeSubscriptionCard(price: "$99.99/년", subtitle: "연간 구독", isBest: true)
+        let monthlyCard = makeSubscriptionCard(price: "$9.99/월", subtitle: L("onboarding.subscription.monthly"), isBest: false)
+        let yearlyCard = makeSubscriptionCard(price: "$99.99/년", subtitle: L("onboarding.subscription.yearly"), isBest: true)
 
         let cardStack = UIStackView(arrangedSubviews: [monthlyCard, yearlyCard])
         cardStack.axis = .horizontal
@@ -517,9 +822,8 @@ private extension OnboardingViewController {
         cardStack.distribution = .fillEqually
         cardStack.translatesAutoresizingMaskIntoConstraints = false
 
-        // CTA 버튼
         let startButton = UIButton(type: .system)
-        startButton.setTitle("무료 체험 시작", for: .normal)
+        startButton.setTitle(L("onboarding.subscription.start_trial"), for: .normal)
         startButton.titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
         startButton.backgroundColor = .systemBlue
         startButton.setTitleColor(.white, for: .normal)
@@ -619,7 +923,7 @@ private extension OnboardingViewController {
         priceLabel.translatesAutoresizingMaskIntoConstraints = false
 
         let subtitleLabel = UILabel()
-        subtitleLabel.text = isBest ? "\(subtitle) (BEST)" : subtitle
+        subtitleLabel.text = isBest ? "\(subtitle) \(L("onboarding.subscription.best_label"))" : subtitle
         subtitleLabel.font = .systemFont(ofSize: 13)
         subtitleLabel.textColor = .secondaryLabel
         subtitleLabel.textAlignment = .center
@@ -645,5 +949,13 @@ private extension OnboardingViewController {
 
     @objc func subscriptionStartTapped() {
         completeOnboarding()
+    }
+}
+
+// MARK: - Collection Safe Subscript
+
+private extension Collection {
+    subscript(safe index: Index) -> Element? {
+        return indices.contains(index) ? self[index] : nil
     }
 }

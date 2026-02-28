@@ -51,6 +51,5 @@ final class ClipboardHistoryManager {
         guard let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier),
               let data = try? JSONEncoder().encode(items) else { return }
         defaults.set(data, forKey: AppConstants.UserDefaultsKeys.clipboardHistory)
-        defaults.synchronize()
     }
 }

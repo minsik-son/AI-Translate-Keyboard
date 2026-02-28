@@ -1,5 +1,7 @@
 // === Settings ===
 "settings.title" = "设置";
+"settings.section.appearance" = "外观";
+"settings.dark_mode" = "深色模式";
 "settings.section.keyboard" = "键盘设置";
 "settings.keyboard_theme" = "键盘主题";
 "settings.language" = "语言";
@@ -15,18 +17,13 @@
 "settings.app_language" = "应用语言";
 "settings.keyboard_language" = "键盘语言";
 "settings.number_row" = "数字行";
+"settings.redo_onboarding" = "重新查看引导";
 
 // === Onboarding ===
 "onboarding.welcome.subtitle" = "随时随地翻译的键盘";
 "onboarding.permission.title" = "键盘设置";
 "onboarding.permission.step1" = "前往设置 → 通用 → 键盘 → 添加新键盘\n添加 Translator Keyboard";
 "onboarding.permission.step2" = "请开启\"允许完全访问\"\n（翻译功能需要此权限）";
-"onboarding.feature.translate.title" = "实时翻译";
-"onboarding.feature.translate.description" = "直接在键盘上翻译\n边输入边查看翻译结果";
-"onboarding.feature.multilang.title" = "多语言支持";
-"onboarding.feature.multilang.description" = "支持韩语、英语等\n多种语言";
-"onboarding.feature.smart.title" = "智能功能";
-"onboarding.feature.smart.description" = "触控板光标移动、主题切换等\n便捷功能";
 "onboarding.subscription.restore" = "恢复购买";
 "onboarding.subscription.title" = "升级到 Pro";
 "onboarding.subscription.benefit.unlimited" = "无限翻译";
@@ -38,11 +35,29 @@
 "onboarding.subscription.yearly" = "年度订阅";
 "onboarding.subscription.best_label" = "(BEST)";
 "onboarding.subscription.start_trial" = "开始免费试用";
-"onboarding.permission.success.title" = "设置完成！";
-"onboarding.permission.success.description" = "键盘已准备就绪";
 "onboarding.cta.start" = "开始使用";
 "onboarding.cta.go_settings" = "前往设置";
+"onboarding.cta.done_settings" = "我已完成设置";
 "onboarding.cta.next" = "下一步";
+"onboarding.verify.title" = "让我们检查键盘是否已设置好！";
+"onboarding.verify.instruction" = "点击下方输入框，使用🌐按钮切换到我们的键盘";
+"onboarding.verify.placeholder" = "点击这里输入";
+"onboarding.verify.waiting" = "等待键盘...";
+"onboarding.verify.switch_hint" = "使用🌐按钮切换到 Translator Keyboard";
+"onboarding.verify.success" = "设置完成！";
+"onboarding.verify.no_full_access" = "未启用完全访问权限";
+"onboarding.verify.full_access_desc" = "翻译和纠正功能需要完全访问权限";
+"onboarding.verify.go_settings" = "在设置中启用";
+"onboarding.verify.timeout" = "未找到键盘";
+"onboarding.verify.timeout_desc" = "键盘可能尚未添加";
+"onboarding.verify.retry" = "返回设置";
+"onboarding.features.title" = "您可以使用这些功能";
+"onboarding.features.translate" = "实时翻译";
+"onboarding.features.translate_desc" = "直接从键盘翻译";
+"onboarding.features.correct" = "AI拼写纠正";
+"onboarding.features.correct_desc" = "自动拼写检查和纠正";
+"onboarding.features.clipboard" = "剪贴板历史";
+"onboarding.features.clipboard_desc" = "快速重用复制的文本";
 
 // === Keyboard Errors & Status ===
 "keyboard.error.full_access" = "请允许完全访问";
@@ -106,6 +121,7 @@
 "tone.casual" = "随意";
 "tone.formal" = "正式";
 "tone.polished" = "精修";
+"tone.friendly" = "友好";
 
 // === Clipboard ===
 "clipboard.title" = "剪贴板";
@@ -121,3 +137,126 @@
 "clipboard.onboarding.body" = "自动保存复制的文本。\n所有数据仅存储在设备上\n不会发送到服务器。";
 "clipboard.onboarding.paste_notice" = "iOS可能会显示'粘贴'通知。\n请参阅应用内指南了解如何关闭。";
 "clipboard.onboarding.confirm" = "确定";
+
+// === Tab Bar ===
+"tab.home" = "首页";
+"tab.ai_writer" = "AI写作";
+"tab.history" = "历史";
+"tab.theme" = "主题";
+"tab.settings" = "设置";
+
+// === Home ===
+"home.greeting.morning" = "早上好";
+"home.greeting.afternoon" = "下午好";
+"home.greeting.evening" = "晚上好";
+"home.title" = "仪表盘";
+"home.weekly_report" = "本周AI报告";
+"home.words_typed" = "个单词输入";
+"home.corrections" = "个拼写已纠正";
+"home.accuracy" = "准确率";
+"home.vs_last_week" = "vs 上周";
+"home.stat.corrections" = "纠正";
+"home.stat.translations" = "翻译";
+"home.stat.clipboard" = "剪贴板";
+"home.stat.phrases" = "短语";
+"home.quick_actions" = "快捷操作";
+
+// === AI Writer ===
+"ai_writer.title" = "AI消息写作";
+"ai_writer.subtitle" = "Gemini以您喜欢的语气撰写";
+"ai_writer.placeholder" = "需要写什么消息？";
+"ai_writer.generate" = "生成";
+"ai_writer.generating" = "生成中...";
+"ai_writer.result" = "Gemini结果";
+"ai_writer.copy" = "复制";
+"ai_writer.copied" = "已复制";
+"ai_writer.regenerate" = "重新生成";
+
+// === History ===
+"history.title" = "历史";
+"history.subtitle" = "翻译 · 校正 · 剪贴板";
+"history.filter.all" = "全部";
+"history.filter.translate" = "翻译";
+"history.filter.correct" = "校正";
+"history.filter.clipboard" = "剪贴板";
+"history.empty" = "暂无记录";
+
+// === Settings (new) ===
+"settings.paste_guide" = "粘贴通知关闭指南";
+"settings.section.ai" = "AI功能";
+"settings.ai_correction" = "Gemini AI校正";
+"settings.ai_translation" = "Gemini AI翻译";
+"settings.section.privacy" = "隐私";
+"settings.privacy_dashboard" = "隐私面板";
+"settings.full_access_explain" = "完全访问说明";
+
+// === Onboarding Trust ===
+"onboarding.trust.title" = "完全访问说明";
+"onboarding.trust.no_passwords" = "我们绝不收集密码或银行卡信息";
+"onboarding.trust.no_storage" = "键盘输入内容不会被存储";
+"onboarding.trust.ai_only" = "仅发送AI校正/翻译请求";
+"onboarding.trust.cta" = "开启完全访问";
+
+// === Paste Guide ===
+"paste_guide.description" = "了解如何关闭iOS上访问剪贴板时出现的粘贴通知。";
+"paste_guide.step1.title" = "打开设置";
+"paste_guide.step1.detail" = "打开iPhone的设置应用，找到Translator Keyboard。";
+"paste_guide.step2.title" = "从其他App粘贴";
+"paste_guide.step2.detail" = "找到\"从其他App粘贴\"，将其更改为\"允许\"。";
+"paste_guide.step3.title" = "完成";
+"paste_guide.step3.detail" = "现在可以无通知地使用剪贴板功能。";
+"paste_guide.open_settings" = "前往设置";
+
+// === Privacy Dashboard ===
+"privacy.header" = "查看Translator Keyboard收集和不收集的数据。";
+"privacy.not_collected" = "未收集的数据";
+"privacy.keyboard_input" = "键盘输入：不收集";
+"privacy.passwords_cards" = "密码和银行卡信息：不收集";
+"privacy.clipboard_data" = "剪贴板历史：仅存储在设备上";
+"privacy.stats_data" = "统计数据：仅存储在设备上";
+"privacy.server_comm" = "服务器通信";
+"privacy.ai_correction_server" = "AI校正：发送到服务器（仅用于校正，不存储）";
+"privacy.ai_translation_server" = "AI翻译：发送到服务器（仅用于翻译，不存储）";
+
+// === Full Access Explain ===
+"full_access.header" = "了解为什么需要完全访问以及哪些功能需要它。";
+"full_access.basic_typing" = "基本输入";
+"full_access.ai_correction" = "AI校正";
+"full_access.ai_translation" = "AI翻译";
+"full_access.clipboard" = "剪贴板历史";
+"full_access.theme_layout" = "主题/布局";
+"full_access.required" = "需要";
+"full_access.not_required" = "不需要";
+"full_access.setup_step1.title" = "添加键盘";
+"full_access.setup_step1.detail" = "设置 → 通用 → 键盘 → 添加新键盘 → Translator Keyboard";
+"full_access.setup_step2.title" = "允许完全访问";
+"full_access.setup_step2.detail" = "点击 Translator Keyboard 并开启「允许完全访问」";
+"full_access.already_granted" = "已开启完全访问权限";
+"full_access.go_settings" = "前往设置";
+
+// === AI Correction Info ===
+"ai_correction.description" = "Gemini AI实时校正您文本的拼写和语法。";
+"ai_correction.engine" = "AI引擎";
+"ai_correction.supported" = "功能";
+"ai_correction.supported_detail" = "拼写、间距、语法校正";
+"ai_correction.tone" = "语气设置";
+"ai_correction.tone_detail" = "默认、随意、正式、精修";
+"ai_correction.privacy" = "隐私";
+"ai_correction.privacy_detail" = "仅校正请求发送到服务器，不会被存储";
+
+// === AI Translation Info ===
+"ai_translation.description" = "Gemini AI将您的文本实时翻译为所选语言。";
+"ai_translation.engine" = "AI引擎";
+"ai_translation.languages" = "语言";
+"ai_translation.languages_detail" = "支持韩语、英语、日语、中文等13种语言";
+"ai_translation.privacy" = "隐私";
+"ai_translation.privacy_detail" = "仅翻译请求发送到服务器，不会被存储";
+
+// === Clipboard Time (simple) ===
+"clipboard.time.now" = "刚刚";
+
+// === Session Limit ===
+"session_limit.title" = "今日免费使用次数已用完";
+"session_limit.subtitle" = "明天可以再次使用";
+"session_limit.upgrade" = "升级到高级版";
+"session_limit.remaining" = "今日剩余: %d次";

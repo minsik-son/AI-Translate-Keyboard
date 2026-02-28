@@ -26,6 +26,5 @@ final class SavedPhrasesManager {
     private func save(_ phrases: [String]) {
         let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier)
         defaults?.set(phrases, forKey: AppConstants.UserDefaultsKeys.savedPhrases)
-        defaults?.synchronize()
     }
 }

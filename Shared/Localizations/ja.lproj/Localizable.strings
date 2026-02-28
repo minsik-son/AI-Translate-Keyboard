@@ -1,5 +1,7 @@
 // === Settings ===
 "settings.title" = "設定";
+"settings.section.appearance" = "外観";
+"settings.dark_mode" = "ダークモード";
 "settings.section.keyboard" = "キーボード設定";
 "settings.keyboard_theme" = "キーボードテーマ";
 "settings.language" = "言語";
@@ -15,18 +17,13 @@
 "settings.app_language" = "アプリの言語";
 "settings.keyboard_language" = "キーボード言語";
 "settings.number_row" = "数字行";
+"settings.redo_onboarding" = "オンボーディングをやり直す";
 
 // === Onboarding ===
 "onboarding.welcome.subtitle" = "どこでも翻訳できるキーボード";
 "onboarding.permission.title" = "キーボード設定";
 "onboarding.permission.step1" = "設定 → 一般 → キーボード → キーボード追加で\nTranslator Keyboardを追加してください";
 "onboarding.permission.step2" = "「フルアクセスを許可」をオンにしてください\n（翻訳機能に必要です）";
-"onboarding.feature.translate.title" = "リアルタイム翻訳";
-"onboarding.feature.translate.description" = "キーボードから直接翻訳\n入力しながらすぐに結果を確認できます";
-"onboarding.feature.multilang.title" = "多言語対応";
-"onboarding.feature.multilang.description" = "韓国語、英語を含む\n様々な言語に対応しています";
-"onboarding.feature.smart.title" = "スマート機能";
-"onboarding.feature.smart.description" = "トラックパッドカーソル移動、テーマ変更など\n便利な機能を提供します";
 "onboarding.subscription.restore" = "復元";
 "onboarding.subscription.title" = "Proにアップグレード";
 "onboarding.subscription.benefit.unlimited" = "無制限翻訳";
@@ -38,11 +35,29 @@
 "onboarding.subscription.yearly" = "年額";
 "onboarding.subscription.best_label" = "(BEST)";
 "onboarding.subscription.start_trial" = "無料体験を始める";
-"onboarding.permission.success.title" = "設定完了！";
-"onboarding.permission.success.description" = "キーボードの準備ができました";
 "onboarding.cta.start" = "はじめる";
 "onboarding.cta.go_settings" = "設定へ移動";
+"onboarding.cta.done_settings" = "設定を完了しました";
 "onboarding.cta.next" = "次へ";
+"onboarding.verify.title" = "キーボードが正しく設定されたか確認しましょう！";
+"onboarding.verify.instruction" = "下の入力欄をタップして🌐ボタンでキーボードを切り替えてください";
+"onboarding.verify.placeholder" = "ここをタップして入力してみてください";
+"onboarding.verify.waiting" = "キーボードを待っています...";
+"onboarding.verify.switch_hint" = "🌐ボタンでTranslator Keyboardに切り替えてください";
+"onboarding.verify.success" = "設定が完了しました！";
+"onboarding.verify.no_full_access" = "フルアクセスがオフになっています";
+"onboarding.verify.full_access_desc" = "翻訳・校正機能にはフルアクセスが必要です";
+"onboarding.verify.go_settings" = "設定でオンにする";
+"onboarding.verify.timeout" = "キーボードが見つかりません";
+"onboarding.verify.timeout_desc" = "キーボードが追加されていないようです";
+"onboarding.verify.retry" = "設定に戻る";
+"onboarding.features.title" = "こんな機能が使えます";
+"onboarding.features.translate" = "リアルタイム翻訳";
+"onboarding.features.translate_desc" = "キーボードからすぐに翻訳";
+"onboarding.features.correct" = "AIタイプミス修正";
+"onboarding.features.correct_desc" = "自動でスペルチェック・修正";
+"onboarding.features.clipboard" = "クリップボード履歴";
+"onboarding.features.clipboard_desc" = "コピーしたテキストをすぐに再利用";
 
 // === Keyboard Errors & Status ===
 "keyboard.error.full_access" = "フルアクセスを許可してください";
@@ -106,6 +121,7 @@
 "tone.casual" = "カジュアル";
 "tone.formal" = "敬語";
 "tone.polished" = "整文";
+"tone.friendly" = "フレンドリー";
 
 // === Clipboard ===
 "clipboard.title" = "クリップボード";
@@ -121,3 +137,126 @@
 "clipboard.onboarding.body" = "コピーしたテキストを自動的に保存します。\nすべてのデータは端末内にのみ保存され\nサーバーには送信されません。";
 "clipboard.onboarding.paste_notice" = "iOSの仕様により「ペースト許可」通知が\n表示される場合があります。\n無効化する方法はアプリ内ガイドを\nご参照ください。";
 "clipboard.onboarding.confirm" = "OK";
+
+// === Tab Bar ===
+"tab.home" = "ホーム";
+"tab.ai_writer" = "AI作成";
+"tab.history" = "履歴";
+"tab.theme" = "テーマ";
+"tab.settings" = "設定";
+
+// === Home ===
+"home.greeting.morning" = "おはようございます";
+"home.greeting.afternoon" = "こんにちは";
+"home.greeting.evening" = "こんばんは";
+"home.title" = "ダッシュボード";
+"home.weekly_report" = "今週のAIレポート";
+"home.words_typed" = "単語入力";
+"home.corrections" = "個のタイプミスを修正";
+"home.accuracy" = "正確度";
+"home.vs_last_week" = "先週比";
+"home.stat.corrections" = "修正";
+"home.stat.translations" = "翻訳";
+"home.stat.clipboard" = "クリップボード";
+"home.stat.phrases" = "定型文";
+"home.quick_actions" = "クイックアクション";
+
+// === AI Writer ===
+"ai_writer.title" = "AIメッセージ作成";
+"ai_writer.subtitle" = "Geminiがトーンに合わせて作成します";
+"ai_writer.placeholder" = "どんなメッセージを作成しますか？";
+"ai_writer.generate" = "作成する";
+"ai_writer.generating" = "生成中...";
+"ai_writer.result" = "Gemini結果";
+"ai_writer.copy" = "コピー";
+"ai_writer.copied" = "コピー済み";
+"ai_writer.regenerate" = "再生成";
+
+// === History ===
+"history.title" = "履歴";
+"history.subtitle" = "翻訳・修正・クリップボード";
+"history.filter.all" = "すべて";
+"history.filter.translate" = "翻訳";
+"history.filter.correct" = "修正";
+"history.filter.clipboard" = "クリップボード";
+"history.empty" = "履歴がありません";
+
+// === Settings (new) ===
+"settings.paste_guide" = "ペースト通知の解除方法";
+"settings.section.ai" = "AI機能";
+"settings.ai_correction" = "Gemini AI修正";
+"settings.ai_translation" = "Gemini AI翻訳";
+"settings.section.privacy" = "プライバシー";
+"settings.privacy_dashboard" = "プライバシーダッシュボード";
+"settings.full_access_explain" = "フルアクセスの説明";
+
+// === Onboarding Trust ===
+"onboarding.trust.title" = "フルアクセスについて";
+"onboarding.trust.no_passwords" = "パスワードやカード情報は収集しません";
+"onboarding.trust.no_storage" = "キーボード入力は保存されません";
+"onboarding.trust.ai_only" = "AI修正・翻訳のリクエストのみ送信されます";
+"onboarding.trust.cta" = "フルアクセスを設定する";
+
+// === Paste Guide ===
+"paste_guide.description" = "iOSでクリップボードにアクセスする際に表示されるペースト通知を無効にする方法です。";
+"paste_guide.step1.title" = "設定アプリを開く";
+"paste_guide.step1.detail" = "iPhoneの設定アプリを開き、Translator Keyboardを見つけてください。";
+"paste_guide.step2.title" = "他のアプリからペースト";
+"paste_guide.step2.detail" = "「他のアプリからペースト」を見つけて「許可」に変更してください。";
+"paste_guide.step3.title" = "完了";
+"paste_guide.step3.detail" = "ペースト通知なしでクリップボード機能を使用できます。";
+"paste_guide.open_settings" = "設定へ移動";
+
+// === Privacy Dashboard ===
+"privacy.header" = "Translator Keyboardが収集するデータと収集しないデータをご確認ください。";
+"privacy.not_collected" = "収集しないデータ";
+"privacy.keyboard_input" = "キーボード入力内容：収集しません";
+"privacy.passwords_cards" = "パスワード・カード情報：収集しません";
+"privacy.clipboard_data" = "クリップボード履歴：端末内にのみ保存";
+"privacy.stats_data" = "統計データ：端末内にのみ保存";
+"privacy.server_comm" = "サーバー通信";
+"privacy.ai_correction_server" = "AI修正：サーバーに送信（修正のみ、保存なし）";
+"privacy.ai_translation_server" = "AI翻訳：サーバーに送信（翻訳のみ、保存なし）";
+
+// === Full Access Explain ===
+"full_access.header" = "フルアクセスが必要な理由と各機能の必要性をご確認ください。";
+"full_access.basic_typing" = "基本入力";
+"full_access.ai_correction" = "AIタイプミス修正";
+"full_access.ai_translation" = "AI翻訳";
+"full_access.clipboard" = "クリップボード履歴";
+"full_access.theme_layout" = "テーマ/レイアウト";
+"full_access.required" = "必要";
+"full_access.not_required" = "不要";
+"full_access.setup_step1.title" = "キーボードを追加";
+"full_access.setup_step1.detail" = "設定 → 一般 → キーボード → 新しいキーボードを追加 → Translator Keyboard";
+"full_access.setup_step2.title" = "フルアクセスを許可";
+"full_access.setup_step2.detail" = "Translator Keyboardをタップして「フルアクセスを許可」をオンにしてください";
+"full_access.already_granted" = "フルアクセスは既に有効です";
+"full_access.go_settings" = "設定へ移動";
+
+// === AI Correction Info ===
+"ai_correction.description" = "Gemini AIが入力テキストのスペルと文法をリアルタイムで修正します。";
+"ai_correction.engine" = "AIエンジン";
+"ai_correction.supported" = "機能";
+"ai_correction.supported_detail" = "スペル、スペース、文法の修正";
+"ai_correction.tone" = "トーン設定";
+"ai_correction.tone_detail" = "デフォルト、カジュアル、敬語、整文";
+"ai_correction.privacy" = "プライバシー";
+"ai_correction.privacy_detail" = "修正リクエストのみサーバーに送信され、保存されません";
+
+// === AI Translation Info ===
+"ai_translation.description" = "Gemini AIが入力テキストを選択した言語にリアルタイムで翻訳します。";
+"ai_translation.engine" = "AIエンジン";
+"ai_translation.languages" = "対応言語";
+"ai_translation.languages_detail" = "韓国語、英語、日本語、中国語など13言語";
+"ai_translation.privacy" = "プライバシー";
+"ai_translation.privacy_detail" = "翻訳リクエストのみサーバーに送信され、保存されません";
+
+// === Clipboard Time (simple) ===
+"clipboard.time.now" = "たった今";
+
+// === Session Limit ===
+"session_limit.title" = "今日の無料利用回数を使い切りました";
+"session_limit.subtitle" = "明日また利用できます";
+"session_limit.upgrade" = "プレミアムにアップグレード";
+"session_limit.remaining" = "本日の残り回数: %d回";

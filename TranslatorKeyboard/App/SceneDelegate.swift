@@ -6,33 +6,35 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
-        let mainVC = MainViewController()
-        let nav = UINavigationController(rootViewController: mainVC)
-        window?.rootViewController = nav
+        let tabBarController = TabBarController()
+        window?.rootViewController = tabBarController
         window?.makeKeyAndVisible()
+
+        // 라이트/다크 모드 적용
+        let isDark = UserDefaults(suiteName: AppConstants.appGroupIdentifier)?.bool(forKey: AppConstants.UserDefaultsKeys.appDarkMode) ?? false
+        window?.overrideUserInterfaceStyle = isDark ? .dark : .light
 
         // 온보딩: 첫 실행 시 표시
         let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier) ?? UserDefaults.standard
         if !defaults.bool(forKey: AppConstants.UserDefaultsKeys.hasCompletedOnboarding) {
             let onboardingVC = OnboardingViewController()
             onboardingVC.modalPresentationStyle = .fullScreen
-            nav.present(onboardingVC, animated: false)
+            tabBarController.present(onboardingVC, animated: false)
         }
 
         if let urlContext = connectionOptions.urlContexts.first {
-            handleURL(urlContext.url, nav: nav)
+            handleURL(urlContext.url, tabBar: tabBarController)
         }
     }
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         guard let url = URLContexts.first?.url else { return }
-        guard let nav = window?.rootViewController as? UINavigationController else { return }
-        handleURL(url, nav: nav)
+        guard let tabBar = window?.rootViewController as? TabBarController else { return }
+        handleURL(url, tabBar: tabBar)
     }
 
-    private func handleURL(_ url: URL, nav: UINavigationController) {
+    private func handleURL(_ url: URL, tabBar: TabBarController) {
         guard url.scheme == "translatorkeyboard", url.host == "settings" else { return }
-        nav.popToRootViewController(animated: false)
-        nav.pushViewController(SettingsViewController(), animated: true)
+        tabBar.selectedIndex = 4 // Settings tab
     }
 }

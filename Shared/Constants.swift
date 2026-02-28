@@ -27,6 +27,9 @@ enum AppConstants {
         static let primaryKeyboardLanguage = "primary_keyboard_language"
         static let clipboardHistory = "clipboard_history"
         static let clipboardOnboardingShown = "clipboard_onboarding_shown"
+        static let compositionSessionHistory = "composition_session_history"
+        static let keyboardFullAccessEnabled = "keyboard_full_access_enabled"
+        static let appDarkMode = "app_dark_mode"
     }
 
     enum API {
@@ -42,5 +45,7 @@ enum AppConstants {
         static let freeSessionsPerDay = 30
         static let debounceDuration: TimeInterval = 0.3
         static let cacheMaxItems = 100
+        static let sessionIdleTimeout: TimeInterval = 30
+        static let maxHistoryItems = 100
     }
 }

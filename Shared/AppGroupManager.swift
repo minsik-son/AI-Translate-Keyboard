@@ -15,7 +15,6 @@ final class AppGroupManager {
 
     func set(_ value: Any?, forKey key: String) {
         userDefaults?.set(value, forKey: key)
-        userDefaults?.synchronize()
     }
 
     func string(forKey key: String) -> String? {

@@ -11,7 +11,7 @@ class CorrectionManager {
     weak var delegate: CorrectionManagerDelegate?
 
     private let cache = TranslationCache.shared
-    private let session: URLSession
+    private var session: URLSession { SharedNetworkSession.shared }
     private var debounceWorkItem: DispatchWorkItem?
     private var lastCorrectedText: String = ""
     private var retryCount = 0
@@ -20,14 +20,6 @@ class CorrectionManager {
 
     private var languageCode: String = "ko"
     private var toneStyle: ToneStyle = .none
-
-    init() {
-        let config = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = AppConstants.API.timeout
-        config.timeoutIntervalForResource = AppConstants.API.timeout
-        config.httpShouldUsePipelining = true
-        self.session = URLSession(configuration: config)
-    }
 
     func setLanguage(_ code: String) {
         self.languageCode = code
@@ -158,6 +150,9 @@ class CorrectionManager {
 
         cache.set(text: text, source: "correct_\(toneStyle.rawValue)", target: languageCode, translatedText: correctedText)
         lastCorrectedText = text
+
+        // Log to session (stats는 세션 종료 시 CompositionSessionManager에서 처리)
+        CompositionSessionManager.shared.recordAPICall(sourceText: text, resultText: correctedText)
 
         delegate?.correctionManager(self, didCorrect: correctedText, language: languageCode)
     }

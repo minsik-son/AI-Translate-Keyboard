@@ -127,7 +127,8 @@ class TranslationInputView: UIView {
             // Input label — fills left area, multi-line, no max height
             inputLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 10),
             inputLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 10),
-            inputLabel.trailingAnchor.constraint(lessThanOrEqualTo: counterLabel.leadingAnchor, constant: -6),
+            // Fixed offset: close margin 2 + close 30 + gap 4 + counter max 42 + gap 6 = 84
+            inputLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -84),
 
             // Placeholder
             placeholderLabel.topAnchor.constraint(equalTo: inputLabel.topAnchor),
@@ -224,28 +225,18 @@ class TranslationInputView: UIView {
         }
     }
 
-    /// Width used for text layout calculations (must match idealHeight and updateCursorPosition)
-    private var textLayoutWidth: CGFloat {
-        return bounds.width - 8 * 2 - 10 - 6 - 40 - 30  // margins, padding, counter, close
-    }
-
     /// Returns the ideal height based on current text content (no max limit)
     func idealHeight() -> CGFloat {
-        let maxWidth = textLayoutWidth
+        let maxWidth = inputLabel.frame.width
         guard maxWidth > 0 else { return TranslationInputView.minHeight }
 
-        let text = (inputLabel.text ?? "") as NSString
-        if text.length == 0 { return TranslationInputView.minHeight }
+        guard let text = inputLabel.text, !text.isEmpty else { return TranslationInputView.minHeight }
 
-        let boundingRect = text.boundingRect(
-            with: CGSize(width: maxWidth, height: .greatestFiniteMagnitude),
-            options: [.usesLineFragmentOrigin, .usesFontLeading],
-            attributes: [.font: inputLabel.font!],
-            context: nil
-        )
+        // Use sizeThatFits to match UILabel's own rendering exactly
+        let labelHeight = inputLabel.sizeThatFits(CGSize(width: maxWidth, height: .greatestFiniteMagnitude)).height
 
         // Label height + vertical padding (top 10 + bottom 10) + container padding (top 4 + bottom 4)
-        let neededHeight = ceil(boundingRect.height) + 20 + 8
+        let neededHeight = ceil(labelHeight) + 20 + 8
 
         return max(neededHeight, TranslationInputView.minHeight)
     }
@@ -289,7 +280,7 @@ class TranslationInputView: UIView {
             return
         }
 
-        let maxWidth = textLayoutWidth
+        let maxWidth = inputLabel.frame.width
         guard maxWidth > 0 else {
             cursorLeading?.constant = 0
             cursorTop?.constant = 0
@@ -297,50 +288,51 @@ class TranslationInputView: UIView {
         }
 
         let font = inputLabel.font!
-        let attrs: [NSAttributedString.Key: Any] = [.font: font]
         let lineHeight = ceil(font.lineHeight)
+
+        // Use Core Text (CTFramesetter) — matches UILabel's internal text rendering engine,
+        // unlike NSLayoutManager (TextKit 1) which wraps text at different positions
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineBreakMode = inputLabel.lineBreakMode
+        let attrs: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .paragraphStyle: paragraphStyle
+        ]
 
         // Text ends with \n — cursor goes to the beginning of the next empty line
         if text.hasSuffix("\n") {
-            let measureText = text + " "
-            let rect = (measureText as NSString).boundingRect(
-                with: CGSize(width: maxWidth, height: .greatestFiniteMagnitude),
-                options: [.usesLineFragmentOrigin, .usesFontLeading],
-                attributes: attrs, context: nil
-            )
+            let attrString = NSAttributedString(string: text + " ", attributes: attrs)
+            let frameSetter = CTFramesetterCreateWithAttributedString(attrString)
+            let path = CGMutablePath()
+            path.addRect(CGRect(x: 0, y: 0, width: maxWidth, height: .greatestFiniteMagnitude))
+            let frame = CTFramesetterCreateFrame(frameSetter, CFRange(location: 0, length: 0), path, nil)
+            let lineCount = (CTFrameGetLines(frame) as! [CTLine]).count
+
             cursorLeading?.constant = 0
-            cursorTop?.constant = max(0, ceil(rect.height) - lineHeight)
+            cursorTop?.constant = max(0, CGFloat(lineCount - 1) * lineHeight)
             return
         }
 
-        // Y: boundingRect (matches idealHeight measurement)
-        let fullRect = (text as NSString).boundingRect(
-            with: CGSize(width: maxWidth, height: .greatestFiniteMagnitude),
-            options: [.usesLineFragmentOrigin, .usesFontLeading],
-            attributes: attrs, context: nil
-        )
-        cursorTop?.constant = max(0, ceil(fullRect.height) - lineHeight)
+        let attrString = NSAttributedString(string: text, attributes: attrs)
+        let frameSetter = CTFramesetterCreateWithAttributedString(attrString)
+        let path = CGMutablePath()
+        path.addRect(CGRect(x: 0, y: 0, width: maxWidth, height: .greatestFiniteMagnitude))
+        let frame = CTFramesetterCreateFrame(frameSetter, CFRange(location: 0, length: 0), path, nil)
+        let lines = CTFrameGetLines(frame) as! [CTLine]
 
-        // X: TextKit for accurate last-glyph position (handles soft-wrap)
-        let attributedText = NSAttributedString(string: text, attributes: attrs)
-        let textStorage = NSTextStorage(attributedString: attributedText)
-        let layoutManager = NSLayoutManager()
-        let textContainer = NSTextContainer(size: CGSize(width: maxWidth, height: .greatestFiniteMagnitude))
-        textContainer.lineFragmentPadding = 0
-        layoutManager.addTextContainer(textContainer)
-        textStorage.addLayoutManager(layoutManager)
-        layoutManager.ensureLayout(for: textContainer)
-
-        let numberOfGlyphs = layoutManager.numberOfGlyphs
-        guard numberOfGlyphs > 0 else {
+        guard !lines.isEmpty else {
             cursorLeading?.constant = 0
+            cursorTop?.constant = 0
             return
         }
-        let lastGlyphIndex = numberOfGlyphs - 1
-        let lastGlyphRect = layoutManager.boundingRect(
-            forGlyphRange: NSRange(location: lastGlyphIndex, length: 1),
-            in: textContainer
-        )
-        cursorLeading?.constant = min(lastGlyphRect.maxX, maxWidth)
+
+        // Y: position cursor at the top of the last line
+        cursorTop?.constant = max(0, CGFloat(lines.count - 1) * lineHeight)
+
+        // X: exact offset after the last character on the last line
+        let lastLine = lines.last!
+        let lineRange = CTLineGetStringRange(lastLine)
+        let cursorOffset = CTLineGetOffsetForStringIndex(lastLine, lineRange.location + lineRange.length, nil)
+        cursorLeading?.constant = min(CGFloat(cursorOffset), maxWidth)
     }
 }

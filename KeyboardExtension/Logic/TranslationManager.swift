@@ -20,7 +20,7 @@ class TranslationManager {
     weak var delegate: TranslationManagerDelegate?
 
     private let cache = TranslationCache.shared
-    private let session: URLSession
+    private var session: URLSession { SharedNetworkSession.shared }
     private var debounceWorkItem: DispatchWorkItem?
     private var lastTranslatedText: String = ""
     private var retryCount = 0
@@ -29,14 +29,6 @@ class TranslationManager {
 
     private var sourceLang: String = "ko"
     private var targetLang: String = "en"
-
-    init() {
-        let config = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = AppConstants.API.timeout
-        config.timeoutIntervalForResource = AppConstants.API.timeout
-        config.httpShouldUsePipelining = true
-        self.session = URLSession(configuration: config)
-    }
 
     func setLanguages(source: String, target: String) {
         self.sourceLang = source
@@ -164,6 +156,9 @@ class TranslationManager {
 
         cache.set(text: text, source: sourceLang, target: targetLang, translatedText: translatedText)
         lastTranslatedText = text
+
+        // Log to session (stats는 세션 종료 시 CompositionSessionManager에서 처리)
+        CompositionSessionManager.shared.recordAPICall(sourceText: text, resultText: translatedText)
 
         delegate?.translationManager(self, didTranslate: translatedText, from: sourceLang, to: targetLang)
     }

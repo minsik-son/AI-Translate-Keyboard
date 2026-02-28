@@ -1,5 +1,7 @@
 // === Settings ===
 "settings.title" = "Ajustes";
+"settings.section.appearance" = "Apariencia";
+"settings.dark_mode" = "Modo oscuro";
 "settings.section.keyboard" = "Ajustes del teclado";
 "settings.keyboard_theme" = "Tema del teclado";
 "settings.language" = "Idioma";
@@ -15,18 +17,13 @@
 "settings.app_language" = "Idioma de la app";
 "settings.keyboard_language" = "Idioma del teclado";
 "settings.number_row" = "Fila de números";
+"settings.redo_onboarding" = "Repetir introducción";
 
 // === Onboarding ===
 "onboarding.welcome.subtitle" = "Un teclado para traducir en cualquier lugar";
 "onboarding.permission.title" = "Configuración del teclado";
 "onboarding.permission.step1" = "Ve a Ajustes → General → Teclado → Añadir teclado\ny añade Translator Keyboard";
 "onboarding.permission.step2" = "Activa 'Permitir acceso completo'\n(Necesario para la traducción)";
-"onboarding.feature.translate.title" = "Traducción en tiempo real";
-"onboarding.feature.translate.description" = "Traduce directamente desde el teclado\nVe los resultados al instante mientras escribes";
-"onboarding.feature.multilang.title" = "Soporte multilingüe";
-"onboarding.feature.multilang.description" = "Compatible con varios idiomas\nincluyendo coreano e inglés";
-"onboarding.feature.smart.title" = "Funciones inteligentes";
-"onboarding.feature.smart.description" = "Movimiento del cursor con trackpad, cambio de temas\ny otras funciones útiles";
 "onboarding.subscription.restore" = "Restaurar";
 "onboarding.subscription.title" = "Actualizar a Pro";
 "onboarding.subscription.benefit.unlimited" = "Traducción ilimitada";
@@ -38,11 +35,29 @@
 "onboarding.subscription.yearly" = "Anual";
 "onboarding.subscription.best_label" = "(BEST)";
 "onboarding.subscription.start_trial" = "Iniciar prueba gratuita";
-"onboarding.permission.success.title" = "¡Configuración completa!";
-"onboarding.permission.success.description" = "Tu teclado está listo para usar";
 "onboarding.cta.start" = "Comenzar";
 "onboarding.cta.go_settings" = "Ir a Ajustes";
+"onboarding.cta.done_settings" = "He completado la configuración";
 "onboarding.cta.next" = "Siguiente";
+"onboarding.verify.title" = "¡Comprobemos si el teclado está configurado!";
+"onboarding.verify.instruction" = "Toca el campo de abajo y cambia a nuestro teclado usando 🌐";
+"onboarding.verify.placeholder" = "Toca aquí para escribir";
+"onboarding.verify.waiting" = "Esperando el teclado...";
+"onboarding.verify.switch_hint" = "Cambia a Translator Keyboard usando el botón 🌐";
+"onboarding.verify.success" = "¡Configuración completada!";
+"onboarding.verify.no_full_access" = "El acceso completo no está activado";
+"onboarding.verify.full_access_desc" = "Se requiere acceso completo para traducción y corrección";
+"onboarding.verify.go_settings" = "Activar en Ajustes";
+"onboarding.verify.timeout" = "Teclado no encontrado";
+"onboarding.verify.timeout_desc" = "Es posible que el teclado no se haya añadido";
+"onboarding.verify.retry" = "Volver a Ajustes";
+"onboarding.features.title" = "Esto es lo que puedes hacer";
+"onboarding.features.translate" = "Traducción en tiempo real";
+"onboarding.features.translate_desc" = "Traduce directamente desde tu teclado";
+"onboarding.features.correct" = "Corrección de errores con IA";
+"onboarding.features.correct_desc" = "Corrección ortográfica automática";
+"onboarding.features.clipboard" = "Historial del portapapeles";
+"onboarding.features.clipboard_desc" = "Reutiliza rápidamente el texto copiado";
 
 // === Keyboard Errors & Status ===
 "keyboard.error.full_access" = "Por favor, permite el acceso completo";
@@ -106,6 +121,7 @@
 "tone.casual" = "Informal";
 "tone.formal" = "Formal";
 "tone.polished" = "Pulido";
+"tone.friendly" = "Amigable";
 
 // === Clipboard ===
 "clipboard.title" = "Portapapeles";
@@ -121,3 +137,126 @@
 "clipboard.onboarding.body" = "El texto copiado se guarda automáticamente.\nTodos los datos se almacenan solo en el dispositivo\ny nunca se envían a un servidor.";
 "clipboard.onboarding.paste_notice" = "iOS puede mostrar una notificación de 'pegar'.\nConsulta la guía en la app para desactivarla.";
 "clipboard.onboarding.confirm" = "OK";
+
+// === Tab Bar ===
+"tab.home" = "Inicio";
+"tab.ai_writer" = "AI Escritor";
+"tab.history" = "Historial";
+"tab.theme" = "Tema";
+"tab.settings" = "Ajustes";
+
+// === Home ===
+"home.greeting.morning" = "Buenos días";
+"home.greeting.afternoon" = "Buenas tardes";
+"home.greeting.evening" = "Buenas noches";
+"home.title" = "Panel";
+"home.weekly_report" = "Informe AI semanal";
+"home.words_typed" = "palabras escritas";
+"home.corrections" = "errores corregidos";
+"home.accuracy" = "precisión";
+"home.vs_last_week" = "vs semana pasada";
+"home.stat.corrections" = "Correcciones";
+"home.stat.translations" = "Traducciones";
+"home.stat.clipboard" = "Portapapeles";
+"home.stat.phrases" = "Frases";
+"home.quick_actions" = "Acciones rápidas";
+
+// === AI Writer ===
+"ai_writer.title" = "Escritor AI";
+"ai_writer.subtitle" = "Gemini escribe en tu tono preferido";
+"ai_writer.placeholder" = "¿Qué mensaje debo escribir?";
+"ai_writer.generate" = "Generar";
+"ai_writer.generating" = "Generando...";
+"ai_writer.result" = "Resultado de Gemini";
+"ai_writer.copy" = "Copiar";
+"ai_writer.copied" = "Copiado";
+"ai_writer.regenerate" = "Regenerar";
+
+// === History ===
+"history.title" = "Historial";
+"history.subtitle" = "Traducción · Corrección · Portapapeles";
+"history.filter.all" = "Todo";
+"history.filter.translate" = "Traducción";
+"history.filter.correct" = "Corrección";
+"history.filter.clipboard" = "Portapapeles";
+"history.empty" = "Sin historial";
+
+// === Settings (new) ===
+"settings.paste_guide" = "Guía de notificación de pegado";
+"settings.section.ai" = "Funciones AI";
+"settings.ai_correction" = "Corrección Gemini AI";
+"settings.ai_translation" = "Traducción Gemini AI";
+"settings.section.privacy" = "Privacidad";
+"settings.privacy_dashboard" = "Panel de privacidad";
+"settings.full_access_explain" = "Acceso completo explicado";
+
+// === Onboarding Trust ===
+"onboarding.trust.title" = "Info de acceso completo";
+"onboarding.trust.no_passwords" = "Nunca recopilamos contraseñas ni datos de tarjetas";
+"onboarding.trust.no_storage" = "La entrada del teclado nunca se almacena";
+"onboarding.trust.ai_only" = "Solo se envían solicitudes de corrección/traducción AI";
+"onboarding.trust.cta" = "Activar acceso completo";
+
+// === Paste Guide ===
+"paste_guide.description" = "Aprende cómo desactivar la notificación de pegado que aparece al acceder al portapapeles en iOS.";
+"paste_guide.step1.title" = "Abrir Ajustes";
+"paste_guide.step1.detail" = "Abre la app de Ajustes en tu iPhone y busca Translator Keyboard.";
+"paste_guide.step2.title" = "Pegar desde otras apps";
+"paste_guide.step2.detail" = "Busca 'Pegar desde otras apps' y cámbialo a 'Permitir'.";
+"paste_guide.step3.title" = "Listo";
+"paste_guide.step3.detail" = "Ahora puedes usar la función de portapapeles sin notificaciones.";
+"paste_guide.open_settings" = "Abrir Ajustes";
+
+// === Privacy Dashboard ===
+"privacy.header" = "Consulta qué datos recopila y no recopila Translator Keyboard.";
+"privacy.not_collected" = "Datos no recopilados";
+"privacy.keyboard_input" = "Entrada del teclado: No recopilada";
+"privacy.passwords_cards" = "Contraseñas e info de tarjetas: No recopiladas";
+"privacy.clipboard_data" = "Historial del portapapeles: Solo en dispositivo";
+"privacy.stats_data" = "Estadísticas: Solo en dispositivo";
+"privacy.server_comm" = "Comunicación con servidor";
+"privacy.ai_correction_server" = "Corrección AI: Enviada al servidor (solo corrección, no almacenada)";
+"privacy.ai_translation_server" = "Traducción AI: Enviada al servidor (solo traducción, no almacenada)";
+
+// === Full Access Explain ===
+"full_access.header" = "Descubre por qué se necesita acceso completo y qué funciones lo requieren.";
+"full_access.basic_typing" = "Escritura básica";
+"full_access.ai_correction" = "Corrección AI";
+"full_access.ai_translation" = "Traducción AI";
+"full_access.clipboard" = "Historial del portapapeles";
+"full_access.theme_layout" = "Tema/Diseño";
+"full_access.required" = "Necesario";
+"full_access.not_required" = "No necesario";
+"full_access.setup_step1.title" = "Agregar teclado";
+"full_access.setup_step1.detail" = "Ajustes → General → Teclado → Agregar nuevo teclado → Translator Keyboard";
+"full_access.setup_step2.title" = "Permitir acceso completo";
+"full_access.setup_step2.detail" = "Toca Translator Keyboard y activa 'Permitir acceso completo'";
+"full_access.already_granted" = "El acceso completo ya está activado";
+"full_access.go_settings" = "Ir a Ajustes";
+
+// === AI Correction Info ===
+"ai_correction.description" = "Gemini AI corrige la ortografía y gramática de tu texto en tiempo real.";
+"ai_correction.engine" = "Motor AI";
+"ai_correction.supported" = "Funciones";
+"ai_correction.supported_detail" = "Corrección ortográfica, de espaciado y gramática";
+"ai_correction.tone" = "Ajustes de tono";
+"ai_correction.tone_detail" = "Predeterminado, Informal, Formal, Pulido";
+"ai_correction.privacy" = "Privacidad";
+"ai_correction.privacy_detail" = "Solo las solicitudes de corrección se envían al servidor y no se almacenan";
+
+// === AI Translation Info ===
+"ai_translation.description" = "Gemini AI traduce tu texto al idioma seleccionado en tiempo real.";
+"ai_translation.engine" = "Motor AI";
+"ai_translation.languages" = "Idiomas";
+"ai_translation.languages_detail" = "13 idiomas incluyendo coreano, inglés, japonés, chino";
+"ai_translation.privacy" = "Privacidad";
+"ai_translation.privacy_detail" = "Solo las solicitudes de traducción se envían al servidor y no se almacenan";
+
+// === Clipboard Time (simple) ===
+"clipboard.time.now" = "Ahora mismo";
+
+// === Session Limit ===
+"session_limit.title" = "Has usado todas las sesiones gratuitas de hoy";
+"session_limit.subtitle" = "Puedes usarlo de nuevo mañana";
+"session_limit.upgrade" = "Actualizar a Premium";
+"session_limit.remaining" = "Restantes hoy: %d";

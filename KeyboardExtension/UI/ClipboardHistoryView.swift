@@ -268,7 +268,6 @@ class ClipboardHistoryView: UIView {
     @objc private func onboardingConfirmTapped() {
         let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier)
         defaults?.set(true, forKey: AppConstants.UserDefaultsKeys.clipboardOnboardingShown)
-        defaults?.synchronize()
 
         UIView.animate(withDuration: 0.2) {
             self.onboardingCard.alpha = 0
