@@ -3,6 +3,7 @@ import UIKit
 class TonePickerView: UIView {
 
     var onToneSelected: ((ToneStyle) -> Void)?
+    var onLockedToneTapped: (() -> Void)?
 
     private var selectedTone: ToneStyle = .none
     private var pillButtons: [UIButton] = []
@@ -44,7 +45,9 @@ class TonePickerView: UIView {
         for tone in ToneStyle.allCases {
             let btn = UIButton(type: .custom)
             btn.titleLabel?.font = .systemFont(ofSize: 13, weight: .medium)
-            btn.setTitle(tone.displayName, for: .normal)
+            let locked = FeatureGate.shared.isToneLocked(tone)
+            let title = locked ? "\(tone.displayName) \u{1F512}" : tone.displayName
+            btn.setTitle(title, for: .normal)
             btn.tag = ToneStyle.allCases.firstIndex(of: tone) ?? 0
             btn.layer.cornerRadius = 15
             btn.clipsToBounds = true
@@ -65,6 +68,10 @@ class TonePickerView: UIView {
         let allCases = ToneStyle.allCases
         guard sender.tag < allCases.count else { return }
         let tone = allCases[sender.tag]
+        if FeatureGate.shared.isToneLocked(tone) {
+            onLockedToneTapped?()
+            return
+        }
         selectedTone = tone
         updateSelection()
         onToneSelected?(tone)
@@ -106,6 +113,7 @@ class TonePickerView: UIView {
         let allCases = ToneStyle.allCases
         for (index, btn) in pillButtons.enumerated() {
             let tone = allCases[index]
+            let locked = FeatureGate.shared.isToneLocked(tone)
             if tone == selectedTone {
                 btn.backgroundColor = .systemBlue
                 btn.setTitleColor(.white, for: .normal)
@@ -118,6 +126,7 @@ class TonePickerView: UIView {
                     btn.setTitleColor(.label, for: .normal)
                 }
             }
+            btn.alpha = locked ? 0.5 : 1.0
         }
     }
 }

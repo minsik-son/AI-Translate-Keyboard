@@ -3,6 +3,7 @@ import Foundation
 enum UserTier: String {
     case free = "free"
     case pro = "pro"
+    case premium = "premium"
 }
 
 final class SubscriptionStatus {
@@ -18,7 +19,7 @@ final class SubscriptionStatus {
             return .free
         }
 
-        if tier == .pro {
+        if tier != .free {
             guard let expiry = appGroup.date(forKey: AppConstants.UserDefaultsKeys.subscriptionExpiry),
                   expiry > Date() else {
                 return .free
@@ -29,7 +30,7 @@ final class SubscriptionStatus {
     }
 
     var isPro: Bool {
-        return currentTier == .pro
+        return currentTier == .pro || currentTier == .premium
     }
 
     func updateTier(_ tier: UserTier, expiryDate: Date? = nil) {

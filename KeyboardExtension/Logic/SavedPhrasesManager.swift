@@ -5,15 +5,22 @@ final class SavedPhrasesManager {
 
     private init() {}
 
+    var canAddPhrase: Bool {
+        getPhrases().count < FeatureGate.shared.maxSavedPhrases
+    }
+
     func getPhrases() -> [String] {
         let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier)
         return defaults?.stringArray(forKey: AppConstants.UserDefaultsKeys.savedPhrases) ?? []
     }
 
-    func addPhrase(_ phrase: String) {
+    @discardableResult
+    func addPhrase(_ phrase: String) -> Bool {
+        guard getPhrases().count < FeatureGate.shared.maxSavedPhrases else { return false }
         var phrases = getPhrases()
         phrases.insert(phrase, at: 0)
         save(phrases)
+        return true
     }
 
     func deletePhrase(at index: Int) {

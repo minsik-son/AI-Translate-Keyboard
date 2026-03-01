@@ -42,10 +42,7 @@ enum AppConstants {
     enum Limits {
         static let maxCharacters = 200
         static let warningCharacters = 150
-        static let freeSessionsPerDay = 30
-        static let debounceDuration: TimeInterval = 0.3
         static let cacheMaxItems = 100
         static let sessionIdleTimeout: TimeInterval = 30
-        static let maxHistoryItems = 100
     }
 }

@@ -31,10 +31,10 @@ class HomeViewController: UIViewController {
     // MARK: - Setup
 
     private func setupNavigation() {
-        navigationController?.navigationBar.prefersLargeTitles = true
+        title = L("home.title")
+        navigationController?.navigationBar.prefersLargeTitles = false
         let appearance = UINavigationBarAppearance()
         appearance.configureWithTransparentBackground()
-        appearance.largeTitleTextAttributes = [.foregroundColor: AppColors.text]
         appearance.titleTextAttributes = [.foregroundColor: AppColors.text]
         navigationController?.navigationBar.standardAppearance = appearance
         navigationController?.navigationBar.scrollEdgeAppearance = appearance
@@ -77,19 +77,19 @@ class HomeViewController: UIViewController {
     private let clipboardCountLabel = UILabel()
     private let phrasesCountLabel = UILabel()
 
+    // 교정/번역 카드 참조 (소진 시 UI 변경용)
+    private var correctionCard: UIView?
+    private var translationCard: UIView?
+    private let correctionAdBadge = UILabel()
+    private let translationAdBadge = UILabel()
+
     private func buildContent() {
         // Greeting
         greetingLabel.font = .systemFont(ofSize: 14, weight: .regular)
         greetingLabel.textColor = AppColors.textSub
         contentStack.addArrangedSubview(greetingLabel)
 
-        let titleLabel = UILabel()
-        titleLabel.text = L("home.title")
-        titleLabel.font = .systemFont(ofSize: 28, weight: .bold)
-        titleLabel.textColor = AppColors.text
-        contentStack.addArrangedSubview(titleLabel)
-
-        contentStack.setCustomSpacing(24, after: titleLabel)
+        contentStack.setCustomSpacing(16, after: greetingLabel)
 
         // Weekly Report Card
         buildReportCard()
@@ -171,14 +171,26 @@ class HomeViewController: UIViewController {
         clipboardCountLabel.text = "0"
         phrasesCountLabel.text = "0"
 
-        topRow.addArrangedSubview(makeStatCard(
+        let cCard = makeStatCard(
             icon: "pencil", color: AppColors.orange,
-            title: L("home.stat.corrections"), valueLabel: correctionCountLabel
-        ))
-        topRow.addArrangedSubview(makeStatCard(
+            title: L("home.stat.corrections"), valueLabel: correctionCountLabel,
+            adBadge: correctionAdBadge
+        )
+        let correctionTap = UITapGestureRecognizer(target: self, action: #selector(correctionCardTapped))
+        cCard.addGestureRecognizer(correctionTap)
+        correctionCard = cCard
+
+        let tCard = makeStatCard(
             icon: "globe", color: AppColors.blue,
-            title: L("home.stat.translations"), valueLabel: translationCountLabel
-        ))
+            title: L("home.stat.translations"), valueLabel: translationCountLabel,
+            adBadge: translationAdBadge
+        )
+        let translationTap = UITapGestureRecognizer(target: self, action: #selector(translationCardTapped))
+        tCard.addGestureRecognizer(translationTap)
+        translationCard = tCard
+
+        topRow.addArrangedSubview(cCard)
+        topRow.addArrangedSubview(tCard)
         bottomRow.addArrangedSubview(makeStatCard(
             icon: "doc.on.clipboard", color: AppColors.green,
             title: L("home.stat.clipboard"), valueLabel: clipboardCountLabel
@@ -194,7 +206,7 @@ class HomeViewController: UIViewController {
         return grid
     }
 
-    private func makeStatCard(icon: String, color: UIColor, title: String, valueLabel: UILabel) -> UIView {
+    private func makeStatCard(icon: String, color: UIColor, title: String, valueLabel: UILabel, adBadge: UILabel? = nil) -> UIView {
         let card = UIView()
         card.backgroundColor = AppColors.card
         card.layer.cornerRadius = 14
@@ -220,10 +232,26 @@ class HomeViewController: UIViewController {
         valueLabel.font = .systemFont(ofSize: 26, weight: .bold)
         valueLabel.textColor = AppColors.text
 
-        let stack = UIStackView(arrangedSubviews: [iconBg, titleLabel, valueLabel])
+        var arrangedViews: [UIView] = [iconBg, titleLabel, valueLabel]
+
+        // 광고 배지 (소진 시 표시)
+        if let badge = adBadge {
+            badge.text = "▶ " + L("home.watch_ad")
+            badge.font = .systemFont(ofSize: 11, weight: .semibold)
+            badge.textColor = .white
+            badge.backgroundColor = AppColors.accent
+            badge.layer.cornerRadius = 8
+            badge.clipsToBounds = true
+            badge.textAlignment = .center
+            badge.isHidden = true
+            arrangedViews.append(badge)
+        }
+
+        let stack = UIStackView(arrangedSubviews: arrangedViews)
         stack.axis = .vertical
         stack.spacing = 6
         stack.alignment = .leading
+        stack.isUserInteractionEnabled = false
         stack.translatesAutoresizingMaskIntoConstraints = false
         card.addSubview(stack)
 
@@ -239,6 +267,11 @@ class HomeViewController: UIViewController {
             stack.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -16),
             stack.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -16),
         ])
+
+        if let badge = adBadge {
+            badge.heightAnchor.constraint(equalToConstant: 24).isActive = true
+            badge.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
+        }
 
         return card
     }
@@ -319,6 +352,66 @@ class HomeViewController: UIViewController {
         }
     }
 
+    @objc private func correctionCardTapped() {
+        guard !SubscriptionStatus.shared.isPro,
+              DailyUsageManager.shared.remainingCorrections <= 0 else { return }
+        presentRewardedAds()
+    }
+
+    @objc private func translationCardTapped() {
+        guard !SubscriptionStatus.shared.isPro,
+              DailyUsageManager.shared.remainingTranslations <= 0 else { return }
+        presentRewardedAds()
+    }
+
+    private func presentRewardedAds() {
+        if DailyUsageManager.shared.canWatchRewardedAd {
+            let rewardVC = RewardedAdsViewController()
+            rewardVC.modalPresentationStyle = .fullScreen
+            present(rewardVC, animated: true)
+        } else {
+            let paywallVC = PaywallViewController()
+            paywallVC.modalPresentationStyle = .pageSheet
+            present(paywallVC, animated: true)
+        }
+    }
+
+    private func updateDailyLimitCards() {
+        guard !SubscriptionStatus.shared.isPro else {
+            // Pro 유저는 소진 UI 숨김
+            correctionAdBadge.isHidden = true
+            translationAdBadge.isHidden = true
+            correctionCard?.layer.borderColor = AppColors.border.cgColor
+            translationCard?.layer.borderColor = AppColors.border.cgColor
+            return
+        }
+
+        let correctionExhausted = DailyUsageManager.shared.remainingCorrections <= 0
+        let translationExhausted = DailyUsageManager.shared.remainingTranslations <= 0
+
+        // 교정 카드
+        if correctionExhausted {
+            correctionAdBadge.isHidden = false
+            correctionCard?.layer.borderColor = AppColors.orange.withAlphaComponent(0.5).cgColor
+            correctionCard?.layer.borderWidth = 1.5
+        } else {
+            correctionAdBadge.isHidden = true
+            correctionCard?.layer.borderColor = AppColors.border.cgColor
+            correctionCard?.layer.borderWidth = 1
+        }
+
+        // 번역 카드
+        if translationExhausted {
+            translationAdBadge.isHidden = false
+            translationCard?.layer.borderColor = AppColors.blue.withAlphaComponent(0.5).cgColor
+            translationCard?.layer.borderWidth = 1.5
+        } else {
+            translationAdBadge.isHidden = true
+            translationCard?.layer.borderColor = AppColors.border.cgColor
+            translationCard?.layer.borderWidth = 1
+        }
+    }
+
     @objc private func handleHistoryChange() {
         refreshStats()
     }
@@ -336,7 +429,6 @@ class HomeViewController: UIViewController {
         let stats = StatsManager.shared
         let greeting = timeBasedGreeting()
         greetingLabel.text = greeting
-        title = L("home.title")
 
         reportWordsLabel.text = "\(stats.weeklyWordsTyped) " + L("home.words_typed")
         reportCorrectionsLabel.text = "Gemini \(stats.weeklyCorrections)" + L("home.corrections")
@@ -353,6 +445,9 @@ class HomeViewController: UIViewController {
 
         correctionCountLabel.text = "\(stats.weeklyCorrections)"
         translationCountLabel.text = "\(stats.weeklyTranslations)"
+
+        // Free 티어: 일일 할당량 소진 시 카드 UI 변경
+        updateDailyLimitCards()
 
         // Clipboard items count
         let clipboardData = UserDefaults(suiteName: AppConstants.appGroupIdentifier)?.data(forKey: AppConstants.UserDefaultsKeys.clipboardHistory)

@@ -32,14 +32,6 @@ class SettingsViewController: UITableViewController {
                     SettingsItem(title: L("settings.autocomplete"), iconName: "text.badge.checkmark", iconBackgroundColor: .systemGreen, accessory: .toggle(key: AppConstants.UserDefaultsKeys.autoComplete)),
                     SettingsItem(title: L("settings.auto_capitalize"), iconName: "textformat.size.larger", iconBackgroundColor: .systemOrange, accessory: .toggle(key: AppConstants.UserDefaultsKeys.autoCapitalize)),
                     SettingsItem(title: L("settings.haptic"), iconName: "hand.tap", iconBackgroundColor: .systemIndigo, accessory: .toggle(key: AppConstants.UserDefaultsKeys.hapticFeedback)),
-                    SettingsItem(title: L("settings.paste_guide"), iconName: "doc.on.clipboard", iconBackgroundColor: .systemTeal, accessory: .chevron),
-                ]
-            ),
-            (
-                title: L("settings.section.ai"),
-                items: [
-                    SettingsItem(title: L("settings.ai_correction"), iconName: "checkmark.circle", iconBackgroundColor: AppColors.orange, accessory: .chevron),
-                    SettingsItem(title: L("settings.ai_translation"), iconName: "globe", iconBackgroundColor: AppColors.blue, accessory: .chevron),
                 ]
             ),
             (
@@ -53,6 +45,7 @@ class SettingsViewController: UITableViewController {
                 title: L("settings.section.about"),
                 items: [
                     SettingsItem(title: L("settings.redo_onboarding"), iconName: "arrow.counterclockwise", iconBackgroundColor: .systemBlue, accessory: .chevron),
+                    SettingsItem(title: L("settings.paste_guide"), iconName: "doc.on.clipboard", iconBackgroundColor: .systemTeal, accessory: .chevron),
                     SettingsItem(title: L("settings.rate_us"), iconName: "star.fill", iconBackgroundColor: .systemYellow, accessory: .chevron),
                     SettingsItem(title: L("settings.faq"), iconName: "questionmark.circle", iconBackgroundColor: .systemBlue, accessory: .chevron),
                     SettingsItem(title: L("settings.privacy"), iconName: "hand.raised.fill", iconBackgroundColor: .systemGreen, accessory: .chevron),
@@ -61,6 +54,36 @@ class SettingsViewController: UITableViewController {
             ),
         ]
     }
+
+    // MARK: - Admin Mode
+
+    private var versionTapCount = 0
+    private var versionTapTimer: Timer?
+
+    private lazy var versionFooterView: UIView = {
+        let container = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 60))
+
+        let label = UILabel()
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
+        label.text = "Translator Keyboard v\(version) (\(build))"
+        label.font = .systemFont(ofSize: 13)
+        label.textColor = AppColors.textSub
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.isUserInteractionEnabled = true
+
+        let tap = UITapGestureRecognizer(target: self, action: #selector(versionLabelTapped))
+        label.addGestureRecognizer(tap)
+
+        container.addSubview(label)
+        NSLayoutConstraint.activate([
+            label.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            label.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+        ])
+
+        return container
+    }()
 
     // MARK: - Lifecycle
 
@@ -77,11 +100,13 @@ class SettingsViewController: UITableViewController {
         title = L("settings.title")
         navigationController?.navigationBar.prefersLargeTitles = true
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "SettingsCell")
+        tableView.tableFooterView = versionFooterView
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         title = L("settings.title")
+        updateAdminBadge()
         tableView.reloadData()
     }
 
@@ -139,20 +164,17 @@ class SettingsViewController: UITableViewController {
         // Keyboard section
         case (1, 0): vc = LanguageSettingsViewController()
         case (1, 1): vc = LayoutSettingsViewController()
-        case (1, 5): vc = PasteGuideViewController()
-        // AI section
-        case (2, 0): vc = AICorrectionInfoViewController()
-        case (2, 1): vc = AITranslationInfoViewController()
         // Privacy section
-        case (3, 0): vc = PrivacyDashboardViewController()
-        case (3, 1): vc = FullAccessExplainViewController()
+        case (2, 0): vc = PrivacyDashboardViewController()
+        case (2, 1): vc = FullAccessExplainViewController()
         // About section
-        case (4, 0):
+        case (3, 0):
             let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier) ?? UserDefaults.standard
             defaults.set(false, forKey: AppConstants.UserDefaultsKeys.hasCompletedOnboarding)
             let onboarding = OnboardingViewController()
             onboarding.modalPresentationStyle = .fullScreen
             present(onboarding, animated: true)
+        case (3, 1): vc = PasteGuideViewController()
         default: break
         }
 
@@ -172,6 +194,74 @@ class SettingsViewController: UITableViewController {
             if key == AppConstants.UserDefaultsKeys.appDarkMode {
                 view.window?.overrideUserInterfaceStyle = sender.isOn ? .dark : .light
             }
+        }
+    }
+
+    // MARK: - Admin Mode Actions
+
+    @objc private func versionLabelTapped() {
+        versionTapCount += 1
+        versionTapTimer?.invalidate()
+
+        if versionTapCount >= 10 {
+            versionTapCount = 0
+            if AdminMode.shared.isEnabled {
+                showAdminDeactivateAlert()
+            } else {
+                showAdminCodeAlert()
+            }
+        } else {
+            // 3초 안에 10번 탭해야 함
+            versionTapTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false) { [weak self] _ in
+                self?.versionTapCount = 0
+            }
+        }
+    }
+
+    private func showAdminCodeAlert() {
+        let alert = UIAlertController(title: "Admin Mode", message: "Enter admin code", preferredStyle: .alert)
+        alert.addTextField { field in
+            field.placeholder = "Code"
+            field.isSecureTextEntry = true
+        }
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Activate", style: .default) { [weak self] _ in
+            guard let code = alert.textFields?.first?.text else { return }
+            if AdminMode.shared.activate(code: code) {
+                self?.updateAdminBadge()
+                let success = UIAlertController(title: "Admin Mode Activated", message: "All feature limits are now unlocked.", preferredStyle: .alert)
+                success.addAction(UIAlertAction(title: "OK", style: .default))
+                self?.present(success, animated: true)
+            } else {
+                let fail = UIAlertController(title: "Invalid Code", message: nil, preferredStyle: .alert)
+                fail.addAction(UIAlertAction(title: "OK", style: .default))
+                self?.present(fail, animated: true)
+            }
+        })
+        present(alert, animated: true)
+    }
+
+    private func showAdminDeactivateAlert() {
+        let alert = UIAlertController(title: "Admin Mode Active", message: "Do you want to deactivate admin mode?", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Keep Active", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Deactivate", style: .destructive) { [weak self] _ in
+            AdminMode.shared.deactivate()
+            self?.updateAdminBadge()
+        })
+        present(alert, animated: true)
+    }
+
+    private func updateAdminBadge() {
+        if AdminMode.shared.isEnabled {
+            navigationItem.rightBarButtonItem = UIBarButtonItem(
+                title: "🔧 ADMIN",
+                style: .plain,
+                target: self,
+                action: #selector(versionLabelTapped)
+            )
+            navigationItem.rightBarButtonItem?.tintColor = .systemRed
+        } else {
+            navigationItem.rightBarButtonItem = nil
         }
     }
 

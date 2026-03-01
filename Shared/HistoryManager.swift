@@ -9,7 +9,7 @@ final class HistoryManager {
 
     private let defaults: UserDefaults?
     private let historyKey = "history_items"
-    private let maxItems = 200
+    private var maxItems: Int { FeatureGate.shared.maxHistoryItems }
 
     private init() {
         defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier)

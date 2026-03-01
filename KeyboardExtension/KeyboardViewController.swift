@@ -605,8 +605,8 @@ class KeyboardViewController: UIInputViewController {
             return
         }
 
-        guard CompositionSessionManager.shared.canStartSession() else {
-            showStatusMessage(L("session_limit.title"))
+        guard CompositionSessionManager.shared.canStartSession(mode: .translate) else {
+            showDailyLimitReached(mode: .translate)
             return
         }
         CompositionSessionManager.shared.startSession(mode: .translate)
@@ -646,8 +646,8 @@ class KeyboardViewController: UIInputViewController {
             return
         }
 
-        guard CompositionSessionManager.shared.canStartSession() else {
-            showStatusMessage(L("session_limit.title"))
+        guard CompositionSessionManager.shared.canStartSession(mode: .correct) else {
+            showDailyLimitReached(mode: .correct)
             return
         }
         CompositionSessionManager.shared.startSession(mode: .correct)
@@ -1443,8 +1443,8 @@ class KeyboardViewController: UIInputViewController {
         func open(_ url: URL, options: [String: Any], completionHandler: ((Bool) -> Void)?)
     }
 
-    private func openContainingApp() {
-        guard let url = URL(string: "translatorkeyboard://settings") else { return }
+    private func openContainingApp(path: String = "settings") {
+        guard let url = URL(string: "translatorkeyboard://\(path)") else { return }
         var responder: UIResponder? = self
         while let r = responder {
             if let opener = r as? URLOpener {
@@ -1452,6 +1452,33 @@ class KeyboardViewController: UIInputViewController {
                 return
             }
             responder = r.next
+        }
+    }
+
+    private func showDailyLimitReached(mode: CompositionSession.SessionMode) {
+        let modeText = mode == .correct ? L("home.stat.corrections") : L("home.stat.translations")
+        let remaining = CompositionSessionManager.shared.remainingSessions(for: mode)
+
+        if remaining <= 0 {
+            // 토스트 메시지에 광고/업그레이드 안내 포함
+            let message: String
+            if DailyUsageManager.shared.canWatchRewardedAd {
+                message = String(format: L("session_limit.watch_ad"), modeText)
+            } else {
+                message = String(format: L("session_limit.upgrade"), modeText)
+            }
+            showStatusMessage(message)
+
+            // 메인 앱의 페이월 또는 리워드 광고 화면으로 이동
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                if DailyUsageManager.shared.canWatchRewardedAd {
+                    self?.openContainingApp(path: "reward-ad")
+                } else {
+                    self?.openContainingApp(path: "paywall")
+                }
+            }
+        } else {
+            showStatusMessage(L("session_limit.title"))
         }
     }
 

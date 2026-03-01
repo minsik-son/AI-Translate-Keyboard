@@ -46,7 +46,7 @@ class CorrectionManager {
             self?.performCorrection(text: trimmed)
         }
         debounceWorkItem = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + AppConstants.Limits.debounceDuration, execute: workItem)
+        DispatchQueue.main.asyncAfter(deadline: .now() + FeatureGate.shared.debounceDuration, execute: workItem)
     }
 
     func cancelPending() {
@@ -83,7 +83,8 @@ class CorrectionManager {
             "language": languageCode,
             "tone": toneStyle.rawValue,
             "tier": tier,
-            "deviceId": deviceId
+            "deviceId": deviceId,
+            "model": FeatureGate.shared.apiModelName
         ]
 
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
@@ -154,6 +155,7 @@ class CorrectionManager {
         // Log to session (stats는 세션 종료 시 CompositionSessionManager에서 처리)
         CompositionSessionManager.shared.recordAPICall(sourceText: text, resultText: correctedText)
 
+        // 카운트는 세션 종료 시 CompositionSessionManager에서 1회만 기록
         delegate?.correctionManager(self, didCorrect: correctedText, language: languageCode)
     }
 }

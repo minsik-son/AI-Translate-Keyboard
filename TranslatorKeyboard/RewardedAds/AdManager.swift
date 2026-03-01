@@ -1,18 +1,17 @@
 import UIKit
 
 protocol AdManagerDelegate: AnyObject {
-    func adManagerDidRewardUser(_ manager: AdManager, bonusSessions: Int)
-    func adManagerDidFailToLoad(_ manager: AdManager, error: Error)
+    func adManagerDidRewardUser(_ manager: AdManager)
+    func adManagerDidFailToLoad(_ manager: AdManager)
     func adManagerDidDismissAd(_ manager: AdManager)
+    func adManagerReachedDailyLimit(_ manager: AdManager)
 }
 
 final class AdManager: NSObject {
     static let shared = AdManager()
-
     weak var delegate: AdManagerDelegate?
 
     private static let rewardedAdUnitID = "ca-app-pub-xxxxxxxxxxxxx/xxxxxxxxxx" // Replace with real ID
-    private static let bonusSessionCount = 30
 
     private var isAdReady = false
 
@@ -25,7 +24,7 @@ final class AdManager: NSObject {
         // GADRewardedAd.load(withAdUnitID: Self.rewardedAdUnitID, request: GADRequest()) { [weak self] ad, error in
         //     if let error = error {
         //         self?.isAdReady = false
-        //         self?.delegate?.adManagerDidFailToLoad(self!, error: error)
+        //         self?.delegate?.adManagerDidFailToLoad(self!)
         //         return
         //     }
         //     self?.rewardedAd = ad
@@ -41,21 +40,21 @@ final class AdManager: NSObject {
             loadRewardedAd()
             return
         }
-
-        // When ad completes, grant bonus sessions
+        guard DailyUsageManager.shared.canWatchRewardedAd else {
+            delegate?.adManagerReachedDailyLimit(self)
+            return
+        }
+        // When ad completes, grant bonus
         grantReward()
     }
 
     var canShowAd: Bool {
-        return isAdReady
+        return isAdReady && DailyUsageManager.shared.canWatchRewardedAd
     }
 
     private func grantReward() {
-        let sessionManager = SessionManager.shared
-        sessionManager.addBonusSessions(Self.bonusSessionCount)
-        delegate?.adManagerDidRewardUser(self, bonusSessions: Self.bonusSessionCount)
-
-        // Reload next ad
+        DailyUsageManager.shared.recordRewardedAd()
+        delegate?.adManagerDidRewardUser(self)
         isAdReady = false
         loadRewardedAd()
     }

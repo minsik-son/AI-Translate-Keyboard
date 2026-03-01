@@ -85,6 +85,16 @@ class CompositionSessionManager {
         idleTimer?.invalidate()
         idleTimer = nil
 
+        // API 호출이 있었던 세션만 일일 사용량으로 카운트 (세션당 1회)
+        if session.apiCallCount > 0 {
+            switch session.mode {
+            case .correct:
+                DailyUsageManager.shared.recordCorrection()
+            case .translate:
+                DailyUsageManager.shared.recordTranslation()
+            }
+        }
+
         saveSessionToHistory(session)
         currentSession = nil
     }
@@ -118,22 +128,25 @@ class CompositionSessionManager {
     }
 
     func remainingSessions() -> Int {
-        let today = formattedDate(Date())
-        let lastDate = userDefaults?.string(forKey: AppConstants.UserDefaultsKeys.lastSessionDate)
+        return min(DailyUsageManager.shared.remainingCorrections, DailyUsageManager.shared.remainingTranslations)
+    }
 
-        if lastDate != today {
-            return AppConstants.Limits.freeSessionsPerDay
+    func remainingSessions(for mode: CompositionSession.SessionMode) -> Int {
+        switch mode {
+        case .correct: return DailyUsageManager.shared.remainingCorrections
+        case .translate: return DailyUsageManager.shared.remainingTranslations
         }
-
-        let used = userDefaults?.integer(forKey: AppConstants.UserDefaultsKeys.dailySessionCount) ?? 0
-        let bonus = userDefaults?.integer(forKey: AppConstants.UserDefaultsKeys.bonusSessions) ?? 0
-
-        return max(0, AppConstants.Limits.freeSessionsPerDay + bonus - used)
     }
 
     func canStartSession() -> Bool {
         if SubscriptionStatus.shared.isPro { return true }
         return remainingSessions() > 0
+    }
+
+    func canStartSession(mode: CompositionSession.SessionMode) -> Bool {
+        if SubscriptionStatus.shared.isPro { return true }
+        if AdminMode.shared.isEnabled { return true }
+        return remainingSessions(for: mode) > 0
     }
 
     var hasActiveSession: Bool {

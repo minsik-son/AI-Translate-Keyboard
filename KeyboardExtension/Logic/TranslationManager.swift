@@ -53,7 +53,7 @@ class TranslationManager {
             self?.performTranslation(text: trimmed)
         }
         debounceWorkItem = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + AppConstants.Limits.debounceDuration, execute: workItem)
+        DispatchQueue.main.asyncAfter(deadline: .now() + FeatureGate.shared.debounceDuration, execute: workItem)
     }
 
     func cancelPending() {
@@ -85,7 +85,8 @@ class TranslationManager {
             "sourceLang": sourceLang,
             "targetLang": targetLang,
             "tier": tier,
-            "deviceId": deviceId
+            "deviceId": deviceId,
+            "model": FeatureGate.shared.apiModelName
         ]
 
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
@@ -160,6 +161,7 @@ class TranslationManager {
         // Log to session (stats는 세션 종료 시 CompositionSessionManager에서 처리)
         CompositionSessionManager.shared.recordAPICall(sourceText: text, resultText: translatedText)
 
+        // 카운트는 세션 종료 시 CompositionSessionManager에서 1회만 기록
         delegate?.translationManager(self, didTranslate: translatedText, from: sourceLang, to: targetLang)
     }
 }

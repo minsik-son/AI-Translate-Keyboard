@@ -7,6 +7,8 @@ final class StoreKitManager {
     enum ProductID: String, CaseIterable {
         case monthlyPro = "com.translatorkeyboard.pro.monthly"
         case yearlyPro = "com.translatorkeyboard.pro.yearly"
+        case monthlyPremium = "com.translatorkeyboard.premium.monthly"
+        case yearlyPremium = "com.translatorkeyboard.premium.yearly"
     }
 
     private(set) var products: [Product] = []
@@ -83,7 +85,13 @@ final class StoreKitManager {
 
         if let expirationDate = transaction.expirationDate {
             if expirationDate > Date() {
-                SubscriptionStatus.shared.updateTier(.pro, expiryDate: expirationDate)
+                let tier: UserTier
+                if transaction.productID.contains("premium") {
+                    tier = .premium
+                } else {
+                    tier = .pro
+                }
+                SubscriptionStatus.shared.updateTier(tier, expiryDate: expirationDate)
             } else {
                 SubscriptionStatus.shared.updateTier(.free)
             }
@@ -97,7 +105,8 @@ final class StoreKitManager {
             do {
                 let transaction = try checkVerified(result)
                 if let expirationDate = transaction.expirationDate, expirationDate > Date() {
-                    SubscriptionStatus.shared.updateTier(.pro, expiryDate: expirationDate)
+                    let tier: UserTier = transaction.productID.contains("premium") ? .premium : .pro
+                    SubscriptionStatus.shared.updateTier(tier, expiryDate: expirationDate)
                     hasActiveSubscription = true
                 }
             } catch {

@@ -3,7 +3,7 @@ import Foundation
 final class ClipboardHistoryManager {
     static let shared = ClipboardHistoryManager()
 
-    private let maxItems = 30
+    private var maxItems: Int { FeatureGate.shared.maxClipboardItems }
     private let maxTextLength = 2000
 
     private init() {}

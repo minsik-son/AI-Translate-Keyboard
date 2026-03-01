@@ -34,7 +34,26 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     private func handleURL(_ url: URL, tabBar: TabBarController) {
-        guard url.scheme == "translatorkeyboard", url.host == "settings" else { return }
-        tabBar.selectedIndex = 4 // Settings tab
+        guard url.scheme == "translatorkeyboard" else { return }
+
+        switch url.host {
+        case "settings":
+            tabBar.selectedIndex = 4
+
+        case "paywall":
+            let paywallVC = PaywallViewController()
+            paywallVC.modalPresentationStyle = .pageSheet
+            let presenter = tabBar.presentedViewController ?? tabBar
+            presenter.present(paywallVC, animated: true)
+
+        case "reward-ad":
+            let rewardVC = RewardedAdsViewController()
+            rewardVC.modalPresentationStyle = .fullScreen
+            let presenter = tabBar.presentedViewController ?? tabBar
+            presenter.present(rewardVC, animated: true)
+
+        default:
+            break
+        }
     }
 }

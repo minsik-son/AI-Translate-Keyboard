@@ -9,6 +9,15 @@
 /* Begin PBXBuildFile section */
 		0C6DEB4CF9B55C2B513025D4 /* LocalizationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF1D1F3F9CA9F69A67054C25 /* LocalizationManager.swift */; };
 		13E2BA2EAF38109D37866AEE /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2CDFC8B502F230107E052E7 /* Constants.swift */; };
+		155290611FD84B138EBFF0AA /* FeatureGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFFE634A94A64A2F8F243186 /* FeatureGate.swift */; };
+		66DB83ECA2F043B990BE945B /* FeatureGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFFE634A94A64A2F8F243186 /* FeatureGate.swift */; };
+		7237963120014F2EB5E42F8B /* DailyUsageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA63F578073C4EA0A059B928 /* DailyUsageManager.swift */; };
+		3E5922FE0A6B41D79E37A4CD /* DailyUsageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA63F578073C4EA0A059B928 /* DailyUsageManager.swift */; };
+		AD15949F86CE40BDADBB12E1 /* AdminMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F2D41AC8FC84858A4EF2A49 /* AdminMode.swift */; };
+		90C244B176664DB7B8761707 /* AdminMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F2D41AC8FC84858A4EF2A49 /* AdminMode.swift */; };
+		FFFE634A94A64A2F8F243186 /* FeatureGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureGate.swift; sourceTree = "<group>"; };
+		FA63F578073C4EA0A059B928 /* DailyUsageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyUsageManager.swift; sourceTree = "<group>"; };
+		9F2D41AC8FC84858A4EF2A49 /* AdminMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminMode.swift; sourceTree = "<group>"; };
 		1D98277DFBD46B145B1AEA14 /* AppGroupManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FE78200C931753ED4B82721 /* AppGroupManager.swift */; };
 		1F142C55559956B546EB2E1C /* AdManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33DDEB1B46819A80FA123ADC /* AdManager.swift */; };
 		20242EBCBB1F370E0C1A4B16 /* KeyboardExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 15F02063B8037FB8B731BEE2 /* KeyboardExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -59,6 +68,7 @@
 		CC33DD44EE5500080001 /* ThemeSelectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC33DD44EE5500080002 /* ThemeSelectionViewController.swift */; };
 		CC33DD44EE5500080003 /* KeyboardTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB22CC33DD44EE5500070002 /* KeyboardTheme.swift */; };
 		DD11EE22FF33001100220002 /* ToneStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD11EE22FF33001100220001 /* ToneStyle.swift */; };
+		AFE0ABBE8F454D5785429328 /* ToneStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD11EE22FF33001100220001 /* ToneStyle.swift */; };
 		DD11EE22FF33001100220004 /* TonePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD11EE22FF33001100220003 /* TonePickerView.swift */; };
 		EE11FF22003344550066AA03 /* LanguageSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE11FF22003344550066AA01 /* LanguageSettingsViewController.swift */; };
 		EE11FF22003344550066AA04 /* LayoutSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE11FF22003344550066AA02 /* LayoutSettingsViewController.swift */; };
@@ -354,6 +364,9 @@
 				AA00BB11CC22DD33EE11000E /* CompositionSessionManager.swift */,
 				CB01AA11BB22CC33DD440010 /* ClipboardItem.swift */,
 				C2CDFC8B502F230107E052E7 /* Constants.swift */,
+				FFFE634A94A64A2F8F243186 /* FeatureGate.swift */,
+				FA63F578073C4EA0A059B928 /* DailyUsageManager.swift */,
+				9F2D41AC8FC84858A4EF2A49 /* AdminMode.swift */,
 				AA00BB11CC22DD33EE11000B /* HistoryItem.swift */,
 				AA00BB11CC22DD33EE11000C /* HistoryManager.swift */,
 				BF1D1F3F9CA9F69A67054C25 /* LocalizationManager.swift */,
@@ -594,7 +607,10 @@
 				AA00BB11CC22DD33EE33000C /* HistoryManager.swift in Sources */,
 				AA00BB11CC22DD33EE33000D /* StatsManager.swift in Sources */,
 				AA00BB11CC22DD33EE33000E /* CompositionSessionManager.swift in Sources */,
-			);
+				155290611FD84B138EBFF0AA /* FeatureGate.swift in Sources */,
+				7237963120014F2EB5E42F8B /* DailyUsageManager.swift in Sources */,
+				AD15949F86CE40BDADBB12E1 /* AdminMode.swift in Sources */,
+);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		E4C8E3DB10A82D2C45F59E89 /* Sources */ = {
@@ -624,6 +640,7 @@
 				DCD3592930A0D79C8DE0C43C /* TranslationCache.swift in Sources */,
 				AA00BB11CC22DD33EE220001 /* TabBarController.swift in Sources */,
 				AA00BB11CC22DD33EE220002 /* HomeViewController.swift in Sources */,
+				AFE0ABBE8F454D5785429328 /* ToneStyle.swift in Sources */,
 				AA00BB11CC22DD33EE220003 /* AIWriterViewController.swift in Sources */,
 				AA00BB11CC22DD33EE220004 /* HistoryViewController.swift in Sources */,
 				AA00BB11CC22DD33EE220005 /* PasteGuideViewController.swift in Sources */,
@@ -636,7 +653,10 @@
 				AA00BB11CC22DD33EE22000C /* HistoryManager.swift in Sources */,
 				AA00BB11CC22DD33EE22000D /* StatsManager.swift in Sources */,
 				AA00BB11CC22DD33EE22000E /* CompositionSessionManager.swift in Sources */,
-			);
+				66DB83ECA2F043B990BE945B /* FeatureGate.swift in Sources */,
+				3E5922FE0A6B41D79E37A4CD /* DailyUsageManager.swift in Sources */,
+				90C244B176664DB7B8761707 /* AdminMode.swift in Sources */,
+);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
