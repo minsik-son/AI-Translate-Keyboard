@@ -164,16 +164,24 @@
 "home.greeting.afternoon" = "Buon pomeriggio";
 "home.greeting.evening" = "Buonasera";
 "home.title" = "Dashboard";
-"home.weekly_report" = "Report AI settimanale";
-"home.words_typed" = "parole digitate";
-"home.corrections" = "errori corretti";
-"home.accuracy" = "precisione";
-"home.vs_last_week" = "vs settimana scorsa";
+// Plan Status Card
+"home.plan.free" = "Piano Free";
+"home.plan.pro" = "Piano Pro";
+"home.plan.premium" = "Piano Premium";
+"home.plan.free_desc" = "Utilizzo giornaliero limitato";
+"home.plan.pro_desc" = "100 utilizzi al giorno";
+"home.plan.premium_desc" = "Utilizzo illimitato";
+"home.plan.subscribe" = "Abbonati a Pro";
+"home.plan.price" = "Solo %@/mese";
+"home.plan.subscribed" = "Abbonato";
+"home.plan.daily_usage" = "Utilizzo giornaliero";
+"home.plan.unlimited" = "∞";
 "home.stat.corrections" = "Correzioni";
 "home.stat.translations" = "Traduzioni";
 "home.stat.clipboard" = "Appunti";
 "home.stat.phrases" = "Frasi";
 "home.quick_actions" = "Azioni rapide";
+"home.watch_ad" = "Guarda annuncio per ricaricare";
 
 // === AI Writer ===
 "ai_writer.title" = "Scrittore AI";
@@ -272,5 +280,50 @@
 // === Session Limit ===
 "session_limit.title" = "Hai esaurito le sessioni gratuite di oggi";
 "session_limit.subtitle" = "Potrai usarlo di nuovo domani";
-"session_limit.upgrade" = "Passa a Premium";
+"session_limit.upgrade" = "%@ esaurito! Passa a Pro";
+"session_limit.watch_ad" = "%@ esaurito! Guarda un annuncio per più utilizzi";
 "session_limit.remaining" = "Rimanenti oggi: %d";
+
+// === Rewarded Ads ===
+"reward.mode.correction" = "Correzione";
+"reward.mode.translation" = "Traduzione";
+"reward.title_format" = "Guarda annuncio per %@ +%d utilizzi";
+"reward.desc" = "Guarda un annuncio per ottenere %d utilizzi extra";
+"reward.progress" = "Oggi %d/%d visti";
+"reward.cta_watch" = "Guarda annuncio";
+"reward.cta_done" = "Tutti gli annunci visti oggi";
+"reward.cta_close" = "Chiudi";
+"reward.bonus_granted" = "+%d ricaricati!";
+"reward.ad_failed" = "Impossibile caricare l'annuncio. Riprova";
+"reward.limit_reached" = "Tutti gli annunci visti oggi";
+
+// === Paywall ===
+"paywall.title" = "Scegli il piano giusto per te";
+"paywall.features_header" = "FUNZIONALITÀ";
+"paywall.tier.free" = "FREE";
+"paywall.tier.pro" = "PRO";
+"paywall.tier.premium" = "PREMIUM";
+"paywall.feature.daily_usage" = "Correzioni/traduzioni giornaliere";
+"paywall.feature.tone" = "Stili di tono";
+"paywall.feature.themes" = "Temi premium";
+"paywall.feature.no_ads" = "Nessun annuncio";
+"paywall.feature.phrases" = "Frasi salvate";
+"paywall.value.basic" = "Predefinito";
+"paywall.value.all" = "Tutti";
+"paywall.value.unlimited" = "Illimitato";
+"paywall.value.uses" = "%d";
+"paywall.value.max" = "%d";
+"paywall.plan_section" = "Scegli piano";
+"paywall.pro_yearly" = "Pro Annuale";
+"paywall.pro_monthly" = "Pro Mensile";
+"paywall.premium_monthly" = "Premium Mensile";
+"paywall.save_percent" = "RISPARMIA 50%";
+"paywall.billed_yearly" = "Pagamento unico $47.99";
+"paywall.per_month" = "%@/mese";
+"paywall.cta_subscribe_yearly" = "Inizia Pro Annuale";
+"paywall.cta_subscribe_monthly" = "Inizia Pro Mensile";
+"paywall.cta_subscribe_premium" = "Inizia Premium";
+"paywall.error_loading" = "Impossibile caricare le info prodotto";
+"paywall.error_purchase" = "Acquisto fallito. Riprova";
+"paywall.error_restore" = "Ripristino fallito";
+"paywall.error_no_subscription" = "Nessun abbonamento attivo trovato";

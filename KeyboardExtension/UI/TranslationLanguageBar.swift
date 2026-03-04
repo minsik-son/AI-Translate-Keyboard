@@ -5,6 +5,7 @@ class TranslationLanguageBar: UIView {
     var onSourceTap: (() -> Void)?
     var onTargetTap: (() -> Void)?
     var onSwapTap: (() -> Void)?
+    var onCloseTap: (() -> Void)?
 
     private let sourcePill: UIButton = {
         let btn = UIButton(type: .custom)
@@ -35,6 +36,15 @@ class TranslationLanguageBar: UIView {
         return btn
     }()
 
+    private let closeButton: UIButton = {
+        let btn = UIButton(type: .system)
+        let config = UIImage.SymbolConfiguration(pointSize: 13, weight: .semibold)
+        btn.setImage(UIImage(systemName: "xmark", withConfiguration: config), for: .normal)
+        btn.tintColor = .secondaryLabel
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        return btn
+    }()
+
     // MARK: - Init
 
     override init(frame: CGRect) {
@@ -54,26 +64,33 @@ class TranslationLanguageBar: UIView {
         addSubview(sourcePill)
         addSubview(swapButton)
         addSubview(targetPill)
+        addSubview(closeButton)
 
         let pillHeight: CGFloat = 36
 
         NSLayoutConstraint.activate([
-            // Swap button — centered
-            swapButton.centerXAnchor.constraint(equalTo: centerXAnchor),
+            // Close button — right edge
+            closeButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
+            closeButton.centerYAnchor.constraint(equalTo: centerYAnchor),
+            closeButton.widthAnchor.constraint(equalToConstant: 28),
+            closeButton.heightAnchor.constraint(equalToConstant: 28),
+
+            // Swap button — centered in remaining space (between leading and close button)
+            swapButton.centerXAnchor.constraint(equalTo: centerXAnchor, constant: -14),
             swapButton.centerYAnchor.constraint(equalTo: centerYAnchor),
             swapButton.widthAnchor.constraint(equalToConstant: 40),
             swapButton.heightAnchor.constraint(equalToConstant: pillHeight),
 
             // Source pill — left side
-            sourcePill.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            sourcePill.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
             sourcePill.centerYAnchor.constraint(equalTo: centerYAnchor),
             sourcePill.trailingAnchor.constraint(equalTo: swapButton.leadingAnchor, constant: -4),
             sourcePill.heightAnchor.constraint(equalToConstant: pillHeight),
 
-            // Target pill — right side
+            // Target pill — between swap and close
             targetPill.leadingAnchor.constraint(equalTo: swapButton.trailingAnchor, constant: 4),
             targetPill.centerYAnchor.constraint(equalTo: centerYAnchor),
-            targetPill.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            targetPill.trailingAnchor.constraint(equalTo: closeButton.leadingAnchor, constant: -4),
             targetPill.heightAnchor.constraint(equalToConstant: pillHeight),
         ])
 
@@ -83,6 +100,7 @@ class TranslationLanguageBar: UIView {
         sourcePill.addTarget(self, action: #selector(sourceTapped), for: .touchUpInside)
         targetPill.addTarget(self, action: #selector(targetTapped), for: .touchUpInside)
         swapButton.addTarget(self, action: #selector(swapTapped), for: .touchUpInside)
+        closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
     }
 
     // MARK: - Actions
@@ -90,6 +108,7 @@ class TranslationLanguageBar: UIView {
     @objc private func sourceTapped() { onSourceTap?() }
     @objc private func targetTapped() { onTargetTap?() }
     @objc private func swapTapped() { onSwapTap?() }
+    @objc private func closeTapped() { onCloseTap?() }
 
     // MARK: - Public
 
@@ -112,6 +131,7 @@ class TranslationLanguageBar: UIView {
             sourcePill.setTitleColor(theme.keyTextColor, for: .normal)
             targetPill.setTitleColor(theme.keyTextColor, for: .normal)
             swapButton.tintColor = theme.keyTextColor.withAlphaComponent(0.6)
+            closeButton.tintColor = theme.keyTextColor.withAlphaComponent(0.6)
         } else {
             backgroundColor = .clear
             sourcePill.backgroundColor = isDark ? UIColor(white: 0.25, alpha: 1) : .white
@@ -119,6 +139,7 @@ class TranslationLanguageBar: UIView {
             sourcePill.setTitleColor(isDark ? .white : .label, for: .normal)
             targetPill.setTitleColor(isDark ? .white : .label, for: .normal)
             swapButton.tintColor = isDark ? UIColor(white: 0.55, alpha: 1) : .secondaryLabel
+            closeButton.tintColor = isDark ? UIColor(white: 0.55, alpha: 1) : .secondaryLabel
         }
     }
 }

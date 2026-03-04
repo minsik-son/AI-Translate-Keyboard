@@ -164,16 +164,24 @@
 "home.greeting.afternoon" = "Добрый день";
 "home.greeting.evening" = "Добрый вечер";
 "home.title" = "Панель";
-"home.weekly_report" = "Еженедельный AI отчёт";
-"home.words_typed" = "слов набрано";
-"home.corrections" = "опечаток исправлено";
-"home.accuracy" = "точность";
-"home.vs_last_week" = "vs прошлая неделя";
+// Plan Status Card
+"home.plan.free" = "План Free";
+"home.plan.pro" = "План Pro";
+"home.plan.premium" = "План Premium";
+"home.plan.free_desc" = "Ограниченное ежедневное использование";
+"home.plan.pro_desc" = "100 использований в день";
+"home.plan.premium_desc" = "Безлимитное использование";
+"home.plan.subscribe" = "Подписка Pro";
+"home.plan.price" = "Всего %@/мес";
+"home.plan.subscribed" = "Подписан";
+"home.plan.daily_usage" = "Ежедневное использование";
+"home.plan.unlimited" = "∞";
 "home.stat.corrections" = "Исправления";
 "home.stat.translations" = "Переводы";
 "home.stat.clipboard" = "Буфер обмена";
 "home.stat.phrases" = "Фразы";
 "home.quick_actions" = "Быстрые действия";
+"home.watch_ad" = "Посмотреть рекламу для зарядки";
 
 // === AI Writer ===
 "ai_writer.title" = "AI Редактор сообщений";
@@ -272,5 +280,50 @@
 // === Session Limit ===
 "session_limit.title" = "Все бесплатные сеансы на сегодня использованы";
 "session_limit.subtitle" = "Вы сможете использовать снова завтра";
-"session_limit.upgrade" = "Обновить до Premium";
+"session_limit.upgrade" = "%@ исчерпано! Обновите до Pro";
+"session_limit.watch_ad" = "%@ исчерпано! Посмотрите рекламу для дополнительных использований";
 "session_limit.remaining" = "Осталось сегодня: %d";
+
+// === Rewarded Ads ===
+"reward.mode.correction" = "Исправление";
+"reward.mode.translation" = "Перевод";
+"reward.title_format" = "Посмотрите рекламу для %@ +%d использований";
+"reward.desc" = "Посмотрите рекламу чтобы получить %d дополнительных использований";
+"reward.progress" = "Сегодня %d/%d просмотрено";
+"reward.cta_watch" = "Смотреть рекламу";
+"reward.cta_done" = "Вся реклама на сегодня просмотрена";
+"reward.cta_close" = "Закрыть";
+"reward.bonus_granted" = "+%d заряжено!";
+"reward.ad_failed" = "Не удалось загрузить рекламу. Попробуйте снова";
+"reward.limit_reached" = "Вся реклама на сегодня просмотрена";
+
+// === Paywall ===
+"paywall.title" = "Выберите подходящий план";
+"paywall.features_header" = "ФУНКЦИИ";
+"paywall.tier.free" = "FREE";
+"paywall.tier.pro" = "PRO";
+"paywall.tier.premium" = "PREMIUM";
+"paywall.feature.daily_usage" = "Ежедневные исправления/переводы";
+"paywall.feature.tone" = "Стили тона";
+"paywall.feature.themes" = "Премиум темы";
+"paywall.feature.no_ads" = "Без рекламы";
+"paywall.feature.phrases" = "Сохранённые фразы";
+"paywall.value.basic" = "Стандартный";
+"paywall.value.all" = "Все";
+"paywall.value.unlimited" = "Безлимитно";
+"paywall.value.uses" = "%d";
+"paywall.value.max" = "%d";
+"paywall.plan_section" = "Выбрать план";
+"paywall.pro_yearly" = "Pro Годовой";
+"paywall.pro_monthly" = "Pro Месячный";
+"paywall.premium_monthly" = "Premium Месячный";
+"paywall.save_percent" = "СКИДКА 50%";
+"paywall.billed_yearly" = "Единоразовый платёж $47.99";
+"paywall.per_month" = "%@/мес";
+"paywall.cta_subscribe_yearly" = "Начать Pro Годовой";
+"paywall.cta_subscribe_monthly" = "Начать Pro Месячный";
+"paywall.cta_subscribe_premium" = "Начать Premium";
+"paywall.error_loading" = "Не удалось загрузить информацию о продукте";
+"paywall.error_purchase" = "Покупка не удалась. Попробуйте снова";
+"paywall.error_restore" = "Восстановление не удалось";
+"paywall.error_no_subscription" = "Активная подписка не найдена";

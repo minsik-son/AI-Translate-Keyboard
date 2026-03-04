@@ -47,7 +47,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             presenter.present(paywallVC, animated: true)
 
         case "reward-ad":
-            let rewardVC = RewardedAdsViewController()
+            let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+            let modeParam = components?.queryItems?.first(where: { $0.name == "mode" })?.value
+            let mode: RewardMode = modeParam == "translation" ? .translation : .correction
+            let rewardVC = RewardedAdsViewController(mode: mode)
             rewardVC.modalPresentationStyle = .fullScreen
             let presenter = tabBar.presentedViewController ?? tabBar
             presenter.present(rewardVC, animated: true)

@@ -92,6 +92,16 @@ class LanguagePickerView: UIView {
         return label
     }()
 
+    private let closeButton: UIButton = {
+        let btn = UIButton(type: .system)
+        let config = UIImage.SymbolConfiguration(pointSize: 14, weight: .semibold)
+        btn.setImage(UIImage(systemName: "xmark", withConfiguration: config), for: .normal)
+        btn.tintColor = .white
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        btn.isHidden = true
+        return btn
+    }()
+
     private var tabIndicatorLeading: NSLayoutConstraint?
     private var tabIndicatorWidth: NSLayoutConstraint?
 
@@ -122,10 +132,16 @@ class LanguagePickerView: UIView {
         headerView.addSubview(targetTabButton)
         headerView.addSubview(tabIndicator)
         headerView.addSubview(singleHeaderLabel)
+        headerView.addSubview(closeButton)
 
         NSLayoutConstraint.activate([
             singleHeaderLabel.centerXAnchor.constraint(equalTo: headerView.centerXAnchor),
             singleHeaderLabel.centerYAnchor.constraint(equalTo: headerView.centerYAnchor),
+
+            closeButton.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -12),
+            closeButton.centerYAnchor.constraint(equalTo: headerView.centerYAnchor),
+            closeButton.widthAnchor.constraint(equalToConstant: 30),
+            closeButton.heightAnchor.constraint(equalToConstant: 30),
         ])
 
         NSLayoutConstraint.activate([
@@ -168,6 +184,7 @@ class LanguagePickerView: UIView {
 
         sourceTabButton.addTarget(self, action: #selector(sourceTabTapped), for: .touchUpInside)
         targetTabButton.addTarget(self, action: #selector(targetTabTapped), for: .touchUpInside)
+        closeButton.addTarget(self, action: #selector(closeButtonTapped), for: .touchUpInside)
 
         // Tap outside header to dismiss
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(backgroundTapped(_:)))
@@ -183,6 +200,7 @@ class LanguagePickerView: UIView {
         targetTabButton.isHidden = false
         tabIndicator.isHidden = false
         singleHeaderLabel.isHidden = true
+        closeButton.isHidden = true
         selectedSourceCode = sourceCode
         selectedTargetCode = targetCode
         currentTab = initialTab
@@ -197,6 +215,7 @@ class LanguagePickerView: UIView {
         tabIndicator.isHidden = true
         singleHeaderLabel.isHidden = false
         singleHeaderLabel.text = title
+        closeButton.isHidden = false
         selectedSourceCode = code
         currentTab = .source
         tableView.reloadData()
@@ -214,6 +233,10 @@ class LanguagePickerView: UIView {
         currentTab = .target
         updateTabUI()
         tableView.reloadData()
+    }
+
+    @objc private func closeButtonTapped() {
+        onDismiss?()
     }
 
     @objc private func backgroundTapped(_ gesture: UITapGestureRecognizer) {

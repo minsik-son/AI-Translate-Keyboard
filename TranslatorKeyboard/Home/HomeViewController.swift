@@ -66,11 +66,27 @@ class HomeViewController: UIViewController {
     // MARK: - Content
 
     private let greetingLabel = UILabel()
-    private let reportCard = UIView()
-    private let reportWordsLabel = UILabel()
-    private let reportCorrectionsLabel = UILabel()
-    private let reportAccuracyLabel = UILabel()
-    private let reportChangeLabel = UILabel()
+
+    // Plan card
+    private let planCard = UIView()
+    private let planNameLabel = UILabel()
+    private let planDescLabel = UILabel()
+    private let subscribeButton = UIButton(type: .system)
+    private let priceLabel = UILabel()
+    private let subscribedStack = UIStackView()
+
+    // Dual circular progress (correction + translation)
+    private let corrProgressContainer = UIView()
+    private let corrCenterLabel = UILabel()
+    private let corrSubLabel = UILabel()
+    private var corrTrackLayer = CAShapeLayer()
+    private var corrProgressLayer = CAShapeLayer()
+
+    private let transProgressContainer = UIView()
+    private let transCenterLabel = UILabel()
+    private let transSubLabel = UILabel()
+    private var transTrackLayer = CAShapeLayer()
+    private var transProgressLayer = CAShapeLayer()
 
     private let correctionCountLabel = UILabel()
     private let translationCountLabel = UILabel()
@@ -91,10 +107,10 @@ class HomeViewController: UIViewController {
 
         contentStack.setCustomSpacing(16, after: greetingLabel)
 
-        // Weekly Report Card
-        buildReportCard()
-        contentStack.addArrangedSubview(reportCard)
-        contentStack.setCustomSpacing(16, after: reportCard)
+        // Plan Status + Daily Usage Card
+        buildPlanCard()
+        contentStack.addArrangedSubview(planCard)
+        contentStack.setCustomSpacing(16, after: planCard)
 
         // Stats Grid (2x2)
         let statsGrid = buildStatsGrid()
@@ -113,46 +129,272 @@ class HomeViewController: UIViewController {
         contentStack.addArrangedSubview(quickActions)
     }
 
-    private func buildReportCard() {
-        reportCard.backgroundColor = AppColors.accentSoft
-        reportCard.layer.cornerRadius = 14
-        reportCard.layer.borderWidth = 1
-        reportCard.layer.borderColor = AppColors.accent.withAlphaComponent(0.3).cgColor
+    private func buildPlanCard() {
+        planCard.backgroundColor = AppColors.card
+        planCard.layer.cornerRadius = 14
+        planCard.layer.borderWidth = 1
+        planCard.layer.borderColor = AppColors.border.cgColor
 
-        let stack = UIStackView()
-        stack.axis = .vertical
-        stack.spacing = 8
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        reportCard.addSubview(stack)
+        // === Top section: plan info ===
+        let topStack = UIStackView()
+        topStack.axis = .vertical
+        topStack.spacing = 6
+        topStack.alignment = .leading
+
+        planNameLabel.font = .systemFont(ofSize: 22, weight: .bold)
+        planNameLabel.textColor = AppColors.text
+        topStack.addArrangedSubview(planNameLabel)
+
+        planDescLabel.font = .systemFont(ofSize: 13)
+        planDescLabel.textColor = AppColors.textSub
+        planDescLabel.numberOfLines = 0
+        topStack.addArrangedSubview(planDescLabel)
+        topStack.setCustomSpacing(14, after: planDescLabel)
+
+        // Subscribe button (Free only)
+        subscribeButton.setTitle(L("home.plan.subscribe"), for: .normal)
+        subscribeButton.titleLabel?.font = .systemFont(ofSize: 14, weight: .bold)
+        subscribeButton.setTitleColor(.white, for: .normal)
+        subscribeButton.backgroundColor = AppColors.accent
+        subscribeButton.layer.cornerRadius = 10
+        subscribeButton.contentEdgeInsets = UIEdgeInsets(top: 10, left: 20, bottom: 10, right: 20)
+        subscribeButton.addTarget(self, action: #selector(subscribeTapped), for: .touchUpInside)
+        topStack.addArrangedSubview(subscribeButton)
+
+        // Price label (Free only)
+        priceLabel.font = .systemFont(ofSize: 12)
+        priceLabel.textColor = AppColors.textMuted
+        topStack.addArrangedSubview(priceLabel)
+
+        // Subscribed badge (Pro/Premium)
+        let checkIcon = UIImageView(image: UIImage(systemName: "checkmark.circle.fill"))
+        checkIcon.tintColor = AppColors.green
+        checkIcon.translatesAutoresizingMaskIntoConstraints = false
+        checkIcon.widthAnchor.constraint(equalToConstant: 18).isActive = true
+        checkIcon.heightAnchor.constraint(equalToConstant: 18).isActive = true
+
+        let subscribedLabel = UILabel()
+        subscribedLabel.text = L("home.plan.subscribed")
+        subscribedLabel.font = .systemFont(ofSize: 14, weight: .medium)
+        subscribedLabel.textColor = AppColors.green
+
+        subscribedStack.axis = .horizontal
+        subscribedStack.spacing = 6
+        subscribedStack.alignment = .center
+        subscribedStack.addArrangedSubview(checkIcon)
+        subscribedStack.addArrangedSubview(subscribedLabel)
+        topStack.addArrangedSubview(subscribedStack)
+
+        // Top wrapper with padding
+        let topWrapper = UIView()
+        topStack.translatesAutoresizingMaskIntoConstraints = false
+        topWrapper.addSubview(topStack)
         NSLayoutConstraint.activate([
-            stack.topAnchor.constraint(equalTo: reportCard.topAnchor, constant: 18),
-            stack.leadingAnchor.constraint(equalTo: reportCard.leadingAnchor, constant: 18),
-            stack.trailingAnchor.constraint(equalTo: reportCard.trailingAnchor, constant: -18),
-            stack.bottomAnchor.constraint(equalTo: reportCard.bottomAnchor, constant: -18),
+            topStack.topAnchor.constraint(equalTo: topWrapper.topAnchor, constant: 20),
+            topStack.leadingAnchor.constraint(equalTo: topWrapper.leadingAnchor, constant: 20),
+            topStack.trailingAnchor.constraint(equalTo: topWrapper.trailingAnchor, constant: -20),
+            topStack.bottomAnchor.constraint(equalTo: topWrapper.bottomAnchor, constant: -16),
         ])
 
-        let headerLabel = UILabel()
-        headerLabel.text = "✨ " + L("home.weekly_report")
-        headerLabel.font = .systemFont(ofSize: 15, weight: .semibold)
-        headerLabel.textColor = AppColors.text
-        stack.addArrangedSubview(headerLabel)
-        stack.setCustomSpacing(12, after: headerLabel)
+        // === Divider ===
+        let divider = UIView()
+        divider.backgroundColor = AppColors.border
+        divider.translatesAutoresizingMaskIntoConstraints = false
+        divider.heightAnchor.constraint(equalToConstant: 1).isActive = true
 
-        reportWordsLabel.font = .systemFont(ofSize: 15, weight: .medium)
-        reportWordsLabel.textColor = AppColors.text
-        stack.addArrangedSubview(reportWordsLabel)
+        // === Bottom section: dual circular progress ===
+        let circleSize: CGFloat = 80
 
-        reportCorrectionsLabel.font = .systemFont(ofSize: 15, weight: .medium)
-        reportCorrectionsLabel.textColor = AppColors.text
-        stack.addArrangedSubview(reportCorrectionsLabel)
+        // Correction circle
+        let corrColumn = UIStackView()
+        corrColumn.axis = .vertical
+        corrColumn.spacing = 6
+        corrColumn.alignment = .center
 
-        reportAccuracyLabel.font = .systemFont(ofSize: 15, weight: .medium)
-        reportAccuracyLabel.textColor = AppColors.text
-        stack.addArrangedSubview(reportAccuracyLabel)
+        corrProgressContainer.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            corrProgressContainer.widthAnchor.constraint(equalToConstant: circleSize),
+            corrProgressContainer.heightAnchor.constraint(equalToConstant: circleSize),
+        ])
+        corrCenterLabel.font = .systemFont(ofSize: 15, weight: .bold)
+        corrCenterLabel.textColor = AppColors.text
+        corrCenterLabel.textAlignment = .center
+        corrCenterLabel.translatesAutoresizingMaskIntoConstraints = false
+        corrProgressContainer.addSubview(corrCenterLabel)
+        NSLayoutConstraint.activate([
+            corrCenterLabel.centerXAnchor.constraint(equalTo: corrProgressContainer.centerXAnchor),
+            corrCenterLabel.centerYAnchor.constraint(equalTo: corrProgressContainer.centerYAnchor),
+        ])
+        corrSubLabel.text = L("home.stat.corrections")
+        corrSubLabel.font = .systemFont(ofSize: 12, weight: .medium)
+        corrSubLabel.textColor = AppColors.textSub
+        corrColumn.addArrangedSubview(corrProgressContainer)
+        corrColumn.addArrangedSubview(corrSubLabel)
 
-        reportChangeLabel.font = .systemFont(ofSize: 13, weight: .regular)
-        reportChangeLabel.textColor = AppColors.textSub
-        stack.addArrangedSubview(reportChangeLabel)
+        // Translation circle
+        let transColumn = UIStackView()
+        transColumn.axis = .vertical
+        transColumn.spacing = 6
+        transColumn.alignment = .center
+
+        transProgressContainer.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            transProgressContainer.widthAnchor.constraint(equalToConstant: circleSize),
+            transProgressContainer.heightAnchor.constraint(equalToConstant: circleSize),
+        ])
+        transCenterLabel.font = .systemFont(ofSize: 15, weight: .bold)
+        transCenterLabel.textColor = AppColors.text
+        transCenterLabel.textAlignment = .center
+        transCenterLabel.translatesAutoresizingMaskIntoConstraints = false
+        transProgressContainer.addSubview(transCenterLabel)
+        NSLayoutConstraint.activate([
+            transCenterLabel.centerXAnchor.constraint(equalTo: transProgressContainer.centerXAnchor),
+            transCenterLabel.centerYAnchor.constraint(equalTo: transProgressContainer.centerYAnchor),
+        ])
+        transSubLabel.text = L("home.stat.translations")
+        transSubLabel.font = .systemFont(ofSize: 12, weight: .medium)
+        transSubLabel.textColor = AppColors.textSub
+        transColumn.addArrangedSubview(transProgressContainer)
+        transColumn.addArrangedSubview(transSubLabel)
+
+        // Two circles side by side, centered
+        let circlesStack = UIStackView(arrangedSubviews: [corrColumn, transColumn])
+        circlesStack.axis = .horizontal
+        circlesStack.spacing = 32
+        circlesStack.alignment = .center
+        circlesStack.distribution = .equalCentering
+
+        // Bottom wrapper with padding
+        let bottomWrapper = UIView()
+        circlesStack.translatesAutoresizingMaskIntoConstraints = false
+        bottomWrapper.addSubview(circlesStack)
+        NSLayoutConstraint.activate([
+            circlesStack.topAnchor.constraint(equalTo: bottomWrapper.topAnchor, constant: 16),
+            circlesStack.centerXAnchor.constraint(equalTo: bottomWrapper.centerXAnchor),
+            circlesStack.bottomAnchor.constraint(equalTo: bottomWrapper.bottomAnchor, constant: -16),
+        ])
+
+        // === Main vertical layout ===
+        let mainStack = UIStackView(arrangedSubviews: [topWrapper, divider, bottomWrapper])
+        mainStack.axis = .vertical
+        mainStack.spacing = 0
+        mainStack.translatesAutoresizingMaskIntoConstraints = false
+        planCard.addSubview(mainStack)
+
+        NSLayoutConstraint.activate([
+            mainStack.topAnchor.constraint(equalTo: planCard.topAnchor),
+            mainStack.leadingAnchor.constraint(equalTo: planCard.leadingAnchor),
+            mainStack.trailingAnchor.constraint(equalTo: planCard.trailingAnchor),
+            mainStack.bottomAnchor.constraint(equalTo: planCard.bottomAnchor),
+        ])
+    }
+
+    private func setupCircle(container: UIView, trackLayer: inout CAShapeLayer, progressLayer: inout CAShapeLayer, used: Int, total: Int, color: UIColor) {
+        trackLayer.removeFromSuperlayer()
+        progressLayer.removeFromSuperlayer()
+
+        let size: CGFloat = 80
+        let center = CGPoint(x: size / 2, y: size / 2)
+        let radius: CGFloat = 32
+        let lineWidth: CGFloat = 8
+        let startAngle = -CGFloat.pi / 2
+        let endAngle = startAngle + 2 * CGFloat.pi
+
+        let circularPath = UIBezierPath(
+            arcCenter: center, radius: radius,
+            startAngle: startAngle, endAngle: endAngle, clockwise: true
+        )
+
+        // Track
+        trackLayer = CAShapeLayer()
+        trackLayer.path = circularPath.cgPath
+        trackLayer.strokeColor = AppColors.border.cgColor
+        trackLayer.fillColor = UIColor.clear.cgColor
+        trackLayer.lineWidth = lineWidth
+        trackLayer.lineCap = .round
+        container.layer.addSublayer(trackLayer)
+
+        // Progress
+        progressLayer = CAShapeLayer()
+        progressLayer.path = circularPath.cgPath
+        progressLayer.fillColor = UIColor.clear.cgColor
+        progressLayer.lineWidth = lineWidth
+        progressLayer.lineCap = .round
+
+        let fraction = total > 0 ? CGFloat(used) / CGFloat(total) : 0
+        progressLayer.strokeEnd = min(fraction, 1.0)
+
+        if fraction >= 1.0 {
+            progressLayer.strokeColor = UIColor.systemRed.cgColor
+        } else if fraction >= 0.7 {
+            progressLayer.strokeColor = AppColors.orange.cgColor
+        } else {
+            progressLayer.strokeColor = color.cgColor
+        }
+
+        container.layer.addSublayer(progressLayer)
+    }
+
+    @objc private func subscribeTapped() {
+        let paywallVC = PaywallViewController()
+        paywallVC.modalPresentationStyle = .pageSheet
+        present(paywallVC, animated: true)
+    }
+
+    private func updatePlanCard() {
+        let tier = SubscriptionStatus.shared.currentTier
+        let usage = DailyUsageManager.shared
+
+        // Plan info (left column)
+        switch tier {
+        case .free:
+            planNameLabel.text = L("home.plan.free")
+            planDescLabel.text = L("home.plan.free_desc")
+            subscribeButton.isHidden = false
+            priceLabel.isHidden = false
+            priceLabel.text = String(format: L("home.plan.price"), "$7.99")
+            subscribedStack.isHidden = true
+        case .pro:
+            planNameLabel.text = L("home.plan.pro")
+            planDescLabel.text = L("home.plan.pro_desc")
+            subscribeButton.isHidden = true
+            priceLabel.isHidden = true
+            subscribedStack.isHidden = false
+        case .premium:
+            planNameLabel.text = L("home.plan.premium")
+            planDescLabel.text = L("home.plan.premium_desc")
+            subscribeButton.isHidden = true
+            priceLabel.isHidden = true
+            subscribedStack.isHidden = false
+        }
+
+        // Correction circle (remaining / total including bonus)
+        let corrUsed = usage.correctionCount
+        let corrTotal = FeatureGate.shared.dailyCorrectionLimit
+            + (UserDefaults(suiteName: AppConstants.appGroupIdentifier)?.integer(forKey: "bonus_correction_count") ?? 0)
+
+        // Translation circle
+        let transUsed = usage.translationCount
+        let transTotal = FeatureGate.shared.dailyTranslationLimit
+            + (UserDefaults(suiteName: AppConstants.appGroupIdentifier)?.integer(forKey: "bonus_translation_count") ?? 0)
+
+        if tier == .premium && FeatureGate.shared.isPremiumUnlimited {
+            corrCenterLabel.text = L("home.plan.unlimited")
+            corrCenterLabel.font = .systemFont(ofSize: 20, weight: .bold)
+            transCenterLabel.text = L("home.plan.unlimited")
+            transCenterLabel.font = .systemFont(ofSize: 20, weight: .bold)
+            setupCircle(container: corrProgressContainer, trackLayer: &corrTrackLayer, progressLayer: &corrProgressLayer, used: 1, total: 1, color: AppColors.green)
+            setupCircle(container: transProgressContainer, trackLayer: &transTrackLayer, progressLayer: &transProgressLayer, used: 1, total: 1, color: AppColors.green)
+            corrProgressLayer.strokeColor = AppColors.green.cgColor
+            transProgressLayer.strokeColor = AppColors.green.cgColor
+        } else {
+            corrCenterLabel.text = "\(corrUsed)/\(corrTotal)"
+            corrCenterLabel.font = .systemFont(ofSize: 15, weight: .bold)
+            transCenterLabel.text = "\(transUsed)/\(transTotal)"
+            transCenterLabel.font = .systemFont(ofSize: 15, weight: .bold)
+            setupCircle(container: corrProgressContainer, trackLayer: &corrTrackLayer, progressLayer: &corrProgressLayer, used: corrUsed, total: corrTotal, color: AppColors.orange)
+            setupCircle(container: transProgressContainer, trackLayer: &transTrackLayer, progressLayer: &transProgressLayer, used: transUsed, total: transTotal, color: AppColors.blue)
+        }
     }
 
     private func buildStatsGrid() -> UIView {
@@ -191,14 +433,22 @@ class HomeViewController: UIViewController {
 
         topRow.addArrangedSubview(cCard)
         topRow.addArrangedSubview(tCard)
-        bottomRow.addArrangedSubview(makeStatCard(
+        let clCard = makeStatCard(
             icon: "doc.on.clipboard", color: AppColors.green,
             title: L("home.stat.clipboard"), valueLabel: clipboardCountLabel
-        ))
-        bottomRow.addArrangedSubview(makeStatCard(
+        )
+        let clipboardTap = UITapGestureRecognizer(target: self, action: #selector(clipboardCardTapped))
+        clCard.addGestureRecognizer(clipboardTap)
+
+        let pCard = makeStatCard(
             icon: "bookmark.fill", color: AppColors.pink,
             title: L("home.stat.phrases"), valueLabel: phrasesCountLabel
-        ))
+        )
+        let phrasesTap = UITapGestureRecognizer(target: self, action: #selector(phrasesCardTapped))
+        pCard.addGestureRecognizer(phrasesTap)
+
+        bottomRow.addArrangedSubview(clCard)
+        bottomRow.addArrangedSubview(pCard)
 
         let grid = UIStackView(arrangedSubviews: [topRow, bottomRow])
         grid.axis = .vertical
@@ -353,26 +603,47 @@ class HomeViewController: UIViewController {
     }
 
     @objc private func correctionCardTapped() {
-        guard !SubscriptionStatus.shared.isPro,
-              DailyUsageManager.shared.remainingCorrections <= 0 else { return }
-        presentRewardedAds()
+        if !SubscriptionStatus.shared.isPro && DailyUsageManager.shared.remainingCorrections <= 0 {
+            presentRewardedAds(mode: .correction)
+        } else {
+            navigateToHistory(filter: .correction)
+        }
     }
 
     @objc private func translationCardTapped() {
-        guard !SubscriptionStatus.shared.isPro,
-              DailyUsageManager.shared.remainingTranslations <= 0 else { return }
-        presentRewardedAds()
+        if !SubscriptionStatus.shared.isPro && DailyUsageManager.shared.remainingTranslations <= 0 {
+            presentRewardedAds(mode: .translation)
+        } else {
+            navigateToHistory(filter: .translation)
+        }
     }
 
-    private func presentRewardedAds() {
-        if DailyUsageManager.shared.canWatchRewardedAd {
-            let rewardVC = RewardedAdsViewController()
+    private func presentRewardedAds(mode: RewardMode) {
+        if DailyUsageManager.shared.canWatchRewardedAd(for: mode) {
+            let rewardVC = RewardedAdsViewController(mode: mode)
             rewardVC.modalPresentationStyle = .fullScreen
             present(rewardVC, animated: true)
         } else {
             let paywallVC = PaywallViewController()
             paywallVC.modalPresentationStyle = .pageSheet
             present(paywallVC, animated: true)
+        }
+    }
+
+    @objc private func clipboardCardTapped() {
+        navigateToHistory(filter: .clipboard)
+    }
+
+    @objc private func phrasesCardTapped() {
+        navigateToHistory(filter: nil)
+    }
+
+    private func navigateToHistory(filter: HistoryType?) {
+        guard let tabBar = tabBarController else { return }
+        tabBar.selectedIndex = 2
+        if let nav = tabBar.viewControllers?[2] as? UINavigationController,
+           let historyVC = nav.viewControllers.first as? HistoryViewController {
+            historyVC.selectFilter(filter)
         }
     }
 
@@ -417,8 +688,13 @@ class HomeViewController: UIViewController {
     }
 
     @objc private func handleLanguageChange() {
+        title = L("home.title")
         contentStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        reportCard.subviews.forEach { $0.removeFromSuperview() }
+        planCard.subviews.forEach { $0.removeFromSuperview() }
+        corrTrackLayer.removeFromSuperlayer()
+        corrProgressLayer.removeFromSuperlayer()
+        transTrackLayer.removeFromSuperlayer()
+        transProgressLayer.removeFromSuperlayer()
         buildContent()
         refreshStats()
     }
@@ -430,18 +706,8 @@ class HomeViewController: UIViewController {
         let greeting = timeBasedGreeting()
         greetingLabel.text = greeting
 
-        reportWordsLabel.text = "\(stats.weeklyWordsTyped) " + L("home.words_typed")
-        reportCorrectionsLabel.text = "Gemini \(stats.weeklyCorrections)" + L("home.corrections")
-        let accuracy = stats.weeklyAccuracy
-        reportAccuracyLabel.text = L("home.accuracy") + " \(String(format: "%.1f", accuracy))%"
-        let change = stats.accuracyChange
-        if change != 0 {
-            let sign = change > 0 ? "+" : ""
-            reportChangeLabel.text = L("home.vs_last_week") + " \(sign)\(String(format: "%.1f", change))%"
-            reportChangeLabel.textColor = change > 0 ? AppColors.green : AppColors.orange
-        } else {
-            reportChangeLabel.text = nil
-        }
+        // Plan card update
+        updatePlanCard()
 
         correctionCountLabel.text = "\(stats.weeklyCorrections)"
         translationCountLabel.text = "\(stats.weeklyTranslations)"

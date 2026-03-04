@@ -164,11 +164,18 @@
 "home.greeting.afternoon" = "Good afternoon";
 "home.greeting.evening" = "Good evening";
 "home.title" = "Dashboard";
-"home.weekly_report" = "이번 주 AI 리포트";
-"home.words_typed" = "단어 입력";
-"home.corrections" = "개 오타 교정";
-"home.accuracy" = "정확도";
-"home.vs_last_week" = "지난주 대비";
+// Plan Status Card
+"home.plan.free" = "Free 플랜";
+"home.plan.pro" = "Pro 플랜";
+"home.plan.premium" = "Premium 플랜";
+"home.plan.free_desc" = "일일 사용량 제한";
+"home.plan.pro_desc" = "일일 100회 사용 가능";
+"home.plan.premium_desc" = "무제한 사용";
+"home.plan.subscribe" = "Pro 구독하기";
+"home.plan.price" = "Only %@/월";
+"home.plan.subscribed" = "구독 중";
+"home.plan.daily_usage" = "일일 사용량";
+"home.plan.unlimited" = "∞";
 "home.stat.corrections" = "교정";
 "home.stat.translations" = "번역";
 "home.stat.clipboard" = "클립보드";
@@ -276,3 +283,47 @@
 "session_limit.upgrade" = "%@ 소진! Pro로 업그레이드하세요";
 "session_limit.watch_ad" = "%@ 소진! 광고를 보고 추가 횟수를 받으세요";
 "session_limit.remaining" = "오늘 남은 횟수: %d회";
+
+// === Rewarded Ads ===
+"reward.mode.correction" = "교정";
+"reward.mode.translation" = "번역";
+"reward.title_format" = "광고 보고 %@ +%d회 충전";
+"reward.desc" = "광고를 시청하면 %d회가 추가됩니다";
+"reward.progress" = "오늘 %d/%d회 시청 완료";
+"reward.cta_watch" = "광고 시청하기";
+"reward.cta_done" = "오늘의 광고를 모두 시청했어요";
+"reward.cta_close" = "닫기";
+"reward.bonus_granted" = "+%d회 충전 완료!";
+"reward.ad_failed" = "광고 로드에 실패했어요. 다시 시도해주세요";
+"reward.limit_reached" = "오늘의 광고를 모두 시청했어요";
+
+// === Paywall ===
+"paywall.title" = "나에게 맞는 플랜을 선택하세요";
+"paywall.features_header" = "기능";
+"paywall.tier.free" = "FREE";
+"paywall.tier.pro" = "PRO";
+"paywall.tier.premium" = "PREMIUM";
+"paywall.feature.daily_usage" = "일일 교정/번역";
+"paywall.feature.tone" = "톤 스타일";
+"paywall.feature.themes" = "프리미엄 테마";
+"paywall.feature.no_ads" = "광고 없음";
+"paywall.feature.phrases" = "저장 문구";
+"paywall.value.basic" = "기본";
+"paywall.value.all" = "전체";
+"paywall.value.unlimited" = "무제한";
+"paywall.value.uses" = "%d회";
+"paywall.value.max" = "%d개";
+"paywall.plan_section" = "플랜 선택";
+"paywall.pro_yearly" = "Pro 연간";
+"paywall.pro_monthly" = "Pro 월간";
+"paywall.premium_monthly" = "Premium 월간";
+"paywall.save_percent" = "SAVE 50%";
+"paywall.billed_yearly" = "$47.99 일시불";
+"paywall.per_month" = "%@/월";
+"paywall.cta_subscribe_yearly" = "Pro 연간 구독 시작하기";
+"paywall.cta_subscribe_monthly" = "Pro 월간 구독 시작하기";
+"paywall.cta_subscribe_premium" = "Premium 구독 시작하기";
+"paywall.error_loading" = "상품 정보를 불러올 수 없습니다";
+"paywall.error_purchase" = "결제에 실패했습니다. 다시 시도해주세요";
+"paywall.error_restore" = "복원에 실패했습니다";
+"paywall.error_no_subscription" = "활성 구독을 찾을 수 없습니다";

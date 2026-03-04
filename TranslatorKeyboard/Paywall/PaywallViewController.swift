@@ -5,6 +5,27 @@ class PaywallViewController: UIViewController {
 
     private let storeKitManager = StoreKitManager.shared
 
+    // MARK: - Pricing Fallbacks (when StoreKit products not available)
+
+    private struct FallbackPrice {
+        let display: String
+        let monthly: String?
+    }
+
+    private let fallbackPrices: [String: FallbackPrice] = [
+        StoreKitManager.ProductID.yearlyPro.rawValue: FallbackPrice(display: "$47.99/yr", monthly: "$3.99/mo"),
+        StoreKitManager.ProductID.monthlyPro.rawValue: FallbackPrice(display: "$7.99/mo", monthly: nil),
+        StoreKitManager.ProductID.monthlyPremium.rawValue: FallbackPrice(display: "$14.99/mo", monthly: nil),
+    ]
+
+    // MARK: - State
+
+    private enum SelectedPlan {
+        case yearlyPro, monthlyPro, premium
+    }
+    private var selectedPlan: SelectedPlan = .yearlyPro
+    private var isLoading = false
+
     // MARK: - UI Components
 
     private let scrollView: UIScrollView = {
@@ -14,76 +35,58 @@ class PaywallViewController: UIViewController {
         return sv
     }()
 
-    private let contentView: UIView = {
-        let v = UIView()
-        v.translatesAutoresizingMaskIntoConstraints = false
-        return v
+    private let contentStack: UIStackView = {
+        let s = UIStackView()
+        s.axis = .vertical
+        s.spacing = 24
+        s.translatesAutoresizingMaskIntoConstraints = false
+        return s
     }()
 
     private let closeButton: UIButton = {
         let btn = UIButton(type: .system)
-        btn.setImage(UIImage(systemName: "xmark"), for: .normal)
-        btn.tintColor = AppColors.text
+        let config = UIImage.SymbolConfiguration(pointSize: 15, weight: .semibold)
+        btn.setImage(UIImage(systemName: "xmark", withConfiguration: config), for: .normal)
+        btn.tintColor = AppColors.textSub
+        btn.backgroundColor = AppColors.card
+        btn.layer.cornerRadius = 15
         btn.translatesAutoresizingMaskIntoConstraints = false
         return btn
     }()
 
-    private let titleLabel: UILabel = {
-        let label = UILabel()
-        label.text = L("onboarding.subscription.title")
-        label.font = .systemFont(ofSize: 28, weight: .bold)
-        label.textColor = AppColors.text
-        label.textAlignment = .center
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
+    // Plan selector radio views
+    private var yearlyRadio = UIView()
+    private var monthlyRadio = UIView()
+    private var premiumRadio = UIView()
 
-    // Pro Yearly Card (recommended)
-    private let yearlyProCard = UIView()
-    private let yearlyProBestBadge = UILabel()
-    private let yearlyProTitleLabel = UILabel()
-    private let yearlyProPriceLabel = UILabel()
-    private let yearlyProMonthlyEquivLabel = UILabel()
-    private let yearlySavingsLabel = UILabel()
-    private let yearlyProFeaturesStack = UIStackView()
-
-    // Pro Monthly Card
-    private let monthlyProCard = UIView()
-    private let monthlyProTitleLabel = UILabel()
-    private let monthlyProPriceLabel = UILabel()
-
-    // Premium Card
-    private let premiumCard = UIView()
-    private let premiumBadge = UILabel()
-    private let premiumTitleLabel = UILabel()
+    // Price labels (updated by StoreKit)
+    private let yearlyPriceLabel = UILabel()
+    private let yearlyBilledLabel = UILabel()
+    private let monthlyPriceLabel = UILabel()
     private let premiumPriceLabel = UILabel()
 
-    // Bottom section
-    private let restoreButton: UIButton = {
+    // Plan selector cards
+    private let yearlyCard = UIView()
+    private let monthlyCard = UIView()
+    private let premiumCard = UIView()
+
+    // CTA Button
+    private let ctaButton: UIButton = {
         let btn = UIButton(type: .system)
-        btn.setTitle(L("onboarding.subscription.restore"), for: .normal)
-        btn.titleLabel?.font = .systemFont(ofSize: 14)
-        btn.setTitleColor(AppColors.textSub, for: .normal)
+        btn.titleLabel?.font = .systemFont(ofSize: 17, weight: .bold)
+        btn.setTitleColor(.white, for: .normal)
+        btn.backgroundColor = AppColors.accent
+        btn.layer.cornerRadius = 14
         btn.translatesAutoresizingMaskIntoConstraints = false
         return btn
     }()
 
-    private let termsButton: UIButton = {
-        let btn = UIButton(type: .system)
-        btn.setTitle(L("settings.terms"), for: .normal)
-        btn.titleLabel?.font = .systemFont(ofSize: 12)
-        btn.setTitleColor(AppColors.textMuted, for: .normal)
-        btn.translatesAutoresizingMaskIntoConstraints = false
-        return btn
-    }()
-
-    private let privacyButton: UIButton = {
-        let btn = UIButton(type: .system)
-        btn.setTitle(L("settings.privacy"), for: .normal)
-        btn.titleLabel?.font = .systemFont(ofSize: 12)
-        btn.setTitleColor(AppColors.textMuted, for: .normal)
-        btn.translatesAutoresizingMaskIntoConstraints = false
-        return btn
+    private let ctaSpinner: UIActivityIndicatorView = {
+        let spinner = UIActivityIndicatorView(style: .medium)
+        spinner.color = .white
+        spinner.hidesWhenStopped = true
+        spinner.translatesAutoresizingMaskIntoConstraints = false
+        return spinner
     }()
 
     // MARK: - Lifecycle
@@ -91,19 +94,26 @@ class PaywallViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = AppColors.bg
-        setupUI()
+        setupLayout()
+        buildFeatureTable()
+        buildPlanSelector()
+        buildBottomSection()
+        applyFallbackPrices()
         loadProducts()
+        updateSelectionState()
     }
 
-    // MARK: - Setup
+    // MARK: - Layout
 
-    private func setupUI() {
+    private func setupLayout() {
         view.addSubview(closeButton)
         view.addSubview(scrollView)
-        scrollView.addSubview(contentView)
+        view.addSubview(ctaButton)
+        scrollView.addSubview(contentStack)
+        ctaButton.addSubview(ctaSpinner)
 
         NSLayoutConstraint.activate([
-            closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 12),
             closeButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             closeButton.widthAnchor.constraint(equalToConstant: 30),
             closeButton.heightAnchor.constraint(equalToConstant: 30),
@@ -111,273 +121,435 @@ class PaywallViewController: UIViewController {
             scrollView.topAnchor.constraint(equalTo: closeButton.bottomAnchor, constant: 8),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: ctaButton.topAnchor, constant: -12),
 
-            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
-            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
-            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
+            contentStack.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 8),
+            contentStack.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 24),
+            contentStack.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -24),
+            contentStack.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -16),
+            contentStack.widthAnchor.constraint(equalTo: scrollView.widthAnchor, constant: -48),
+
+            ctaButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+            ctaButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
+            ctaButton.heightAnchor.constraint(equalToConstant: 54),
+            ctaButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12),
+
+            ctaSpinner.centerXAnchor.constraint(equalTo: ctaButton.centerXAnchor),
+            ctaSpinner.centerYAnchor.constraint(equalTo: ctaButton.centerYAnchor),
         ])
 
         closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
-
-        setupTitle()
-        setupYearlyProCard()
-        setupMonthlyProCard()
-        setupPremiumCard()
-        setupBottomSection()
-    }
-
-    private func setupTitle() {
-        contentView.addSubview(titleLabel)
-        NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
-            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
-            titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
-        ])
-    }
-
-    // MARK: - Yearly Pro Card (Recommended)
-
-    private func setupYearlyProCard() {
-        yearlyProCard.backgroundColor = AppColors.card
-        yearlyProCard.layer.cornerRadius = 16
-        yearlyProCard.layer.borderWidth = 2
-        yearlyProCard.layer.borderColor = AppColors.accent.cgColor
-        yearlyProCard.translatesAutoresizingMaskIntoConstraints = false
-        yearlyProCard.isUserInteractionEnabled = true
-        yearlyProCard.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(yearlyProTapped)))
-        contentView.addSubview(yearlyProCard)
-
-        // BEST badge
-        yearlyProBestBadge.text = " BEST "
-        yearlyProBestBadge.font = .systemFont(ofSize: 11, weight: .bold)
-        yearlyProBestBadge.textColor = .white
-        yearlyProBestBadge.backgroundColor = AppColors.accent
-        yearlyProBestBadge.layer.cornerRadius = 4
-        yearlyProBestBadge.layer.masksToBounds = true
-        yearlyProBestBadge.translatesAutoresizingMaskIntoConstraints = false
-        yearlyProCard.addSubview(yearlyProBestBadge)
+        ctaButton.addTarget(self, action: #selector(ctaTapped), for: .touchUpInside)
 
         // Title
-        yearlyProTitleLabel.text = "Pro " + L("onboarding.subscription.yearly")
-        yearlyProTitleLabel.font = .systemFont(ofSize: 18, weight: .bold)
-        yearlyProTitleLabel.textColor = AppColors.text
-        yearlyProTitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        yearlyProCard.addSubview(yearlyProTitleLabel)
+        let titleLabel = UILabel()
+        titleLabel.text = L("paywall.title")
+        titleLabel.font = .systemFont(ofSize: 24, weight: .bold)
+        titleLabel.textColor = AppColors.text
+        titleLabel.textAlignment = .center
+        titleLabel.numberOfLines = 0
+        contentStack.addArrangedSubview(titleLabel)
+    }
 
-        // Price
-        yearlyProPriceLabel.text = "---/yr"
-        yearlyProPriceLabel.font = .systemFont(ofSize: 22, weight: .bold)
-        yearlyProPriceLabel.textColor = AppColors.text
-        yearlyProPriceLabel.translatesAutoresizingMaskIntoConstraints = false
-        yearlyProCard.addSubview(yearlyProPriceLabel)
+    // MARK: - Feature Comparison Table
 
-        // Monthly equivalent
-        yearlyProMonthlyEquivLabel.text = ""
-        yearlyProMonthlyEquivLabel.font = .systemFont(ofSize: 13)
-        yearlyProMonthlyEquivLabel.textColor = AppColors.textSub
-        yearlyProMonthlyEquivLabel.translatesAutoresizingMaskIntoConstraints = false
-        yearlyProCard.addSubview(yearlyProMonthlyEquivLabel)
+    private func buildFeatureTable() {
+        let tableCard = UIView()
+        tableCard.backgroundColor = AppColors.card
+        tableCard.layer.cornerRadius = 16
+        tableCard.layer.borderWidth = 1
+        tableCard.layer.borderColor = AppColors.border.cgColor
 
-        // Savings label
-        yearlySavingsLabel.text = "50% OFF"
-        yearlySavingsLabel.font = .systemFont(ofSize: 12, weight: .semibold)
-        yearlySavingsLabel.textColor = AppColors.green
-        yearlySavingsLabel.translatesAutoresizingMaskIntoConstraints = false
-        yearlyProCard.addSubview(yearlySavingsLabel)
+        let tableStack = UIStackView()
+        tableStack.axis = .vertical
+        tableStack.spacing = 0
+        tableStack.translatesAutoresizingMaskIntoConstraints = false
+        tableCard.addSubview(tableStack)
 
-        // Feature list
-        let proFeatures = [
-            L("onboarding.subscription.benefit.unlimited"),
-            "Flash AI",
-            L("onboarding.subscription.benefit.themes"),
-            L("onboarding.subscription.benefit.no_ads"),
+        NSLayoutConstraint.activate([
+            tableStack.topAnchor.constraint(equalTo: tableCard.topAnchor, constant: 16),
+            tableStack.leadingAnchor.constraint(equalTo: tableCard.leadingAnchor, constant: 16),
+            tableStack.trailingAnchor.constraint(equalTo: tableCard.trailingAnchor, constant: -16),
+            tableStack.bottomAnchor.constraint(equalTo: tableCard.bottomAnchor, constant: -16),
+        ])
+
+        // Header row
+        let headerRow = makeTableRow(
+            feature: L("paywall.features_header"),
+            free: L("paywall.tier.free"),
+            pro: L("paywall.tier.pro"),
+            premium: L("paywall.tier.premium"),
+            isHeader: true
+        )
+        tableStack.addArrangedSubview(headerRow)
+        tableStack.addArrangedSubview(makeSeparator())
+
+        // Feature rows (5 rows — AI model removed per user request, Premium = unlimited)
+        let features: [(String, String, String, String)] = [
+            (L("paywall.feature.daily_usage"),
+             String(format: L("paywall.value.uses"), 10),
+             String(format: L("paywall.value.uses"), 100),
+             L("paywall.value.unlimited")),
+
+            (L("paywall.feature.tone"),
+             L("paywall.value.basic"),
+             L("paywall.value.all"),
+             L("paywall.value.all")),
+
+            (L("paywall.feature.themes"), "—", "✓", "✓"),
+
+            (L("paywall.feature.no_ads"), "—", "✓", "✓"),
+
+            (L("paywall.feature.phrases"),
+             String(format: L("paywall.value.max"), 5),
+             L("paywall.value.unlimited"),
+             L("paywall.value.unlimited")),
         ]
-        yearlyProFeaturesStack.axis = .vertical
-        yearlyProFeaturesStack.spacing = 6
-        yearlyProFeaturesStack.translatesAutoresizingMaskIntoConstraints = false
-        for feature in proFeatures {
-            let row = makeFeatureRow(feature)
-            yearlyProFeaturesStack.addArrangedSubview(row)
+
+        for (i, f) in features.enumerated() {
+            let row = makeTableRow(feature: f.0, free: f.1, pro: f.2, premium: f.3, isHeader: false)
+            tableStack.addArrangedSubview(row)
+            if i < features.count - 1 {
+                tableStack.addArrangedSubview(makeSeparator())
+            }
         }
-        yearlyProCard.addSubview(yearlyProFeaturesStack)
 
-        NSLayoutConstraint.activate([
-            yearlyProCard.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 24),
-            yearlyProCard.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
-            yearlyProCard.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
-
-            yearlyProBestBadge.topAnchor.constraint(equalTo: yearlyProCard.topAnchor, constant: 16),
-            yearlyProBestBadge.leadingAnchor.constraint(equalTo: yearlyProCard.leadingAnchor, constant: 16),
-
-            yearlyProTitleLabel.centerYAnchor.constraint(equalTo: yearlyProBestBadge.centerYAnchor),
-            yearlyProTitleLabel.leadingAnchor.constraint(equalTo: yearlyProBestBadge.trailingAnchor, constant: 8),
-
-            yearlyProPriceLabel.topAnchor.constraint(equalTo: yearlyProBestBadge.bottomAnchor, constant: 12),
-            yearlyProPriceLabel.leadingAnchor.constraint(equalTo: yearlyProCard.leadingAnchor, constant: 16),
-
-            yearlyProMonthlyEquivLabel.centerYAnchor.constraint(equalTo: yearlyProPriceLabel.centerYAnchor),
-            yearlyProMonthlyEquivLabel.leadingAnchor.constraint(equalTo: yearlyProPriceLabel.trailingAnchor, constant: 8),
-
-            yearlySavingsLabel.centerYAnchor.constraint(equalTo: yearlyProPriceLabel.centerYAnchor),
-            yearlySavingsLabel.trailingAnchor.constraint(equalTo: yearlyProCard.trailingAnchor, constant: -16),
-
-            yearlyProFeaturesStack.topAnchor.constraint(equalTo: yearlyProPriceLabel.bottomAnchor, constant: 14),
-            yearlyProFeaturesStack.leadingAnchor.constraint(equalTo: yearlyProCard.leadingAnchor, constant: 16),
-            yearlyProFeaturesStack.trailingAnchor.constraint(equalTo: yearlyProCard.trailingAnchor, constant: -16),
-            yearlyProFeaturesStack.bottomAnchor.constraint(equalTo: yearlyProCard.bottomAnchor, constant: -16),
-        ])
+        contentStack.addArrangedSubview(tableCard)
     }
 
-    // MARK: - Monthly Pro Card
+    private func makeTableRow(feature: String, free: String, pro: String, premium: String, isHeader: Bool) -> UIView {
+        let row = UIStackView()
+        row.axis = .horizontal
+        row.distribution = .fill
+        row.alignment = .center
+        row.spacing = 4
 
-    private func setupMonthlyProCard() {
-        monthlyProCard.backgroundColor = AppColors.card
-        monthlyProCard.layer.cornerRadius = 16
-        monthlyProCard.layer.borderWidth = 1
-        monthlyProCard.layer.borderColor = AppColors.border.cgColor
-        monthlyProCard.translatesAutoresizingMaskIntoConstraints = false
-        monthlyProCard.isUserInteractionEnabled = true
-        monthlyProCard.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(monthlyProTapped)))
-        contentView.addSubview(monthlyProCard)
+        let featureLabel = UILabel()
+        featureLabel.text = feature
+        featureLabel.font = isHeader
+            ? .systemFont(ofSize: 12, weight: .bold)
+            : .systemFont(ofSize: 13, weight: .regular)
+        featureLabel.textColor = isHeader ? AppColors.textMuted : AppColors.text
+        featureLabel.numberOfLines = 1
+        featureLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        featureLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
 
-        monthlyProTitleLabel.text = "Pro " + L("onboarding.subscription.monthly")
-        monthlyProTitleLabel.font = .systemFont(ofSize: 18, weight: .bold)
-        monthlyProTitleLabel.textColor = AppColors.text
-        monthlyProTitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        monthlyProCard.addSubview(monthlyProTitleLabel)
+        let freeView = makeValueLabel(free, isHeader: isHeader, isCheckOrDash: free == "✓" || free == "—")
+        let proView = makeValueLabel(pro, isHeader: isHeader, isCheckOrDash: pro == "✓" || pro == "—")
+        let premiumView = makeValueLabel(premium, isHeader: isHeader, isCheckOrDash: premium == "✓" || premium == "—")
 
-        monthlyProPriceLabel.text = "---/mo"
-        monthlyProPriceLabel.font = .systemFont(ofSize: 20, weight: .bold)
-        monthlyProPriceLabel.textColor = AppColors.text
-        monthlyProPriceLabel.translatesAutoresizingMaskIntoConstraints = false
-        monthlyProCard.addSubview(monthlyProPriceLabel)
+        row.addArrangedSubview(featureLabel)
+        row.addArrangedSubview(freeView)
+        row.addArrangedSubview(proView)
+        row.addArrangedSubview(premiumView)
 
+        // Feature label takes remaining space, value columns are fixed width
+        let colWidth: CGFloat = 58
         NSLayoutConstraint.activate([
-            monthlyProCard.topAnchor.constraint(equalTo: yearlyProCard.bottomAnchor, constant: 12),
-            monthlyProCard.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
-            monthlyProCard.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
-
-            monthlyProTitleLabel.topAnchor.constraint(equalTo: monthlyProCard.topAnchor, constant: 16),
-            monthlyProTitleLabel.leadingAnchor.constraint(equalTo: monthlyProCard.leadingAnchor, constant: 16),
-            monthlyProTitleLabel.bottomAnchor.constraint(equalTo: monthlyProCard.bottomAnchor, constant: -16),
-
-            monthlyProPriceLabel.centerYAnchor.constraint(equalTo: monthlyProCard.centerYAnchor),
-            monthlyProPriceLabel.trailingAnchor.constraint(equalTo: monthlyProCard.trailingAnchor, constant: -16),
+            freeView.widthAnchor.constraint(equalToConstant: colWidth),
+            proView.widthAnchor.constraint(equalToConstant: colWidth),
+            premiumView.widthAnchor.constraint(equalToConstant: colWidth),
         ])
-    }
 
-    // MARK: - Premium Card
-
-    private func setupPremiumCard() {
-        premiumCard.backgroundColor = AppColors.card
-        premiumCard.layer.cornerRadius = 16
-        premiumCard.layer.borderWidth = 1
-        premiumCard.layer.borderColor = AppColors.border.cgColor
-        premiumCard.translatesAutoresizingMaskIntoConstraints = false
-        premiumCard.isUserInteractionEnabled = true
-        premiumCard.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(premiumTapped)))
-        contentView.addSubview(premiumCard)
-
-        premiumBadge.text = " UNLIMITED "
-        premiumBadge.font = .systemFont(ofSize: 11, weight: .bold)
-        premiumBadge.textColor = .white
-        premiumBadge.backgroundColor = AppColors.orange
-        premiumBadge.layer.cornerRadius = 4
-        premiumBadge.layer.masksToBounds = true
-        premiumBadge.translatesAutoresizingMaskIntoConstraints = false
-        premiumCard.addSubview(premiumBadge)
-
-        premiumTitleLabel.text = "Premium " + L("onboarding.subscription.monthly")
-        premiumTitleLabel.font = .systemFont(ofSize: 18, weight: .bold)
-        premiumTitleLabel.textColor = AppColors.text
-        premiumTitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        premiumCard.addSubview(premiumTitleLabel)
-
-        premiumPriceLabel.text = "---/mo"
-        premiumPriceLabel.font = .systemFont(ofSize: 20, weight: .bold)
-        premiumPriceLabel.textColor = AppColors.text
-        premiumPriceLabel.translatesAutoresizingMaskIntoConstraints = false
-        premiumCard.addSubview(premiumPriceLabel)
-
-        NSLayoutConstraint.activate([
-            premiumCard.topAnchor.constraint(equalTo: monthlyProCard.bottomAnchor, constant: 12),
-            premiumCard.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
-            premiumCard.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
-
-            premiumBadge.topAnchor.constraint(equalTo: premiumCard.topAnchor, constant: 16),
-            premiumBadge.leadingAnchor.constraint(equalTo: premiumCard.leadingAnchor, constant: 16),
-
-            premiumTitleLabel.centerYAnchor.constraint(equalTo: premiumBadge.centerYAnchor),
-            premiumTitleLabel.leadingAnchor.constraint(equalTo: premiumBadge.trailingAnchor, constant: 8),
-
-            premiumPriceLabel.topAnchor.constraint(equalTo: premiumBadge.bottomAnchor, constant: 10),
-            premiumPriceLabel.leadingAnchor.constraint(equalTo: premiumCard.leadingAnchor, constant: 16),
-            premiumPriceLabel.bottomAnchor.constraint(equalTo: premiumCard.bottomAnchor, constant: -16),
-        ])
-    }
-
-    // MARK: - Bottom Section
-
-    private func setupBottomSection() {
-        contentView.addSubview(restoreButton)
-
-        let linksStack = UIStackView(arrangedSubviews: [termsButton, privacyButton])
-        linksStack.axis = .horizontal
-        linksStack.spacing = 16
-        linksStack.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(linksStack)
-
-        restoreButton.addTarget(self, action: #selector(restoreTapped), for: .touchUpInside)
-        termsButton.addTarget(self, action: #selector(termsTapped), for: .touchUpInside)
-        privacyButton.addTarget(self, action: #selector(privacyTapped), for: .touchUpInside)
-
-        NSLayoutConstraint.activate([
-            restoreButton.topAnchor.constraint(equalTo: premiumCard.bottomAnchor, constant: 24),
-            restoreButton.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-
-            linksStack.topAnchor.constraint(equalTo: restoreButton.bottomAnchor, constant: 12),
-            linksStack.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            linksStack.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -32),
-        ])
-    }
-
-    // MARK: - Helpers
-
-    private func makeFeatureRow(_ text: String) -> UIView {
         let container = UIView()
-        container.translatesAutoresizingMaskIntoConstraints = false
-
-        let checkmark = UILabel()
-        checkmark.text = "✓"
-        checkmark.font = .systemFont(ofSize: 14, weight: .semibold)
-        checkmark.textColor = AppColors.accent
-        checkmark.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(checkmark)
-
-        let label = UILabel()
-        label.text = text
-        label.font = .systemFont(ofSize: 14)
-        label.textColor = AppColors.textSub
-        label.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(label)
-
+        row.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(row)
         NSLayoutConstraint.activate([
-            checkmark.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            checkmark.centerYAnchor.constraint(equalTo: container.centerYAnchor),
-
-            label.leadingAnchor.constraint(equalTo: checkmark.trailingAnchor, constant: 6),
-            label.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            label.topAnchor.constraint(equalTo: container.topAnchor),
-            label.bottomAnchor.constraint(equalTo: container.bottomAnchor),
+            row.topAnchor.constraint(equalTo: container.topAnchor, constant: isHeader ? 0 : 10),
+            row.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            row.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            row.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: isHeader ? -8 : -10),
         ])
 
         return container
     }
 
-    // MARK: - Load Products
+    private func makeValueLabel(_ text: String, isHeader: Bool, isCheckOrDash: Bool) -> UILabel {
+        let label = UILabel()
+        label.textAlignment = .center
+        label.numberOfLines = 1
+        label.adjustsFontSizeToFitWidth = true
+        label.minimumScaleFactor = 0.7
+
+        if isHeader {
+            label.text = text
+            label.font = .systemFont(ofSize: 11, weight: .bold)
+            label.textColor = AppColors.textMuted
+        } else if text == "✓" {
+            label.text = "✓"
+            label.font = .systemFont(ofSize: 16, weight: .bold)
+            label.textColor = AppColors.green
+        } else if text == "—" {
+            label.text = "—"
+            label.font = .systemFont(ofSize: 14, weight: .medium)
+            label.textColor = AppColors.textMuted
+        } else {
+            label.text = text
+            label.font = .systemFont(ofSize: 12, weight: .medium)
+            label.textColor = AppColors.textSub
+        }
+
+        return label
+    }
+
+    private func makeSeparator() -> UIView {
+        let sep = UIView()
+        sep.backgroundColor = AppColors.border
+        sep.translatesAutoresizingMaskIntoConstraints = false
+        sep.heightAnchor.constraint(equalToConstant: 0.5).isActive = true
+        return sep
+    }
+
+    // MARK: - Plan Selector
+
+    private func buildPlanSelector() {
+        // Section header
+        let sectionLabel = UILabel()
+        sectionLabel.text = L("paywall.plan_section")
+        sectionLabel.font = .systemFont(ofSize: 12, weight: .semibold)
+        sectionLabel.textColor = AppColors.textMuted
+        sectionLabel.text = sectionLabel.text?.uppercased()
+        contentStack.addArrangedSubview(sectionLabel)
+        contentStack.setCustomSpacing(12, after: sectionLabel)
+
+        // Three plan cards
+        yearlyCard.tag = 0
+        monthlyCard.tag = 1
+        premiumCard.tag = 2
+
+        let yearlyContent = buildPlanRow(
+            card: yearlyCard,
+            radio: &yearlyRadio,
+            title: L("paywall.pro_yearly"),
+            priceLabel: yearlyPriceLabel,
+            subLabel: yearlyBilledLabel,
+            badge: L("paywall.save_percent"),
+            badgeColor: AppColors.green,
+            action: #selector(yearlyProTapped)
+        )
+        contentStack.addArrangedSubview(yearlyContent)
+        contentStack.setCustomSpacing(10, after: yearlyContent)
+
+        let monthlyContent = buildPlanRow(
+            card: monthlyCard,
+            radio: &monthlyRadio,
+            title: L("paywall.pro_monthly"),
+            priceLabel: monthlyPriceLabel,
+            subLabel: nil,
+            badge: nil,
+            badgeColor: nil,
+            action: #selector(monthlyProTapped)
+        )
+        contentStack.addArrangedSubview(monthlyContent)
+        contentStack.setCustomSpacing(10, after: monthlyContent)
+
+        let premiumContent = buildPlanRow(
+            card: premiumCard,
+            radio: &premiumRadio,
+            title: L("paywall.premium_monthly"),
+            priceLabel: premiumPriceLabel,
+            subLabel: nil,
+            badge: "UNLIMITED",
+            badgeColor: AppColors.orange,
+            action: #selector(premiumTapped)
+        )
+        contentStack.addArrangedSubview(premiumContent)
+    }
+
+    private func buildPlanRow(
+        card: UIView,
+        radio: inout UIView,
+        title: String,
+        priceLabel: UILabel,
+        subLabel: UILabel?,
+        badge: String?,
+        badgeColor: UIColor?,
+        action: Selector
+    ) -> UIView {
+        card.backgroundColor = AppColors.card
+        card.layer.cornerRadius = 14
+        card.layer.borderWidth = 1.5
+        card.layer.borderColor = AppColors.border.cgColor
+        card.isUserInteractionEnabled = true
+        card.addGestureRecognizer(UITapGestureRecognizer(target: self, action: action))
+
+        // Radio circle
+        let radioOuter = UIView()
+        radioOuter.layer.cornerRadius = 11
+        radioOuter.layer.borderWidth = 2
+        radioOuter.layer.borderColor = AppColors.textMuted.cgColor
+        radioOuter.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            radioOuter.widthAnchor.constraint(equalToConstant: 22),
+            radioOuter.heightAnchor.constraint(equalToConstant: 22),
+        ])
+
+        let radioInner = UIView()
+        radioInner.backgroundColor = AppColors.accent
+        radioInner.layer.cornerRadius = 6
+        radioInner.translatesAutoresizingMaskIntoConstraints = false
+        radioInner.isHidden = true
+        radioOuter.addSubview(radioInner)
+        NSLayoutConstraint.activate([
+            radioInner.centerXAnchor.constraint(equalTo: radioOuter.centerXAnchor),
+            radioInner.centerYAnchor.constraint(equalTo: radioOuter.centerYAnchor),
+            radioInner.widthAnchor.constraint(equalToConstant: 12),
+            radioInner.heightAnchor.constraint(equalToConstant: 12),
+        ])
+
+        radio = radioOuter
+
+        // Title + badge
+        let titleLabel = UILabel()
+        titleLabel.text = title
+        titleLabel.font = .systemFont(ofSize: 16, weight: .bold)
+        titleLabel.textColor = AppColors.text
+
+        let titleRow = UIStackView(arrangedSubviews: [titleLabel])
+        titleRow.axis = .horizontal
+        titleRow.spacing = 8
+        titleRow.alignment = .center
+
+        if let badge = badge, let color = badgeColor {
+            let badgeLabel = UILabel()
+            badgeLabel.text = "  \(badge)  "
+            badgeLabel.font = .systemFont(ofSize: 10, weight: .bold)
+            badgeLabel.textColor = .white
+            badgeLabel.backgroundColor = color
+            badgeLabel.layer.cornerRadius = 4
+            badgeLabel.layer.masksToBounds = true
+            titleRow.addArrangedSubview(badgeLabel)
+        }
+
+        // Price
+        priceLabel.font = .systemFont(ofSize: 14, weight: .semibold)
+        priceLabel.textColor = AppColors.textSub
+
+        let infoStack = UIStackView(arrangedSubviews: [titleRow, priceLabel])
+        infoStack.axis = .vertical
+        infoStack.spacing = 2
+        infoStack.alignment = .leading
+
+        if let sub = subLabel {
+            sub.font = .systemFont(ofSize: 12)
+            sub.textColor = AppColors.textMuted
+            infoStack.addArrangedSubview(sub)
+        }
+
+        // Horizontal: radio + info
+        let hStack = UIStackView(arrangedSubviews: [radioOuter, infoStack])
+        hStack.axis = .horizontal
+        hStack.spacing = 14
+        hStack.alignment = .center
+        hStack.translatesAutoresizingMaskIntoConstraints = false
+        card.addSubview(hStack)
+
+        NSLayoutConstraint.activate([
+            hStack.topAnchor.constraint(equalTo: card.topAnchor, constant: 14),
+            hStack.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 16),
+            hStack.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -16),
+            hStack.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -14),
+        ])
+
+        return card
+    }
+
+    // MARK: - Bottom Section
+
+    private func buildBottomSection() {
+        let restoreButton = UIButton(type: .system)
+        restoreButton.setTitle(L("onboarding.subscription.restore"), for: .normal)
+        restoreButton.titleLabel?.font = .systemFont(ofSize: 14)
+        restoreButton.setTitleColor(AppColors.textSub, for: .normal)
+        restoreButton.addTarget(self, action: #selector(restoreTapped), for: .touchUpInside)
+
+        let termsButton = UIButton(type: .system)
+        termsButton.setTitle(L("settings.terms"), for: .normal)
+        termsButton.titleLabel?.font = .systemFont(ofSize: 12)
+        termsButton.setTitleColor(AppColors.textMuted, for: .normal)
+        termsButton.addTarget(self, action: #selector(termsTapped), for: .touchUpInside)
+
+        let dotLabel = UILabel()
+        dotLabel.text = "·"
+        dotLabel.font = .systemFont(ofSize: 12)
+        dotLabel.textColor = AppColors.textMuted
+
+        let privacyButton = UIButton(type: .system)
+        privacyButton.setTitle(L("settings.privacy"), for: .normal)
+        privacyButton.titleLabel?.font = .systemFont(ofSize: 12)
+        privacyButton.setTitleColor(AppColors.textMuted, for: .normal)
+        privacyButton.addTarget(self, action: #selector(privacyTapped), for: .touchUpInside)
+
+        let linksStack = UIStackView(arrangedSubviews: [termsButton, dotLabel, privacyButton])
+        linksStack.axis = .horizontal
+        linksStack.spacing = 6
+        linksStack.alignment = .center
+
+        let bottomStack = UIStackView(arrangedSubviews: [restoreButton, linksStack])
+        bottomStack.axis = .vertical
+        bottomStack.spacing = 8
+        bottomStack.alignment = .center
+
+        contentStack.addArrangedSubview(bottomStack)
+    }
+
+    // MARK: - Selection State
+
+    private func updateSelectionState() {
+        let cards: [(UIView, UIView, SelectedPlan)] = [
+            (yearlyCard, yearlyRadio, .yearlyPro),
+            (monthlyCard, monthlyRadio, .monthlyPro),
+            (premiumCard, premiumRadio, .premium),
+        ]
+
+        for (card, radio, plan) in cards {
+            let isSelected = plan == selectedPlan
+            card.layer.borderWidth = isSelected ? 2.5 : 1.5
+            card.layer.borderColor = isSelected ? AppColors.accent.cgColor : AppColors.border.cgColor
+
+            // Radio fill
+            radio.layer.borderColor = isSelected ? AppColors.accent.cgColor : AppColors.textMuted.cgColor
+            if let inner = radio.subviews.first {
+                inner.isHidden = !isSelected
+            }
+
+            // Bounce animation
+            if isSelected {
+                UIView.animate(withDuration: 0.12, animations: {
+                    card.transform = CGAffineTransform(scaleX: 0.97, y: 0.97)
+                }) { _ in
+                    UIView.animate(withDuration: 0.12) {
+                        card.transform = .identity
+                    }
+                }
+            }
+        }
+
+        // Update CTA text
+        let ctaText: String
+        switch selectedPlan {
+        case .yearlyPro:
+            ctaText = L("paywall.cta_subscribe_yearly")
+        case .monthlyPro:
+            ctaText = L("paywall.cta_subscribe_monthly")
+        case .premium:
+            ctaText = L("paywall.cta_subscribe_premium")
+        }
+        ctaButton.setTitle(ctaText, for: .normal)
+    }
+
+    // MARK: - Pricing
+
+    private func applyFallbackPrices() {
+        let yearlyKey = StoreKitManager.ProductID.yearlyPro.rawValue
+        let monthlyKey = StoreKitManager.ProductID.monthlyPro.rawValue
+        let premiumKey = StoreKitManager.ProductID.monthlyPremium.rawValue
+
+        yearlyPriceLabel.text = String(format: L("paywall.per_month"), "$3.99")
+        yearlyBilledLabel.text = L("paywall.billed_yearly")
+        monthlyPriceLabel.text = String(format: L("paywall.per_month"), "$7.99")
+        premiumPriceLabel.text = String(format: L("paywall.per_month"), "$14.99")
+    }
 
     private func loadProducts() {
         Task {
@@ -385,7 +557,7 @@ class PaywallViewController: UIViewController {
                 try await storeKitManager.loadProducts()
                 updatePriceLabels()
             } catch {
-                // Product loading failed
+                // StoreKit failed — fallback prices already displayed
             }
         }
     }
@@ -394,24 +566,66 @@ class PaywallViewController: UIViewController {
         for product in storeKitManager.products {
             switch product.id {
             case StoreKitManager.ProductID.yearlyPro.rawValue:
-                yearlyProPriceLabel.text = product.displayPrice + "/" + L("onboarding.subscription.yearly")
-                // Calculate monthly equivalent
                 let monthlyPrice = product.price / 12
                 let formatter = NumberFormatter()
                 formatter.numberStyle = .currency
                 formatter.locale = product.priceFormatStyle.locale
                 if let formatted = formatter.string(from: monthlyPrice as NSDecimalNumber) {
-                    yearlyProMonthlyEquivLabel.text = formatted + "/" + L("onboarding.subscription.monthly")
+                    yearlyPriceLabel.text = String(format: L("paywall.per_month"), formatted)
                 }
+                yearlyBilledLabel.text = product.displayPrice
 
             case StoreKitManager.ProductID.monthlyPro.rawValue:
-                monthlyProPriceLabel.text = product.displayPrice + "/" + L("onboarding.subscription.monthly")
+                monthlyPriceLabel.text = String(format: L("paywall.per_month"), product.displayPrice)
 
             case StoreKitManager.ProductID.monthlyPremium.rawValue:
-                premiumPriceLabel.text = product.displayPrice + "/" + L("onboarding.subscription.monthly")
+                premiumPriceLabel.text = String(format: L("paywall.per_month"), product.displayPrice)
 
             default:
                 break
+            }
+        }
+    }
+
+    // MARK: - Loading State
+
+    private func setLoading(_ loading: Bool) {
+        isLoading = loading
+        ctaButton.isEnabled = !loading
+        if loading {
+            ctaButton.setTitle("", for: .normal)
+            ctaSpinner.startAnimating()
+        } else {
+            ctaSpinner.stopAnimating()
+            updateSelectionState()
+        }
+    }
+
+    // MARK: - Error Toast
+
+    private func showError(_ message: String) {
+        let toast = UILabel()
+        toast.text = "  \(message)  "
+        toast.font = .systemFont(ofSize: 14, weight: .medium)
+        toast.textColor = .white
+        toast.backgroundColor = UIColor.systemRed
+        toast.layer.cornerRadius = 10
+        toast.clipsToBounds = true
+        toast.textAlignment = .center
+        toast.alpha = 0
+        toast.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(toast)
+
+        NSLayoutConstraint.activate([
+            toast.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            toast.bottomAnchor.constraint(equalTo: ctaButton.topAnchor, constant: -12),
+            toast.heightAnchor.constraint(equalToConstant: 36),
+        ])
+
+        UIView.animate(withDuration: 0.3) { toast.alpha = 1 }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            UIView.animate(withDuration: 0.3, animations: { toast.alpha = 0 }) { _ in
+                toast.removeFromSuperview()
             }
         }
     }
@@ -423,40 +637,94 @@ class PaywallViewController: UIViewController {
     }
 
     @objc private func yearlyProTapped() {
-        purchaseProduct(id: .yearlyPro)
+        selectedPlan = .yearlyPro
+        updateSelectionState()
     }
 
     @objc private func monthlyProTapped() {
-        purchaseProduct(id: .monthlyPro)
+        selectedPlan = .monthlyPro
+        updateSelectionState()
     }
 
     @objc private func premiumTapped() {
-        purchaseProduct(id: .monthlyPremium)
+        selectedPlan = .premium
+        updateSelectionState()
+    }
+
+    @objc private func ctaTapped() {
+        guard !isLoading else { return }
+
+        let productId: StoreKitManager.ProductID
+        switch selectedPlan {
+        case .yearlyPro: productId = .yearlyPro
+        case .monthlyPro: productId = .monthlyPro
+        case .premium: productId = .monthlyPremium
+        }
+
+        purchaseProduct(id: productId)
     }
 
     private func purchaseProduct(id: StoreKitManager.ProductID) {
-        guard let product = storeKitManager.products.first(where: { $0.id == id.rawValue }) else { return }
+        guard let product = storeKitManager.products.first(where: { $0.id == id.rawValue }) else {
+            showError(L("paywall.error_loading"))
+            return
+        }
+
+        setLoading(true)
         Task {
             do {
                 let transaction = try await storeKitManager.purchase(product)
+                setLoading(false)
                 if transaction != nil {
-                    dismiss(animated: true)
+                    showSuccessAndDismiss()
                 }
             } catch {
-                // Purchase failed
+                setLoading(false)
+                showError(L("paywall.error_purchase"))
             }
         }
     }
 
+    private func showSuccessAndDismiss() {
+        let check = UIImageView(image: UIImage(systemName: "checkmark.circle.fill"))
+        check.tintColor = AppColors.green
+        check.contentMode = .scaleAspectFit
+        check.translatesAutoresizingMaskIntoConstraints = false
+        check.alpha = 0
+        check.transform = CGAffineTransform(scaleX: 0.3, y: 0.3)
+        view.addSubview(check)
+
+        NSLayoutConstraint.activate([
+            check.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            check.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            check.widthAnchor.constraint(equalToConstant: 80),
+            check.heightAnchor.constraint(equalToConstant: 80),
+        ])
+
+        UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 0.6, initialSpringVelocity: 0.8) {
+            check.alpha = 1
+            check.transform = .identity
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            self?.dismiss(animated: true)
+        }
+    }
+
     @objc private func restoreTapped() {
+        setLoading(true)
         Task {
             do {
                 try await storeKitManager.restorePurchases()
+                setLoading(false)
                 if SubscriptionStatus.shared.isPro {
-                    dismiss(animated: true)
+                    showSuccessAndDismiss()
+                } else {
+                    showError(L("paywall.error_no_subscription"))
                 }
             } catch {
-                // Restore failed
+                setLoading(false)
+                showError(L("paywall.error_restore"))
             }
         }
     }

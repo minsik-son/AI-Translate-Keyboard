@@ -263,6 +263,43 @@ class KeyboardViewController: UIInputViewController {
         updateHeight(for: currentMode, animated: true)
     }
 
+    // MARK: - Book Animation
+
+    private func animateBookOpen(_ views: [UIView]) {
+        inputView?.layoutIfNeeded()
+        for v in views {
+            v.alpha = 0
+            var t = CATransform3DIdentity
+            t.m34 = -1.0 / 500
+            t = CATransform3DRotate(t, -CGFloat.pi * 0.45, 1, 0, 0)
+            v.layer.transform = t
+        }
+        UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 0.82, initialSpringVelocity: 0.3, options: []) {
+            for v in views {
+                v.alpha = 1
+                v.layer.transform = CATransform3DIdentity
+            }
+        }
+    }
+
+    private func animateBookClose(_ views: [UIView], completion: @escaping () -> Void) {
+        UIView.animate(withDuration: 0.25, delay: 0, options: .curveEaseIn) {
+            for v in views {
+                v.alpha = 0
+                var t = CATransform3DIdentity
+                t.m34 = -1.0 / 500
+                t = CATransform3DRotate(t, -CGFloat.pi * 0.45, 1, 0, 0)
+                v.layer.transform = t
+            }
+        } completion: { _ in
+            for v in views {
+                v.layer.transform = CATransform3DIdentity
+                v.alpha = 1
+            }
+            completion()
+        }
+    }
+
     // MARK: - Setup UI
 
     private func setupUI() {
@@ -438,6 +475,9 @@ class KeyboardViewController: UIInputViewController {
         translationLanguageBar.onSwapTap = { [weak self] in
             self?.swapLanguages()
         }
+        translationLanguageBar.onCloseTap = { [weak self] in
+            self?.exitTranslationMode()
+        }
 
         // Correction Language Bar
         correctionLanguageBar.onLanguageTap = { [weak self] in
@@ -611,6 +651,7 @@ class KeyboardViewController: UIInputViewController {
         }
         CompositionSessionManager.shared.startSession(mode: .translate)
         switchMode(to: .translationMode)
+        animateBookOpen([translationLanguageBar, translationInputView])
     }
 
     private func exitTranslationMode() {
@@ -622,7 +663,9 @@ class KeyboardViewController: UIInputViewController {
         defaultModeComposingLength = 0
         translationInputHeightConstraint?.constant = Heights.translationInput
         hideLanguagePicker()
-        switchMode(to: .defaultMode)
+        animateBookClose([translationLanguageBar, translationInputView]) { [weak self] in
+            self?.switchMode(to: .defaultMode)
+        }
     }
 
     // MARK: - Correction Mode
@@ -664,6 +707,7 @@ class KeyboardViewController: UIInputViewController {
         correctionLanguageBar.updateToneName(currentToneStyle.displayName)
         correctionManager.setTone(currentToneStyle)
         switchMode(to: .correctionMode)
+        animateBookOpen([correctionLanguageBar, correctionInputView])
     }
 
     private func exitCorrectionMode() {
@@ -678,7 +722,9 @@ class KeyboardViewController: UIInputViewController {
         correctionInputHeightConstraint?.constant = Heights.translationInput
         hideTonePicker()
         hideLanguagePicker()
-        switchMode(to: .defaultMode)
+        animateBookClose([correctionLanguageBar, correctionInputView]) { [weak self] in
+            self?.switchMode(to: .defaultMode)
+        }
     }
 
     // MARK: - Saved Phrases
@@ -1457,12 +1503,13 @@ class KeyboardViewController: UIInputViewController {
 
     private func showDailyLimitReached(mode: CompositionSession.SessionMode) {
         let modeText = mode == .correct ? L("home.stat.corrections") : L("home.stat.translations")
+        let rewardMode: RewardMode = mode == .correct ? .correction : .translation
         let remaining = CompositionSessionManager.shared.remainingSessions(for: mode)
 
         if remaining <= 0 {
             // 토스트 메시지에 광고/업그레이드 안내 포함
             let message: String
-            if DailyUsageManager.shared.canWatchRewardedAd {
+            if DailyUsageManager.shared.canWatchRewardedAd(for: rewardMode) {
                 message = String(format: L("session_limit.watch_ad"), modeText)
             } else {
                 message = String(format: L("session_limit.upgrade"), modeText)
@@ -1471,8 +1518,8 @@ class KeyboardViewController: UIInputViewController {
 
             // 메인 앱의 페이월 또는 리워드 광고 화면으로 이동
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                if DailyUsageManager.shared.canWatchRewardedAd {
-                    self?.openContainingApp(path: "reward-ad")
+                if DailyUsageManager.shared.canWatchRewardedAd(for: rewardMode) {
+                    self?.openContainingApp(path: "reward-ad?mode=\(rewardMode.rawValue)")
                 } else {
                     self?.openContainingApp(path: "paywall")
                 }

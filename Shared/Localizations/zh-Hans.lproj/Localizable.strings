@@ -164,16 +164,24 @@
 "home.greeting.afternoon" = "下午好";
 "home.greeting.evening" = "晚上好";
 "home.title" = "仪表盘";
-"home.weekly_report" = "本周AI报告";
-"home.words_typed" = "个单词输入";
-"home.corrections" = "个拼写已纠正";
-"home.accuracy" = "准确率";
-"home.vs_last_week" = "vs 上周";
+// Plan Status Card
+"home.plan.free" = "Free 方案";
+"home.plan.pro" = "Pro 方案";
+"home.plan.premium" = "Premium 方案";
+"home.plan.free_desc" = "每日使用次数有限";
+"home.plan.pro_desc" = "每日100次使用";
+"home.plan.premium_desc" = "无限使用";
+"home.plan.subscribe" = "获取无限访问";
+"home.plan.price" = "仅 %@/月";
+"home.plan.subscribed" = "已订阅";
+"home.plan.daily_usage" = "每日使用量";
+"home.plan.unlimited" = "∞";
 "home.stat.corrections" = "纠正";
 "home.stat.translations" = "翻译";
 "home.stat.clipboard" = "剪贴板";
 "home.stat.phrases" = "短语";
 "home.quick_actions" = "快捷操作";
+"home.watch_ad" = "看广告充电";
 
 // === AI Writer ===
 "ai_writer.title" = "AI消息写作";
@@ -272,5 +280,50 @@
 // === Session Limit ===
 "session_limit.title" = "今日免费使用次数已用完";
 "session_limit.subtitle" = "明天可以再次使用";
-"session_limit.upgrade" = "升级到高级版";
+"session_limit.upgrade" = "%@ 已用完！升级到Pro";
+"session_limit.watch_ad" = "%@ 已用完！看广告获取更多次数";
 "session_limit.remaining" = "今日剩余: %d次";
+
+// === Rewarded Ads ===
+"reward.mode.correction" = "纠正";
+"reward.mode.translation" = "翻译";
+"reward.title_format" = "看广告充电 %@ +%d次";
+"reward.desc" = "看广告可获得%d次额外使用";
+"reward.progress" = "今日已看 %d/%d次";
+"reward.cta_watch" = "观看广告";
+"reward.cta_done" = "今日广告已全部观看";
+"reward.cta_close" = "关闭";
+"reward.bonus_granted" = "+%d次已充电！";
+"reward.ad_failed" = "广告加载失败，请重试";
+"reward.limit_reached" = "今日广告已全部观看";
+
+// === Paywall ===
+"paywall.title" = "选择适合你的方案";
+"paywall.features_header" = "功能";
+"paywall.tier.free" = "FREE";
+"paywall.tier.pro" = "PRO";
+"paywall.tier.premium" = "PREMIUM";
+"paywall.feature.daily_usage" = "每日纠正/翻译";
+"paywall.feature.tone" = "语气风格";
+"paywall.feature.themes" = "高级主题";
+"paywall.feature.no_ads" = "无广告";
+"paywall.feature.phrases" = "保存的短语";
+"paywall.value.basic" = "默认";
+"paywall.value.all" = "全部";
+"paywall.value.unlimited" = "无限";
+"paywall.value.uses" = "%d";
+"paywall.value.max" = "%d";
+"paywall.plan_section" = "选择方案";
+"paywall.pro_yearly" = "Pro 年付";
+"paywall.pro_monthly" = "Pro 月付";
+"paywall.premium_monthly" = "Premium 月付";
+"paywall.save_percent" = "省50%";
+"paywall.billed_yearly" = "一次性支付 $47.99";
+"paywall.per_month" = "%@/月";
+"paywall.cta_subscribe_yearly" = "开始Pro年付";
+"paywall.cta_subscribe_monthly" = "开始Pro月付";
+"paywall.cta_subscribe_premium" = "开始Premium";
+"paywall.error_loading" = "无法加载产品信息";
+"paywall.error_purchase" = "购买失败，请重试";
+"paywall.error_restore" = "恢复失败";
+"paywall.error_no_subscription" = "未找到有效订阅";

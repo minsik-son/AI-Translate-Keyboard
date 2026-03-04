@@ -164,11 +164,18 @@
 "home.greeting.afternoon" = "Good afternoon";
 "home.greeting.evening" = "Good evening";
 "home.title" = "Dashboard";
-"home.weekly_report" = "Weekly AI Report";
-"home.words_typed" = "words typed";
-"home.corrections" = "typos corrected";
-"home.accuracy" = "accuracy";
-"home.vs_last_week" = "vs last week";
+// Plan Status Card
+"home.plan.free" = "Free Plan";
+"home.plan.pro" = "Pro Plan";
+"home.plan.premium" = "Premium Plan";
+"home.plan.free_desc" = "Daily usage limited";
+"home.plan.pro_desc" = "100 uses per day";
+"home.plan.premium_desc" = "Unlimited usage";
+"home.plan.subscribe" = "Subscribe to Pro";
+"home.plan.price" = "Only %@/mo";
+"home.plan.subscribed" = "Subscribed";
+"home.plan.daily_usage" = "Daily Usage";
+"home.plan.unlimited" = "∞";
 "home.stat.corrections" = "Corrections";
 "home.stat.translations" = "Translations";
 "home.stat.clipboard" = "Clipboard";
@@ -276,3 +283,47 @@
 "session_limit.upgrade" = "%@ limit reached! Upgrade to Pro";
 "session_limit.watch_ad" = "%@ limit reached! Watch an ad for more";
 "session_limit.remaining" = "Remaining today: %d";
+
+// === Rewarded Ads ===
+"reward.mode.correction" = "Correction";
+"reward.mode.translation" = "Translation";
+"reward.title_format" = "Recharge %@ +%d Uses";
+"reward.desc" = "Watch an ad to get %d more uses";
+"reward.progress" = "%d/%d watched today";
+"reward.cta_watch" = "Watch Ad";
+"reward.cta_done" = "All ads watched for today";
+"reward.cta_close" = "Close";
+"reward.bonus_granted" = "+%d recharged!";
+"reward.ad_failed" = "Failed to load ad. Please try again";
+"reward.limit_reached" = "All ads watched for today";
+
+// === Paywall ===
+"paywall.title" = "Choose the right plan for you";
+"paywall.features_header" = "FEATURES";
+"paywall.tier.free" = "FREE";
+"paywall.tier.pro" = "PRO";
+"paywall.tier.premium" = "PREMIUM";
+"paywall.feature.daily_usage" = "Daily usage";
+"paywall.feature.tone" = "Tone styles";
+"paywall.feature.themes" = "Premium themes";
+"paywall.feature.no_ads" = "No ads";
+"paywall.feature.phrases" = "Saved phrases";
+"paywall.value.basic" = "Default";
+"paywall.value.all" = "All";
+"paywall.value.unlimited" = "Unlimited";
+"paywall.value.uses" = "%d";
+"paywall.value.max" = "%d";
+"paywall.plan_section" = "Choose plan";
+"paywall.pro_yearly" = "Pro Annual";
+"paywall.pro_monthly" = "Pro Monthly";
+"paywall.premium_monthly" = "Premium Monthly";
+"paywall.save_percent" = "SAVE 50%";
+"paywall.billed_yearly" = "Billed as $47.99";
+"paywall.per_month" = "%@/mo";
+"paywall.cta_subscribe_yearly" = "Start Pro Yearly";
+"paywall.cta_subscribe_monthly" = "Start Pro Monthly";
+"paywall.cta_subscribe_premium" = "Start Premium";
+"paywall.error_loading" = "Unable to load product info";
+"paywall.error_purchase" = "Purchase failed. Please try again";
+"paywall.error_restore" = "Restore failed";
+"paywall.error_no_subscription" = "No active subscription found";

@@ -2,220 +2,253 @@ import UIKit
 
 class RewardedAdsViewController: UIViewController, AdManagerDelegate {
 
+    // MARK: - Properties
+
+    private let mode: RewardMode
+    private let maxAds = FeatureGate.shared.maxDailyRewardedAds
+    private let bonus = FeatureGate.shared.rewardedAdBonusCount
+
     // MARK: - UI Elements
 
     private let closeButton: UIButton = {
         let btn = UIButton(type: .system)
-        btn.setImage(UIImage(systemName: "xmark"), for: .normal)
-        btn.tintColor = AppColors.text
+        let config = UIImage.SymbolConfiguration(pointSize: 14, weight: .semibold)
+        btn.setImage(UIImage(systemName: "xmark", withConfiguration: config), for: .normal)
+        btn.tintColor = AppColors.textSub
         btn.translatesAutoresizingMaskIntoConstraints = false
         return btn
     }()
 
+    private let iconContainer: UIView = {
+        let v = UIView()
+        v.backgroundColor = AppColors.accent.withAlphaComponent(0.12)
+        v.layer.cornerRadius = 48
+        v.translatesAutoresizingMaskIntoConstraints = false
+        return v
+    }()
+
+    private let iconView: UIImageView = {
+        let iv = UIImageView()
+        let config = UIImage.SymbolConfiguration(pointSize: 40, weight: .medium)
+        iv.image = UIImage(systemName: "gift.fill", withConfiguration: config)
+        iv.tintColor = AppColors.accent
+        iv.contentMode = .scaleAspectFit
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        return iv
+    }()
+
     private let titleLabel: UILabel = {
         let label = UILabel()
-        // TODO: Localize - "Get More Uses"
-        label.text = "Get More Uses"
         label.font = .systemFont(ofSize: 24, weight: .bold)
         label.textColor = AppColors.text
         label.textAlignment = .center
+        label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
 
-    private let correctionsCard: UIView = {
-        let view = UIView()
-        view.backgroundColor = AppColors.card
-        view.layer.cornerRadius = 12
-        view.layer.borderWidth = 1
-        view.layer.borderColor = AppColors.border.cgColor
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
-
-    private let correctionsIconLabel: UILabel = {
+    private let descLabel: UILabel = {
         let label = UILabel()
-        label.text = "Corrections"
-        label.font = .systemFont(ofSize: 15, weight: .medium)
+        label.font = .systemFont(ofSize: 15)
         label.textColor = AppColors.textSub
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-
-    private let correctionsCountLabel: UILabel = {
-        let label = UILabel()
-        label.font = .systemFont(ofSize: 32, weight: .bold)
-        label.textColor = AppColors.accent
         label.textAlignment = .center
+        label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
 
-    private let translationsCard: UIView = {
-        let view = UIView()
-        view.backgroundColor = AppColors.card
-        view.layer.cornerRadius = 12
-        view.layer.borderWidth = 1
-        view.layer.borderColor = AppColors.border.cgColor
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
+    private let dotsContainer: UIStackView = {
+        let sv = UIStackView()
+        sv.axis = .horizontal
+        sv.spacing = 10
+        sv.alignment = .center
+        sv.distribution = .equalCentering
+        sv.translatesAutoresizingMaskIntoConstraints = false
+        return sv
     }()
 
-    private let translationsIconLabel: UILabel = {
+    private let progressLabel: UILabel = {
         let label = UILabel()
-        label.text = "Translations"
-        label.font = .systemFont(ofSize: 15, weight: .medium)
-        label.textColor = AppColors.textSub
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-
-    private let translationsCountLabel: UILabel = {
-        let label = UILabel()
-        label.font = .systemFont(ofSize: 32, weight: .bold)
-        label.textColor = AppColors.accent
-        label.textAlignment = .center
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-
-    private let adsRemainingLabel: UILabel = {
-        let label = UILabel()
-        label.font = .systemFont(ofSize: 14)
+        label.font = .systemFont(ofSize: 13, weight: .medium)
         label.textColor = AppColors.textSub
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
 
-    private let watchAdButton: UIButton = {
+    private let ctaButton: UIButton = {
         let btn = UIButton(type: .system)
-        // TODO: Localize - "Watch ad to get +5"
-        btn.setTitle("Watch ad to get +5", for: .normal)
         btn.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
-        btn.backgroundColor = AppColors.accent
         btn.setTitleColor(.white, for: .normal)
-        btn.layer.cornerRadius = 12
+        btn.backgroundColor = AppColors.accent
+        btn.layer.cornerRadius = 14
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        return btn
+    }()
+
+    private let closeTextButton: UIButton = {
+        let btn = UIButton(type: .system)
+        btn.setTitle(L("reward.cta_close"), for: .normal)
+        btn.titleLabel?.font = .systemFont(ofSize: 15, weight: .medium)
+        btn.setTitleColor(AppColors.textSub, for: .normal)
         btn.translatesAutoresizingMaskIntoConstraints = false
         return btn
     }()
 
     private let feedbackLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 15, weight: .medium)
-        label.textColor = AppColors.green
+        label.font = .systemFont(ofSize: 15, weight: .semibold)
+        label.textColor = .white
         label.textAlignment = .center
+        label.backgroundColor = AppColors.green
+        label.layer.cornerRadius = 12
+        label.clipsToBounds = true
         label.alpha = 0
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
+
+    private var dotViews: [UIView] = []
+
+    // MARK: - Init
+
+    init(mode: RewardMode) {
+        self.mode = mode
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     // MARK: - Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = AppColors.bg
-        setupUI()
-        updateCounts()
+        setupLayout()
+        updateUI()
         AdManager.shared.delegate = self
         AdManager.shared.loadRewardedAd()
     }
 
-    // MARK: - Setup
+    // MARK: - Layout
 
-    private func setupUI() {
+    private func setupLayout() {
+        // Close button (top-right)
         view.addSubview(closeButton)
-        view.addSubview(titleLabel)
-        view.addSubview(correctionsCard)
-        correctionsCard.addSubview(correctionsIconLabel)
-        correctionsCard.addSubview(correctionsCountLabel)
-        view.addSubview(translationsCard)
-        translationsCard.addSubview(translationsIconLabel)
-        translationsCard.addSubview(translationsCountLabel)
-        view.addSubview(adsRemainingLabel)
-        view.addSubview(watchAdButton)
+        NSLayoutConstraint.activate([
+            closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            closeButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            closeButton.widthAnchor.constraint(equalToConstant: 32),
+            closeButton.heightAnchor.constraint(equalToConstant: 32),
+        ])
+        closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
+
+        // Center content stack
+        let centerStack = UIStackView(arrangedSubviews: [iconContainer, titleLabel, descLabel, dotsContainer, progressLabel])
+        centerStack.axis = .vertical
+        centerStack.alignment = .center
+        centerStack.spacing = 16
+        centerStack.setCustomSpacing(24, after: iconContainer)
+        centerStack.setCustomSpacing(8, after: titleLabel)
+        centerStack.setCustomSpacing(24, after: descLabel)
+        centerStack.setCustomSpacing(8, after: dotsContainer)
+        centerStack.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(centerStack)
+
+        // Icon inside container
+        iconContainer.addSubview(iconView)
+        NSLayoutConstraint.activate([
+            iconContainer.widthAnchor.constraint(equalToConstant: 96),
+            iconContainer.heightAnchor.constraint(equalToConstant: 96),
+            iconView.centerXAnchor.constraint(equalTo: iconContainer.centerXAnchor),
+            iconView.centerYAnchor.constraint(equalTo: iconContainer.centerYAnchor),
+        ])
+
+        // Center the stack vertically (slightly above center)
+        NSLayoutConstraint.activate([
+            centerStack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            centerStack.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -40),
+            centerStack.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: 32),
+            centerStack.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -32),
+        ])
+
+        // Dot indicators
+        setupDots()
+
+        // Bottom buttons
+        view.addSubview(ctaButton)
+        view.addSubview(closeTextButton)
         view.addSubview(feedbackLabel)
 
         NSLayoutConstraint.activate([
-            closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            closeButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            closeButton.widthAnchor.constraint(equalToConstant: 30),
-            closeButton.heightAnchor.constraint(equalToConstant: 30),
+            ctaButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+            ctaButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
+            ctaButton.heightAnchor.constraint(equalToConstant: 54),
+            ctaButton.bottomAnchor.constraint(equalTo: closeTextButton.topAnchor, constant: -12),
 
-            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 60),
-            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
+            closeTextButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            closeTextButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12),
 
-            // Cards side by side
-            correctionsCard.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 32),
-            correctionsCard.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            correctionsCard.trailingAnchor.constraint(equalTo: view.centerXAnchor, constant: -8),
-            correctionsCard.heightAnchor.constraint(equalToConstant: 100),
-
-            correctionsIconLabel.topAnchor.constraint(equalTo: correctionsCard.topAnchor, constant: 16),
-            correctionsIconLabel.centerXAnchor.constraint(equalTo: correctionsCard.centerXAnchor),
-
-            correctionsCountLabel.topAnchor.constraint(equalTo: correctionsIconLabel.bottomAnchor, constant: 8),
-            correctionsCountLabel.centerXAnchor.constraint(equalTo: correctionsCard.centerXAnchor),
-
-            translationsCard.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 32),
-            translationsCard.leadingAnchor.constraint(equalTo: view.centerXAnchor, constant: 8),
-            translationsCard.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            translationsCard.heightAnchor.constraint(equalToConstant: 100),
-
-            translationsIconLabel.topAnchor.constraint(equalTo: translationsCard.topAnchor, constant: 16),
-            translationsIconLabel.centerXAnchor.constraint(equalTo: translationsCard.centerXAnchor),
-
-            translationsCountLabel.topAnchor.constraint(equalTo: translationsIconLabel.bottomAnchor, constant: 8),
-            translationsCountLabel.centerXAnchor.constraint(equalTo: translationsCard.centerXAnchor),
-
-            // Ads remaining label
-            adsRemainingLabel.topAnchor.constraint(equalTo: correctionsCard.bottomAnchor, constant: 32),
-            adsRemainingLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            adsRemainingLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-
-            // Watch ad button
-            watchAdButton.topAnchor.constraint(equalTo: adsRemainingLabel.bottomAnchor, constant: 16),
-            watchAdButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            watchAdButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            watchAdButton.heightAnchor.constraint(equalToConstant: 52),
-
-            // Feedback label
-            feedbackLabel.topAnchor.constraint(equalTo: watchAdButton.bottomAnchor, constant: 16),
-            feedbackLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            feedbackLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
+            feedbackLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 40),
+            feedbackLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40),
+            feedbackLabel.heightAnchor.constraint(equalToConstant: 44),
+            feedbackLabel.bottomAnchor.constraint(equalTo: ctaButton.topAnchor, constant: -16),
         ])
 
-        closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
-        watchAdButton.addTarget(self, action: #selector(watchAdTapped), for: .touchUpInside)
+        ctaButton.addTarget(self, action: #selector(watchAdTapped), for: .touchUpInside)
+        closeTextButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
+    }
+
+    private func setupDots() {
+        for _ in 0..<maxAds {
+            let dot = UIView()
+            dot.layer.cornerRadius = 6
+            dot.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                dot.widthAnchor.constraint(equalToConstant: 12),
+                dot.heightAnchor.constraint(equalToConstant: 12),
+            ])
+            dotsContainer.addArrangedSubview(dot)
+            dotViews.append(dot)
+        }
     }
 
     // MARK: - Update UI
 
-    private func updateCounts() {
-        let remaining = DailyUsageManager.shared
-        correctionsCountLabel.text = "\(remaining.remainingCorrections)"
-        translationsCountLabel.text = "\(remaining.remainingTranslations)"
+    private func updateUI() {
+        let watched = DailyUsageManager.shared.rewardedAdCount(for: mode)
+        let canWatch = DailyUsageManager.shared.canWatchRewardedAd(for: mode)
 
-        let adsLeft = max(0, FeatureGate.shared.maxDailyRewardedAds - DailyUsageManager.shared.rewardedAdCount)
-        // TODO: Localize - "Ads remaining today: X"
-        adsRemainingLabel.text = "Ads remaining today: \(adsLeft)"
+        // Title
+        let modeText = mode == .correction ? L("reward.mode.correction") : L("reward.mode.translation")
+        titleLabel.text = String(format: L("reward.title_format"), modeText, bonus)
 
-        let canWatch = DailyUsageManager.shared.canWatchRewardedAd
-        watchAdButton.isEnabled = canWatch
-        watchAdButton.alpha = canWatch ? 1.0 : 0.5
-    }
+        // Description
+        descLabel.text = String(format: L("reward.desc"), bonus)
 
-    private func showFeedback(_ message: String) {
-        feedbackLabel.text = message
-        feedbackLabel.alpha = 0
-        UIView.animate(withDuration: 0.3) {
-            self.feedbackLabel.alpha = 1
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-            UIView.animate(withDuration: 0.3) {
-                self.feedbackLabel.alpha = 0
+        // Dots
+        for (i, dot) in dotViews.enumerated() {
+            if i < watched {
+                dot.backgroundColor = AppColors.accent
+            } else {
+                dot.backgroundColor = AppColors.border
             }
+        }
+
+        // Progress
+        progressLabel.text = String(format: L("reward.progress"), watched, maxAds)
+
+        // CTA
+        if canWatch {
+            ctaButton.setTitle(L("reward.cta_watch"), for: .normal)
+            ctaButton.backgroundColor = AppColors.accent
+            ctaButton.isEnabled = true
+        } else {
+            ctaButton.setTitle(L("reward.cta_done"), for: .normal)
+            ctaButton.backgroundColor = AppColors.textMuted
+            ctaButton.isEnabled = false
         }
     }
 
@@ -226,27 +259,57 @@ class RewardedAdsViewController: UIViewController, AdManagerDelegate {
     }
 
     @objc private func watchAdTapped() {
-        AdManager.shared.showRewardedAd(from: self)
+        AdManager.shared.showRewardedAd(from: self, mode: mode)
+    }
+
+    // MARK: - Feedback
+
+    private func showFeedback(_ message: String, isError: Bool = false) {
+        feedbackLabel.text = "  \(message)  "
+        feedbackLabel.backgroundColor = isError ? .systemRed : AppColors.green
+        feedbackLabel.alpha = 0
+        feedbackLabel.transform = CGAffineTransform(translationX: 0, y: 10)
+
+        UIView.animate(withDuration: 0.3) {
+            self.feedbackLabel.alpha = 1
+            self.feedbackLabel.transform = .identity
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+            UIView.animate(withDuration: 0.3) {
+                self.feedbackLabel.alpha = 0
+            }
+        }
     }
 
     // MARK: - AdManagerDelegate
 
     func adManagerDidRewardUser(_ manager: AdManager) {
-        updateCounts()
-        // TODO: Localize - "Bonus granted!"
-        showFeedback("Bonus granted!")
+        // Animate the newly filled dot
+        let watched = DailyUsageManager.shared.rewardedAdCount(for: mode)
+        let dotIndex = watched - 1
+        if dotIndex >= 0, dotIndex < dotViews.count {
+            let dot = dotViews[dotIndex]
+            dot.transform = CGAffineTransform(scaleX: 0.3, y: 0.3)
+            dot.backgroundColor = AppColors.accent
+            UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.8) {
+                dot.transform = .identity
+            }
+        }
+
+        updateUI()
+        showFeedback(String(format: L("reward.bonus_granted"), bonus))
     }
 
     func adManagerDidFailToLoad(_ manager: AdManager) {
-        showFeedback("Failed to load ad. Try again later.")
+        showFeedback(L("reward.ad_failed"), isError: true)
     }
 
     func adManagerDidDismissAd(_ manager: AdManager) {
-        // No special handling needed
+        // Handled by didRewardUser
     }
 
     func adManagerReachedDailyLimit(_ manager: AdManager) {
-        showFeedback("Daily ad limit reached.")
-        updateCounts()
+        updateUI()
+        showFeedback(L("reward.limit_reached"))
     }
 }

@@ -164,16 +164,24 @@
 "home.greeting.afternoon" = "こんにちは";
 "home.greeting.evening" = "こんばんは";
 "home.title" = "ダッシュボード";
-"home.weekly_report" = "今週のAIレポート";
-"home.words_typed" = "単語入力";
-"home.corrections" = "個のタイプミスを修正";
-"home.accuracy" = "正確度";
-"home.vs_last_week" = "先週比";
+// Plan Status Card
+"home.plan.free" = "Free プラン";
+"home.plan.pro" = "Pro プラン";
+"home.plan.premium" = "Premium プラン";
+"home.plan.free_desc" = "1日の使用回数制限あり";
+"home.plan.pro_desc" = "1日100回使用可能";
+"home.plan.premium_desc" = "無制限使用";
+"home.plan.subscribe" = "Proに登録";
+"home.plan.price" = "Only %@/月";
+"home.plan.subscribed" = "購読中";
+"home.plan.daily_usage" = "1日の使用量";
+"home.plan.unlimited" = "∞";
 "home.stat.corrections" = "修正";
 "home.stat.translations" = "翻訳";
 "home.stat.clipboard" = "クリップボード";
 "home.stat.phrases" = "定型文";
 "home.quick_actions" = "クイックアクション";
+"home.watch_ad" = "広告を見て充電する";
 
 // === AI Writer ===
 "ai_writer.title" = "AIメッセージ作成";
@@ -272,5 +280,50 @@
 // === Session Limit ===
 "session_limit.title" = "今日の無料利用回数を使い切りました";
 "session_limit.subtitle" = "明日また利用できます";
-"session_limit.upgrade" = "プレミアムにアップグレード";
+"session_limit.upgrade" = "%@ 使い切り！Proにアップグレード";
+"session_limit.watch_ad" = "%@ 使い切り！広告を見て追加回数を取得";
 "session_limit.remaining" = "本日の残り回数: %d回";
+
+// === Rewarded Ads ===
+"reward.mode.correction" = "修正";
+"reward.mode.translation" = "翻訳";
+"reward.title_format" = "広告を見て %@ +%d回充電";
+"reward.desc" = "広告を視聴すると%d回が追加されます";
+"reward.progress" = "本日 %d/%d回視聴済み";
+"reward.cta_watch" = "広告を視聴する";
+"reward.cta_done" = "本日の広告をすべて視聴しました";
+"reward.cta_close" = "閉じる";
+"reward.bonus_granted" = "+%d回充電完了！";
+"reward.ad_failed" = "広告の読み込みに失敗しました。もう一度お試しください";
+"reward.limit_reached" = "本日の広告をすべて視聴しました";
+
+// === Paywall ===
+"paywall.title" = "自分に合ったプランを選択してください";
+"paywall.features_header" = "機能";
+"paywall.tier.free" = "FREE";
+"paywall.tier.pro" = "PRO";
+"paywall.tier.premium" = "PREMIUM";
+"paywall.feature.daily_usage" = "1日の修正/翻訳";
+"paywall.feature.tone" = "トーンスタイル";
+"paywall.feature.themes" = "プレミアムテーマ";
+"paywall.feature.no_ads" = "広告なし";
+"paywall.feature.phrases" = "保存フレーズ";
+"paywall.value.basic" = "デフォルト";
+"paywall.value.all" = "すべて";
+"paywall.value.unlimited" = "無制限";
+"paywall.value.uses" = "%d";
+"paywall.value.max" = "%d";
+"paywall.plan_section" = "プラン選択";
+"paywall.pro_yearly" = "Pro 年額";
+"paywall.pro_monthly" = "Pro 月額";
+"paywall.premium_monthly" = "Premium 月額";
+"paywall.save_percent" = "SAVE 50%";
+"paywall.billed_yearly" = "$47.99 一括払い";
+"paywall.per_month" = "%@/月";
+"paywall.cta_subscribe_yearly" = "Pro年額プランを開始";
+"paywall.cta_subscribe_monthly" = "Pro月額プランを開始";
+"paywall.cta_subscribe_premium" = "Premiumを開始";
+"paywall.error_loading" = "商品情報を読み込めません";
+"paywall.error_purchase" = "購入に失敗しました。もう一度お試しください";
+"paywall.error_restore" = "復元に失敗しました";
+"paywall.error_no_subscription" = "アクティブな購読が見つかりません";

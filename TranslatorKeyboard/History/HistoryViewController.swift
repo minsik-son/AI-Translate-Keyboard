@@ -113,6 +113,12 @@ class HistoryViewController: UIViewController {
 
     // MARK: - Actions
 
+    func selectFilter(_ type: HistoryType?) {
+        selectedFilter = type
+        updateFilterAppearance()
+        reloadData()
+    }
+
     @objc private func filterTapped(_ sender: UIButton) {
         let filters: [HistoryType?] = [nil, .translation, .correction, .clipboard]
         selectedFilter = filters[sender.tag]

@@ -14,6 +14,7 @@ final class AdManager: NSObject {
     private static let rewardedAdUnitID = "ca-app-pub-xxxxxxxxxxxxx/xxxxxxxxxx" // Replace with real ID
 
     private var isAdReady = false
+    private(set) var currentMode: RewardMode = .correction
 
     private override init() {
         super.init()
@@ -35,25 +36,26 @@ final class AdManager: NSObject {
         isAdReady = true
     }
 
-    func showRewardedAd(from viewController: UIViewController) {
+    func showRewardedAd(from viewController: UIViewController, mode: RewardMode) {
+        currentMode = mode
         guard isAdReady else {
             loadRewardedAd()
             return
         }
-        guard DailyUsageManager.shared.canWatchRewardedAd else {
+        guard DailyUsageManager.shared.canWatchRewardedAd(for: mode) else {
             delegate?.adManagerReachedDailyLimit(self)
             return
         }
         // When ad completes, grant bonus
-        grantReward()
+        grantReward(mode: mode)
     }
 
-    var canShowAd: Bool {
-        return isAdReady && DailyUsageManager.shared.canWatchRewardedAd
+    func canShowAd(for mode: RewardMode) -> Bool {
+        return isAdReady && DailyUsageManager.shared.canWatchRewardedAd(for: mode)
     }
 
-    private func grantReward() {
-        DailyUsageManager.shared.recordRewardedAd()
+    private func grantReward(mode: RewardMode) {
+        DailyUsageManager.shared.recordRewardedAd(for: mode)
         delegate?.adManagerDidRewardUser(self)
         isAdReady = false
         loadRewardedAd()

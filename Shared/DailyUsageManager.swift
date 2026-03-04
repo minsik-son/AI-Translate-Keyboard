@@ -1,5 +1,10 @@
 import Foundation
 
+enum RewardMode: String {
+    case correction
+    case translation
+}
+
 final class DailyUsageManager {
     static let shared = DailyUsageManager()
 
@@ -7,7 +12,8 @@ final class DailyUsageManager {
 
     private let correctionCountKey = "daily_correction_count"
     private let translationCountKey = "daily_translation_count"
-    private let rewardedAdCountKey = "daily_rewarded_ad_count"
+    private let rewardedAdCorrectionCountKey = "daily_rewarded_ad_correction_count"
+    private let rewardedAdTranslationCountKey = "daily_rewarded_ad_translation_count"
     private let bonusCorrectionKey = "bonus_correction_count"
     private let bonusTranslationKey = "bonus_translation_count"
     private let lastResetDateKey = "daily_usage_last_reset"
@@ -69,27 +75,28 @@ final class DailyUsageManager {
         return remainingTranslations > 0
     }
 
-    // MARK: - Rewarded Ads
+    // MARK: - Rewarded Ads (Mode-specific)
 
-    var rewardedAdCount: Int {
+    func rewardedAdCount(for mode: RewardMode) -> Int {
         resetIfNewDay()
-        return defaults?.integer(forKey: rewardedAdCountKey) ?? 0
+        let key = mode == .correction ? rewardedAdCorrectionCountKey : rewardedAdTranslationCountKey
+        return defaults?.integer(forKey: key) ?? 0
     }
 
-    var canWatchRewardedAd: Bool {
+    func canWatchRewardedAd(for mode: RewardMode) -> Bool {
         return FeatureGate.shared.canShowRewardedAd
-            && rewardedAdCount < FeatureGate.shared.maxDailyRewardedAds
+            && rewardedAdCount(for: mode) < FeatureGate.shared.maxDailyRewardedAds
     }
 
-    func recordRewardedAd() {
-        let count = rewardedAdCount + 1
-        defaults?.set(count, forKey: rewardedAdCountKey)
+    func recordRewardedAd(for mode: RewardMode) {
+        let key = mode == .correction ? rewardedAdCorrectionCountKey : rewardedAdTranslationCountKey
+        let count = (defaults?.integer(forKey: key) ?? 0) + 1
+        defaults?.set(count, forKey: key)
 
         let bonus = FeatureGate.shared.rewardedAdBonusCount
-        let currentCorrectionBonus = defaults?.integer(forKey: bonusCorrectionKey) ?? 0
-        let currentTranslationBonus = defaults?.integer(forKey: bonusTranslationKey) ?? 0
-        defaults?.set(currentCorrectionBonus + bonus, forKey: bonusCorrectionKey)
-        defaults?.set(currentTranslationBonus + bonus, forKey: bonusTranslationKey)
+        let bonusKey = mode == .correction ? bonusCorrectionKey : bonusTranslationKey
+        let currentBonus = defaults?.integer(forKey: bonusKey) ?? 0
+        defaults?.set(currentBonus + bonus, forKey: bonusKey)
     }
 
     // MARK: - Midnight Reset
@@ -101,7 +108,8 @@ final class DailyUsageManager {
         if today > lastReset {
             defaults?.set(0, forKey: correctionCountKey)
             defaults?.set(0, forKey: translationCountKey)
-            defaults?.set(0, forKey: rewardedAdCountKey)
+            defaults?.set(0, forKey: rewardedAdCorrectionCountKey)
+            defaults?.set(0, forKey: rewardedAdTranslationCountKey)
             defaults?.set(0, forKey: bonusCorrectionKey)
             defaults?.set(0, forKey: bonusTranslationKey)
             defaults?.set(today, forKey: lastResetDateKey)
