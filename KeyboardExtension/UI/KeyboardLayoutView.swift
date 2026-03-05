@@ -593,11 +593,7 @@ class KeyboardLayoutView: UIView {
         configureButtonAppearance(button, key: key)
 
         button.layer.cornerRadius = Layout.cornerRadius
-        button.layer.shadowColor = UIColor.black.cgColor
-        button.layer.shadowOffset = CGSize(width: 0, height: 1)
-        button.layer.shadowOpacity = isDark ? 0.4 : 0.2
-        button.layer.shadowRadius = 0.5
-        button.clipsToBounds = false
+        button.clipsToBounds = true
 
         allKeyButtons.append(button)
         return button
@@ -1089,7 +1085,6 @@ class KeyboardLayoutView: UIView {
             } else {
                 button.backgroundColor = isDark ? UIColor(white: 0.30, alpha: 1) : UIColor(white: 0.88, alpha: 1)
             }
-            button.layer.shadowOpacity = 0
         }
 
         onTrackpadModeChanged?(true)
