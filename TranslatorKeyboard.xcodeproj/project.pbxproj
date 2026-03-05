@@ -15,12 +15,18 @@
 		3E5922FE0A6B41D79E37A4CD /* DailyUsageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA63F578073C4EA0A059B928 /* DailyUsageManager.swift */; };
 		AD15949F86CE40BDADBB12E1 /* AdminMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F2D41AC8FC84858A4EF2A49 /* AdminMode.swift */; };
 		90C244B176664DB7B8761707 /* AdminMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F2D41AC8FC84858A4EF2A49 /* AdminMode.swift */; };
+		DU01AA11BB22CC33DD440002 /* DailyUsageData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DU01AA11BB22CC33DD440001 /* DailyUsageData.swift */; };
+		DU01AA11BB22CC33DD440003 /* DailyUsageData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DU01AA11BB22CC33DD440001 /* DailyUsageData.swift */; };
+		KH01AA11BB22CC33DD440002 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = KH01AA11BB22CC33DD440001 /* KeychainHelper.swift */; };
+		KH01AA11BB22CC33DD440003 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = KH01AA11BB22CC33DD440001 /* KeychainHelper.swift */; };
 		SP01AA11BB22CC33DD440002 /* StatusPopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SP01AA11BB22CC33DD440001 /* StatusPopupView.swift */; };
 		CM01AA11BB22CC33DD440002 /* ContextMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CM01AA11BB22CC33DD440001 /* ContextMenuView.swift */; };
 		DS01AA11BB22CC33DD440002 /* DiffSuggestionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DS01AA11BB22CC33DD440001 /* DiffSuggestionView.swift */; };
 		FFFE634A94A64A2F8F243186 /* FeatureGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureGate.swift; sourceTree = "<group>"; };
 		FA63F578073C4EA0A059B928 /* DailyUsageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyUsageManager.swift; sourceTree = "<group>"; };
 		9F2D41AC8FC84858A4EF2A49 /* AdminMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminMode.swift; sourceTree = "<group>"; };
+		DU01AA11BB22CC33DD440001 /* DailyUsageData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyUsageData.swift; sourceTree = "<group>"; };
+		KH01AA11BB22CC33DD440001 /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
 		1D98277DFBD46B145B1AEA14 /* AppGroupManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FE78200C931753ED4B82721 /* AppGroupManager.swift */; };
 		1F142C55559956B546EB2E1C /* AdManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33DDEB1B46819A80FA123ADC /* AdManager.swift */; };
 		20242EBCBB1F370E0C1A4B16 /* KeyboardExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 15F02063B8037FB8B731BEE2 /* KeyboardExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -375,8 +381,10 @@
 				C2CDFC8B502F230107E052E7 /* Constants.swift */,
 				FFFE634A94A64A2F8F243186 /* FeatureGate.swift */,
 				FA63F578073C4EA0A059B928 /* DailyUsageManager.swift */,
+				DU01AA11BB22CC33DD440001 /* DailyUsageData.swift */,
 				9F2D41AC8FC84858A4EF2A49 /* AdminMode.swift */,
 				AA00BB11CC22DD33EE11000B /* HistoryItem.swift */,
+				KH01AA11BB22CC33DD440001 /* KeychainHelper.swift */,
 				AA00BB11CC22DD33EE11000C /* HistoryManager.swift */,
 				BF1D1F3F9CA9F69A67054C25 /* LocalizationManager.swift */,
 				AA22BB33CC44DD55EE660020 /* Localizations */,
@@ -621,6 +629,8 @@
 				AA00BB11CC22DD33EE33000E /* CompositionSessionManager.swift in Sources */,
 				155290611FD84B138EBFF0AA /* FeatureGate.swift in Sources */,
 				7237963120014F2EB5E42F8B /* DailyUsageManager.swift in Sources */,
+				DU01AA11BB22CC33DD440002 /* DailyUsageData.swift in Sources */,
+				KH01AA11BB22CC33DD440002 /* KeychainHelper.swift in Sources */,
 				AD15949F86CE40BDADBB12E1 /* AdminMode.swift in Sources */,
 );
 			runOnlyForDeploymentPostprocessing = 0;
@@ -667,6 +677,8 @@
 				AA00BB11CC22DD33EE22000E /* CompositionSessionManager.swift in Sources */,
 				66DB83ECA2F043B990BE945B /* FeatureGate.swift in Sources */,
 				3E5922FE0A6B41D79E37A4CD /* DailyUsageManager.swift in Sources */,
+				DU01AA11BB22CC33DD440003 /* DailyUsageData.swift in Sources */,
+				KH01AA11BB22CC33DD440003 /* KeychainHelper.swift in Sources */,
 				90C244B176664DB7B8761707 /* AdminMode.swift in Sources */,
 );
 			runOnlyForDeploymentPostprocessing = 0;
