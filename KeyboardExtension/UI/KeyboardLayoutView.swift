@@ -55,10 +55,10 @@ class KeyboardLayoutView: UIView {
 
     // Return key appearance — set by controller
     var returnKeyDisplayName: String = L("keyboard.return.go") {
-        didSet { if oldValue != returnKeyDisplayName { buildKeyboard() } }
+        didSet { if oldValue != returnKeyDisplayName { invalidateLayoutCache(); buildKeyboard() } }
     }
     var returnKeyIsBlue: Bool = true {
-        didSet { if oldValue != returnKeyIsBlue { buildKeyboard() } }
+        didSet { if oldValue != returnKeyIsBlue { invalidateLayoutCache(); buildKeyboard() } }
     }
 
     // Mode-aware return key override (Proposal 03)
@@ -66,11 +66,11 @@ class KeyboardLayoutView: UIView {
     private var returnKeyHasText: Bool = true
 
     var showNumberRow: Bool = true {
-        didSet { if oldValue != showNumberRow { buildKeyboard() } }
+        didSet { if oldValue != showNumberRow { invalidateLayoutCache(); buildKeyboard() } }
     }
 
     var pairedLanguage: KeyboardLanguage = .korean {
-        didSet { if oldValue != pairedLanguage { buildKeyboard() } }
+        didSet { if oldValue != pairedLanguage { invalidateLayoutCache(); buildKeyboard() } }
     }
 
     private var currentLanguage: KeyboardLanguage = .english
@@ -106,6 +106,23 @@ class KeyboardLayoutView: UIView {
 
     // Trackpad haptic (lighter than key tap)
     private let selectionHaptic = UISelectionFeedbackGenerator()
+
+    // MARK: - Layout Cache
+
+    private struct CachedLayout {
+        let container: UIView
+        let buttons: [UIButton]
+    }
+
+    private var layoutCache: [String: CachedLayout] = [:]
+
+    private var currentCacheKey: String {
+        "\(currentLanguage.rawValue)_\(currentPage)_\(isShifted)"
+    }
+
+    func invalidateLayoutCache() {
+        layoutCache.removeAll()
+    }
 
     // MARK: - Layout Constants
 
@@ -295,18 +312,40 @@ class KeyboardLayoutView: UIView {
 
     private func buildKeyboard() {
         guard !isTrackpadMode else { return }  // 트랙패드 중 재빌드 방지
+
+        let cacheKey = currentCacheKey
+
+        // Cache hit: restore cached layout
+        if let cached = layoutCache[cacheKey] {
+            keyboardContainer.subviews.forEach { $0.removeFromSuperview() }
+            allKeyButtons = cached.buttons
+            cached.container.translatesAutoresizingMaskIntoConstraints = false
+            keyboardContainer.addSubview(cached.container)
+            NSLayoutConstraint.activate([
+                cached.container.topAnchor.constraint(equalTo: keyboardContainer.topAnchor),
+                cached.container.leadingAnchor.constraint(equalTo: keyboardContainer.leadingAnchor),
+                cached.container.trailingAnchor.constraint(equalTo: keyboardContainer.trailingAnchor),
+                cached.container.bottomAnchor.constraint(equalTo: keyboardContainer.bottomAnchor),
+            ])
+            return
+        }
+
+        // Cache miss: build fresh
         keyboardContainer.subviews.forEach { $0.removeFromSuperview() }
         allKeyButtons.removeAll()
+
+        let wrapperView = UIView()
 
         let rows = currentRows()
         let totalRows = rows.count
         let isNumberRow = showNumberRow
         var previousRowView: UIView?
+        var constraints: [NSLayoutConstraint] = []
 
         for (rowIndex, rowKeys) in rows.enumerated() {
             let rowView = buildRow(keys: rowKeys, rowIndex: rowIndex, totalRows: totalRows)
             rowView.translatesAutoresizingMaskIntoConstraints = false
-            keyboardContainer.addSubview(rowView)
+            wrapperView.addSubview(rowView)
 
             let topAnchorRef: NSLayoutYAxisAnchor
             let topConstant: CGFloat
@@ -316,17 +355,17 @@ class KeyboardLayoutView: UIView {
                 // Smaller gap after number row
                 topConstant = (rowIndex == 1 && isNumberRow) ? Layout.numberRowSpacingV : Layout.keySpacingV
             } else {
-                topAnchorRef = keyboardContainer.topAnchor
+                topAnchorRef = wrapperView.topAnchor
                 topConstant = Layout.topInset
             }
 
             // Number row (rowIndex 0 in letters page) uses shorter height
             let rowHeight: CGFloat = (rowIndex == 0 && isNumberRow) ? Layout.numberRowHeight : Layout.keyHeight
 
-            NSLayoutConstraint.activate([
+            constraints.append(contentsOf: [
                 rowView.topAnchor.constraint(equalTo: topAnchorRef, constant: topConstant),
-                rowView.leadingAnchor.constraint(equalTo: keyboardContainer.leadingAnchor, constant: Layout.sideInset),
-                rowView.trailingAnchor.constraint(equalTo: keyboardContainer.trailingAnchor, constant: -Layout.sideInset),
+                rowView.leadingAnchor.constraint(equalTo: wrapperView.leadingAnchor, constant: Layout.sideInset),
+                rowView.trailingAnchor.constraint(equalTo: wrapperView.trailingAnchor, constant: -Layout.sideInset),
                 rowView.heightAnchor.constraint(equalToConstant: rowHeight),
             ])
 
@@ -334,8 +373,23 @@ class KeyboardLayoutView: UIView {
         }
 
         if let lastRow = previousRowView {
-            lastRow.bottomAnchor.constraint(equalTo: keyboardContainer.bottomAnchor, constant: -Layout.bottomInset).isActive = true
+            constraints.append(lastRow.bottomAnchor.constraint(equalTo: wrapperView.bottomAnchor, constant: -Layout.bottomInset))
         }
+
+        NSLayoutConstraint.activate(constraints)
+
+        // Add wrapper to container
+        wrapperView.translatesAutoresizingMaskIntoConstraints = false
+        keyboardContainer.addSubview(wrapperView)
+        NSLayoutConstraint.activate([
+            wrapperView.topAnchor.constraint(equalTo: keyboardContainer.topAnchor),
+            wrapperView.leadingAnchor.constraint(equalTo: keyboardContainer.leadingAnchor),
+            wrapperView.trailingAnchor.constraint(equalTo: keyboardContainer.trailingAnchor),
+            wrapperView.bottomAnchor.constraint(equalTo: keyboardContainer.bottomAnchor),
+        ])
+
+        // Store in cache
+        layoutCache[cacheKey] = CachedLayout(container: wrapperView, buttons: allKeyButtons)
     }
 
     private func buildRow(keys: [String], rowIndex: Int, totalRows: Int) -> UIView {
@@ -360,6 +414,7 @@ class KeyboardLayoutView: UIView {
         let refCount = Int(referenceKeyCount)
         let needsIndent = (keys.count < refCount && currentPage == .letters && rowIndex > (showNumberRow ? 0 : -1))
 
+        var constraints: [NSLayoutConstraint] = []
         var previousButton: UIButton?
         let firstButton = createKeyButton(keys[0], rowIndex: rowIndex)
 
@@ -368,17 +423,15 @@ class KeyboardLayoutView: UIView {
             container.addSubview(btn)
 
             btn.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                btn.topAnchor.constraint(equalTo: container.topAnchor),
-                btn.bottomAnchor.constraint(equalTo: container.bottomAnchor),
-            ])
+            constraints.append(btn.topAnchor.constraint(equalTo: container.topAnchor))
+            constraints.append(btn.bottomAnchor.constraint(equalTo: container.bottomAnchor))
 
             if let prev = previousButton {
-                btn.leadingAnchor.constraint(equalTo: prev.trailingAnchor, constant: Layout.keySpacingH).isActive = true
-                btn.widthAnchor.constraint(equalTo: firstButton.widthAnchor).isActive = true
+                constraints.append(btn.leadingAnchor.constraint(equalTo: prev.trailingAnchor, constant: Layout.keySpacingH))
+                constraints.append(btn.widthAnchor.constraint(equalTo: firstButton.widthAnchor))
             } else {
                 let indent: CGFloat = needsIndent ? 18 : 0
-                btn.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: indent).isActive = true
+                constraints.append(btn.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: indent))
             }
 
             previousButton = btn
@@ -386,14 +439,17 @@ class KeyboardLayoutView: UIView {
 
         if let last = previousButton {
             let indent: CGFloat = needsIndent ? 18 : 0
-            last.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -indent).isActive = true
+            constraints.append(last.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -indent))
         }
+
+        NSLayoutConstraint.activate(constraints)
     }
 
     // MARK: - Row 2: Mixed row (shift/mode + letters + backspace)
 
     private func buildMixedRow(container: UIView, keys: [String], rowIndex: Int) {
         let wideKeyWidth: CGFloat = 42  // Shift/backspace base width
+        var constraints: [NSLayoutConstraint] = []
 
         // Letters page: match letter key widths to 10-key row using multiplier
         if currentPage == .letters {
@@ -406,10 +462,8 @@ class KeyboardLayoutView: UIView {
                 btn.translatesAutoresizingMaskIntoConstraints = false
                 container.addSubview(btn)
 
-                NSLayoutConstraint.activate([
-                    btn.topAnchor.constraint(equalTo: container.topAnchor),
-                    btn.bottomAnchor.constraint(equalTo: container.bottomAnchor),
-                ])
+                constraints.append(btn.topAnchor.constraint(equalTo: container.topAnchor))
+                constraints.append(btn.bottomAnchor.constraint(equalTo: container.bottomAnchor))
 
                 if key == Self.shiftKey || key == Self.moreSymKey || key == Self.symbolKey {
                     leftWideBtn = btn
@@ -426,11 +480,11 @@ class KeyboardLayoutView: UIView {
             let keySpacing = Layout.keySpacingH
             let n = referenceKeyCount
             for btn in letterButtons {
-                btn.widthAnchor.constraint(
+                constraints.append(btn.widthAnchor.constraint(
                     equalTo: container.widthAnchor,
                     multiplier: 1.0 / n,
                     constant: -(n - 1) * keySpacing / n
-                ).isActive = true
+                ))
             }
 
             // Invisible spacer views to distribute leftover space evenly
@@ -445,42 +499,41 @@ class KeyboardLayoutView: UIView {
             container.addSubview(spacerRight)
 
             // Spacers are zero-height, just used for width calculation
-            NSLayoutConstraint.activate([
-                spacerLeft.topAnchor.constraint(equalTo: container.topAnchor),
-                spacerLeft.heightAnchor.constraint(equalToConstant: 0),
-                spacerRight.topAnchor.constraint(equalTo: container.topAnchor),
-                spacerRight.heightAnchor.constraint(equalToConstant: 0),
-            ])
+            constraints.append(spacerLeft.topAnchor.constraint(equalTo: container.topAnchor))
+            constraints.append(spacerLeft.heightAnchor.constraint(equalToConstant: 0))
+            constraints.append(spacerRight.topAnchor.constraint(equalTo: container.topAnchor))
+            constraints.append(spacerRight.heightAnchor.constraint(equalToConstant: 0))
 
             // Layout: shift | spacerLeft | letterKeys | spacerRight | backspace
-            shiftBtn.leadingAnchor.constraint(equalTo: container.leadingAnchor).isActive = true
-            spacerLeft.leadingAnchor.constraint(equalTo: shiftBtn.trailingAnchor).isActive = true
+            constraints.append(shiftBtn.leadingAnchor.constraint(equalTo: container.leadingAnchor))
+            constraints.append(spacerLeft.leadingAnchor.constraint(equalTo: shiftBtn.trailingAnchor))
 
             // First letter key after left spacer
             if let firstLetter = letterButtons.first {
-                firstLetter.leadingAnchor.constraint(equalTo: spacerLeft.trailingAnchor, constant: Layout.keySpacingH).isActive = true
+                constraints.append(firstLetter.leadingAnchor.constraint(equalTo: spacerLeft.trailingAnchor, constant: Layout.keySpacingH))
             }
 
             // Chain letter keys
             for i in 1..<letterButtons.count {
-                letterButtons[i].leadingAnchor.constraint(equalTo: letterButtons[i-1].trailingAnchor, constant: Layout.keySpacingH).isActive = true
+                constraints.append(letterButtons[i].leadingAnchor.constraint(equalTo: letterButtons[i-1].trailingAnchor, constant: Layout.keySpacingH))
             }
 
             // Last letter key to right spacer
             if let lastLetter = letterButtons.last {
-                spacerRight.leadingAnchor.constraint(equalTo: lastLetter.trailingAnchor, constant: Layout.keySpacingH).isActive = true
+                constraints.append(spacerRight.leadingAnchor.constraint(equalTo: lastLetter.trailingAnchor, constant: Layout.keySpacingH))
             }
 
-            backspaceBtn.leadingAnchor.constraint(equalTo: spacerRight.trailingAnchor).isActive = true
-            backspaceBtn.trailingAnchor.constraint(equalTo: container.trailingAnchor).isActive = true
+            constraints.append(backspaceBtn.leadingAnchor.constraint(equalTo: spacerRight.trailingAnchor))
+            constraints.append(backspaceBtn.trailingAnchor.constraint(equalTo: container.trailingAnchor))
 
             // shift.width = wideKeyWidth + spacerLeft.width, backspace.width = wideKeyWidth + spacerRight.width
-            shiftBtn.widthAnchor.constraint(equalTo: spacerLeft.widthAnchor, constant: wideKeyWidth).isActive = true
-            backspaceBtn.widthAnchor.constraint(equalTo: spacerRight.widthAnchor, constant: wideKeyWidth).isActive = true
+            constraints.append(shiftBtn.widthAnchor.constraint(equalTo: spacerLeft.widthAnchor, constant: wideKeyWidth))
+            constraints.append(backspaceBtn.widthAnchor.constraint(equalTo: spacerRight.widthAnchor, constant: wideKeyWidth))
 
             // Equal spacers → even distribution of leftover space
-            spacerLeft.widthAnchor.constraint(equalTo: spacerRight.widthAnchor).isActive = true
+            constraints.append(spacerLeft.widthAnchor.constraint(equalTo: spacerRight.widthAnchor))
 
+            NSLayoutConstraint.activate(constraints)
             return
         }
 
@@ -493,25 +546,23 @@ class KeyboardLayoutView: UIView {
             btn.translatesAutoresizingMaskIntoConstraints = false
             container.addSubview(btn)
 
-            NSLayoutConstraint.activate([
-                btn.topAnchor.constraint(equalTo: container.topAnchor),
-                btn.bottomAnchor.constraint(equalTo: container.bottomAnchor),
-            ])
+            constraints.append(btn.topAnchor.constraint(equalTo: container.topAnchor))
+            constraints.append(btn.bottomAnchor.constraint(equalTo: container.bottomAnchor))
 
             if key == Self.shiftKey || key == Self.moreSymKey || key == Self.symbolKey {
-                btn.leadingAnchor.constraint(equalTo: container.leadingAnchor).isActive = true
-                btn.widthAnchor.constraint(equalToConstant: wideKeyWidth).isActive = true
+                constraints.append(btn.leadingAnchor.constraint(equalTo: container.leadingAnchor))
+                constraints.append(btn.widthAnchor.constraint(equalToConstant: wideKeyWidth))
             } else if key == Self.backKey {
-                btn.trailingAnchor.constraint(equalTo: container.trailingAnchor).isActive = true
-                btn.widthAnchor.constraint(equalToConstant: wideKeyWidth).isActive = true
+                constraints.append(btn.trailingAnchor.constraint(equalTo: container.trailingAnchor))
+                constraints.append(btn.widthAnchor.constraint(equalToConstant: wideKeyWidth))
             } else {
                 if let prev = letterButtons.last ?? container.subviews.first {
-                    btn.leadingAnchor.constraint(equalTo: prev.trailingAnchor, constant: Layout.keySpacingH).isActive = true
+                    constraints.append(btn.leadingAnchor.constraint(equalTo: prev.trailingAnchor, constant: Layout.keySpacingH))
                 }
                 if firstLetter == nil {
                     firstLetter = btn
                 } else {
-                    btn.widthAnchor.constraint(equalTo: firstLetter!.widthAnchor).isActive = true
+                    constraints.append(btn.widthAnchor.constraint(equalTo: firstLetter!.widthAnchor))
                 }
                 letterButtons.append(btn)
             }
@@ -519,8 +570,10 @@ class KeyboardLayoutView: UIView {
 
         if let lastLetter = letterButtons.last {
             let backspaceBtn = container.subviews.last!
-            lastLetter.trailingAnchor.constraint(equalTo: backspaceBtn.leadingAnchor, constant: -Layout.keySpacingH).isActive = true
+            constraints.append(lastLetter.trailingAnchor.constraint(equalTo: backspaceBtn.leadingAnchor, constant: -Layout.keySpacingH))
         }
+
+        NSLayoutConstraint.activate(constraints)
     }
 
     // MARK: - Bottom row (+=♥, 🌐A, space, period, return)
@@ -531,6 +584,7 @@ class KeyboardLayoutView: UIView {
         let periodKeyWidth: CGFloat = 34  // "."
         let returnKeyWidth: CGFloat = 74  // return
 
+        var constraints: [NSLayoutConstraint] = []
         var previousView: UIButton?
 
         for key in keys {
@@ -538,46 +592,46 @@ class KeyboardLayoutView: UIView {
             btn.translatesAutoresizingMaskIntoConstraints = false
             container.addSubview(btn)
 
-            NSLayoutConstraint.activate([
-                btn.topAnchor.constraint(equalTo: container.topAnchor),
-                btn.bottomAnchor.constraint(equalTo: container.bottomAnchor),
-            ])
+            constraints.append(btn.topAnchor.constraint(equalTo: container.topAnchor))
+            constraints.append(btn.bottomAnchor.constraint(equalTo: container.bottomAnchor))
 
             if key == " " {
                 // Space bar: flexible width
                 if let prev = previousView {
-                    btn.leadingAnchor.constraint(equalTo: prev.trailingAnchor, constant: Layout.keySpacingH).isActive = true
+                    constraints.append(btn.leadingAnchor.constraint(equalTo: prev.trailingAnchor, constant: Layout.keySpacingH))
                 }
             } else if key == Self.returnKey {
-                btn.widthAnchor.constraint(equalToConstant: returnKeyWidth).isActive = true
-                btn.trailingAnchor.constraint(equalTo: container.trailingAnchor).isActive = true
+                constraints.append(btn.widthAnchor.constraint(equalToConstant: returnKeyWidth))
+                constraints.append(btn.trailingAnchor.constraint(equalTo: container.trailingAnchor))
                 if let prev = previousView {
-                    btn.leadingAnchor.constraint(equalTo: prev.trailingAnchor, constant: Layout.keySpacingH).isActive = true
+                    constraints.append(btn.leadingAnchor.constraint(equalTo: prev.trailingAnchor, constant: Layout.keySpacingH))
                 }
             } else if key == "." {
-                btn.widthAnchor.constraint(equalToConstant: periodKeyWidth).isActive = true
+                constraints.append(btn.widthAnchor.constraint(equalToConstant: periodKeyWidth))
                 if let prev = previousView {
-                    btn.leadingAnchor.constraint(equalTo: prev.trailingAnchor, constant: Layout.keySpacingH).isActive = true
+                    constraints.append(btn.leadingAnchor.constraint(equalTo: prev.trailingAnchor, constant: Layout.keySpacingH))
                 }
             } else if key == Self.symbolToggleKey || key == Self.globeLangKey || key == Self.abcKey {
-                btn.widthAnchor.constraint(equalToConstant: funcKeyWidth).isActive = true
+                constraints.append(btn.widthAnchor.constraint(equalToConstant: funcKeyWidth))
                 if let prev = previousView {
-                    btn.leadingAnchor.constraint(equalTo: prev.trailingAnchor, constant: Layout.keySpacingH).isActive = true
+                    constraints.append(btn.leadingAnchor.constraint(equalTo: prev.trailingAnchor, constant: Layout.keySpacingH))
                 } else {
-                    btn.leadingAnchor.constraint(equalTo: container.leadingAnchor).isActive = true
+                    constraints.append(btn.leadingAnchor.constraint(equalTo: container.leadingAnchor))
                 }
             } else {
                 // Fallback for any other key
-                btn.widthAnchor.constraint(equalToConstant: funcKeyWidth).isActive = true
+                constraints.append(btn.widthAnchor.constraint(equalToConstant: funcKeyWidth))
                 if let prev = previousView {
-                    btn.leadingAnchor.constraint(equalTo: prev.trailingAnchor, constant: Layout.keySpacingH).isActive = true
+                    constraints.append(btn.leadingAnchor.constraint(equalTo: prev.trailingAnchor, constant: Layout.keySpacingH))
                 } else {
-                    btn.leadingAnchor.constraint(equalTo: container.leadingAnchor).isActive = true
+                    constraints.append(btn.leadingAnchor.constraint(equalTo: container.leadingAnchor))
                 }
             }
 
             previousView = btn
         }
+
+        NSLayoutConstraint.activate(constraints)
     }
 
     // MARK: - Create Key Button
@@ -593,11 +647,7 @@ class KeyboardLayoutView: UIView {
         configureButtonAppearance(button, key: key)
 
         button.layer.cornerRadius = Layout.cornerRadius
-        button.layer.shadowColor = UIColor.black.cgColor
-        button.layer.shadowOffset = CGSize(width: 0, height: 1)
-        button.layer.shadowOpacity = isDark ? 0.4 : 0.2
-        button.layer.shadowRadius = 0.5
-        button.clipsToBounds = false
+        button.clipsToBounds = true
 
         allKeyButtons.append(button)
         return button
@@ -1089,7 +1139,6 @@ class KeyboardLayoutView: UIView {
             } else {
                 button.backgroundColor = isDark ? UIColor(white: 0.30, alpha: 1) : UIColor(white: 0.88, alpha: 1)
             }
-            button.layer.shadowOpacity = 0
         }
 
         onTrackpadModeChanged?(true)
@@ -1104,6 +1153,7 @@ class KeyboardLayoutView: UIView {
         displayLink?.invalidate()
         displayLink = nil
 
+        invalidateLayoutCache()
         buildKeyboard()  // Full rebuild to restore all key appearances
         onTrackpadModeChanged?(false)
     }
@@ -1161,6 +1211,7 @@ class KeyboardLayoutView: UIView {
 
     func applyTheme(_ theme: KeyboardTheme?) {
         customTheme = theme
+        invalidateLayoutCache()
     }
 
     func updateAppearance(isDark: Bool) {
@@ -1170,6 +1221,7 @@ class KeyboardLayoutView: UIView {
         } else {
             backgroundColor = isDark ? UIColor(white: 0.08, alpha: 1) : UIColor(red: 0.82, green: 0.84, blue: 0.86, alpha: 1)
         }
+        invalidateLayoutCache()
         buildKeyboard()
     }
 
@@ -1224,6 +1276,7 @@ class KeyboardLayoutView: UIView {
     func clearReturnKeyOverride() {
         returnKeyModeOverride = nil
         returnKeyHasText = true
+        invalidateLayoutCache()
         buildKeyboard()
     }
 }

@@ -40,6 +40,7 @@ enum AppLanguage: String, CaseIterable {
 final class LocalizationManager {
     static let shared = LocalizationManager()
     private var bundle: Bundle = .main
+    private var lastLoadedLanguage: String?
 
     private init() { loadBundle() }
 
@@ -68,9 +69,14 @@ final class LocalizationManager {
         } else {
             bundle = .main
         }
+        lastLoadedLanguage = langCode
     }
 
-    func reload() { loadBundle() }
+    func reload() {
+        let currentLang = currentLanguage.rawValue
+        guard currentLang != lastLoadedLanguage else { return }
+        loadBundle()
+    }
 }
 
 func L(_ key: String) -> String {

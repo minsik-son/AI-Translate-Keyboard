@@ -105,6 +105,13 @@ class LanguagePickerView: UIView {
     private var tabIndicatorLeading: NSLayoutConstraint?
     private var tabIndicatorWidth: NSLayoutConstraint?
 
+    /// 현재 탭의 반대편 언어를 제외한 필터된 목록
+    private var filteredLanguages: [LanguageItem] {
+        if isSingleLanguageMode { return LanguagePickerView.supportedLanguages }
+        let excludeCode = currentTab == .source ? selectedTargetCode : selectedSourceCode
+        return LanguagePickerView.supportedLanguages.filter { $0.code != excludeCode }
+    }
+
     // MARK: - Theme color
     private let themeBlue = UIColor(red: 0.18, green: 0.50, blue: 0.93, alpha: 1.0)
 
@@ -273,12 +280,12 @@ class LanguagePickerView: UIView {
 extension LanguagePickerView: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return LanguagePickerView.supportedLanguages.count
+        return filteredLanguages.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "LanguageCell", for: indexPath) as! LanguageCell
-        let lang = LanguagePickerView.supportedLanguages[indexPath.row]
+        let lang = filteredLanguages[indexPath.row]
 
         let selectedCode = currentTab == .source ? selectedSourceCode : selectedTargetCode
         let isSelected = lang.code == selectedCode
@@ -289,7 +296,7 @@ extension LanguagePickerView: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let lang = LanguagePickerView.supportedLanguages[indexPath.row]
+        let lang = filteredLanguages[indexPath.row]
 
         if currentTab == .source {
             selectedSourceCode = lang.code

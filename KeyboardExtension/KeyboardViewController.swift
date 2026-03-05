@@ -135,10 +135,15 @@ class KeyboardViewController: UIInputViewController {
         hasUserTypedSinceAppeared = false
         toolbarView.hideSuggestions()
 
-        checkClipboardForNewContent()
-        updateToolbarBadge()
-
         AppGroupManager.shared.set(self.hasFullAccess, forKey: AppConstants.UserDefaultsKeys.keyboardFullAccessEnabled)
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            self?.checkClipboardForNewContent()
+            self?.updateToolbarBadge()
+        }
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -146,13 +151,26 @@ class KeyboardViewController: UIInputViewController {
         CompositionSessionManager.shared.endSession(reason: .keyboardHidden)
     }
 
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        keyboardLayoutView.invalidateLayoutCache()
+    }
+
     private func reloadLocalizedStrings() {
-        translationInputView.setPlaceholder(L("translation.placeholder"))
-        correctionInputView.setPlaceholder(L("correction.placeholder"))
-        phraseInputView.setPlaceholder(L("phrase.placeholder"))
-        phraseInputHeaderView.reloadLocalizedStrings()
+        if translationInputView.superview != nil {
+            translationInputView.setPlaceholder(L("translation.placeholder"))
+        }
+        if correctionInputView.superview != nil {
+            correctionInputView.setPlaceholder(L("correction.placeholder"))
+        }
+        if phraseInputView.superview != nil {
+            phraseInputView.setPlaceholder(L("phrase.placeholder"))
+        }
+        if phraseInputHeaderView.superview != nil {
+            phraseInputHeaderView.reloadLocalizedStrings()
+        }
         updateLanguageLabels()
-        if currentMode == .correctionMode {
+        if currentMode == .correctionMode, correctionLanguageBar.superview != nil {
             correctionLanguageBar.updateToneName(currentToneStyle.displayName)
         }
     }
@@ -184,14 +202,14 @@ class KeyboardViewController: UIInputViewController {
             let contextEmpty = (textDocumentProxy.documentContextBeforeInput ?? "").isEmpty
                             && (textDocumentProxy.documentContextAfterInput ?? "").isEmpty
             if contextEmpty {
-                if currentMode == .correctionMode {
+                if currentMode == .correctionMode, correctionInputView.superview != nil {
                     modeTextInputHandler.clear()
                     correctionInputView.clear()
                     correctionManager.reset()
                     textProxyManager.reset()
                     correctionInputHeightConstraint?.constant = Heights.translationInput
                     updateHeight(for: .correctionMode, animated: true)
-                } else if currentMode == .translationMode {
+                } else if currentMode == .translationMode, translationInputView.superview != nil {
                     modeTextInputHandler.clear()
                     translationInputView.clear()
                     translationManager.cancelPending()
@@ -267,7 +285,6 @@ class KeyboardViewController: UIInputViewController {
     // MARK: - Book Animation
 
     private func animateBookOpen(_ views: [UIView]) {
-        inputView?.layoutIfNeeded()
         for v in views {
             v.alpha = 0
             var t = CATransform3DIdentity
@@ -312,15 +329,19 @@ class KeyboardViewController: UIInputViewController {
         inputView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         inputView.clipsToBounds = true
 
-        // Add main views — toolbar, translationLanguageBar+translationInput, correctionLanguageBar+correctionInput
-        // occupy the SAME top position. Only one group is visible at a time.
-        // Emoji, tone picker, overlays (language picker, saved phrases, clipboard) are lazily created on first use.
-        [toolbarView, translationLanguageBar, translationInputView, correctionLanguageBar, correctionInputView, phraseInputHeaderView, phraseInputView, keyboardLayoutView].forEach {
+        // Only add toolbar + keyboard layout at startup.
+        // Translation, correction, phrase views are lazily added on first mode entry.
+        [toolbarView, keyboardLayoutView].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             inputView.addSubview($0)
         }
-        phraseInputHeaderView.isHidden = true
-        phraseInputView.isHidden = true
+
+        // Fixed height for keyboard layout — prevents stretching when system popup expands inputView
+        keyboardLayoutHeightConstraint = keyboardLayoutView.heightAnchor.constraint(equalToConstant: keyAreaHeight)
+
+        // Keyboard top — initially below toolbar
+        keyboardTopToToolbarConstraint = keyboardLayoutView.topAnchor.constraint(equalTo: toolbarView.bottomAnchor)
+        keyboardTopToToolbarConstraint?.priority = .defaultHigh
 
         NSLayoutConstraint.activate([
             // Toolbar — pinned to top with padding
@@ -329,83 +350,13 @@ class KeyboardViewController: UIInputViewController {
             toolbarView.trailingAnchor.constraint(equalTo: inputView.trailingAnchor),
             toolbarView.heightAnchor.constraint(equalToConstant: Heights.toolbar),
 
-            // Translation Language Bar — pinned to top with padding
-            translationLanguageBar.topAnchor.constraint(equalTo: inputView.topAnchor, constant: Heights.topPadding),
-            translationLanguageBar.leadingAnchor.constraint(equalTo: inputView.leadingAnchor),
-            translationLanguageBar.trailingAnchor.constraint(equalTo: inputView.trailingAnchor),
-            translationLanguageBar.heightAnchor.constraint(equalToConstant: Heights.translationLanguageBar),
-
-            // Translation Input — below language bar
-            translationInputView.topAnchor.constraint(equalTo: translationLanguageBar.bottomAnchor),
-            translationInputView.leadingAnchor.constraint(equalTo: inputView.leadingAnchor),
-            translationInputView.trailingAnchor.constraint(equalTo: inputView.trailingAnchor),
-
-            // Correction Language Bar — pinned to top with padding
-            correctionLanguageBar.topAnchor.constraint(equalTo: inputView.topAnchor, constant: Heights.topPadding),
-            correctionLanguageBar.leadingAnchor.constraint(equalTo: inputView.leadingAnchor),
-            correctionLanguageBar.trailingAnchor.constraint(equalTo: inputView.trailingAnchor),
-            correctionLanguageBar.heightAnchor.constraint(equalToConstant: Heights.translationLanguageBar),
-
-            // Correction Input — initially below correction language bar (re-anchored when tone picker is created)
-            correctionInputView.leadingAnchor.constraint(equalTo: inputView.leadingAnchor),
-            correctionInputView.trailingAnchor.constraint(equalTo: inputView.trailingAnchor),
-
             // Keyboard Layout
             keyboardLayoutView.leadingAnchor.constraint(equalTo: inputView.leadingAnchor),
             keyboardLayoutView.trailingAnchor.constraint(equalTo: inputView.trailingAnchor),
             keyboardLayoutView.bottomAnchor.constraint(equalTo: inputView.bottomAnchor),
-
-            // Phrase Input Header — pinned to top with padding
-            phraseInputHeaderView.topAnchor.constraint(equalTo: inputView.topAnchor, constant: Heights.topPadding),
-            phraseInputHeaderView.leadingAnchor.constraint(equalTo: inputView.leadingAnchor),
-            phraseInputHeaderView.trailingAnchor.constraint(equalTo: inputView.trailingAnchor),
-            phraseInputHeaderView.heightAnchor.constraint(equalToConstant: Heights.translationLanguageBar),
-
-            // Phrase Input — below phrase header
-            phraseInputView.topAnchor.constraint(equalTo: phraseInputHeaderView.bottomAnchor),
-            phraseInputView.leadingAnchor.constraint(equalTo: inputView.leadingAnchor),
-            phraseInputView.trailingAnchor.constraint(equalTo: inputView.trailingAnchor),
+            keyboardLayoutHeightConstraint!,
+            keyboardTopToToolbarConstraint!,
         ])
-
-        // Correction input top — initially pinned to correction language bar (no tone picker yet)
-        correctionInputTopConstraint = correctionInputView.topAnchor.constraint(equalTo: correctionLanguageBar.bottomAnchor)
-        correctionInputTopConstraint?.isActive = true
-
-        // Dynamic height constraints for input views (min height, can grow)
-        translationInputHeightConstraint = translationInputView.heightAnchor.constraint(equalToConstant: Heights.translationInput)
-        translationInputHeightConstraint?.isActive = true
-        correctionInputHeightConstraint = correctionInputView.heightAnchor.constraint(equalToConstant: Heights.translationInput)
-        correctionInputHeightConstraint?.isActive = true
-
-        // Dynamic height for phrase input
-        phraseInputHeightConstraint = phraseInputView.heightAnchor.constraint(equalToConstant: Heights.translationInput)
-        phraseInputHeightConstraint?.isActive = true
-
-        // Fixed height for keyboard layout — prevents stretching when system popup expands inputView
-        keyboardLayoutHeightConstraint = keyboardLayoutView.heightAnchor.constraint(equalToConstant: keyAreaHeight)
-        keyboardLayoutHeightConstraint?.isActive = true
-
-        // Keyboard top switches between toolbar bottom, translation input bottom, correction input bottom, or phrase input bottom
-        keyboardTopToToolbarConstraint = keyboardLayoutView.topAnchor.constraint(equalTo: toolbarView.bottomAnchor)
-        keyboardTopToTranslationConstraint = keyboardLayoutView.topAnchor.constraint(equalTo: translationInputView.bottomAnchor)
-        keyboardTopToCorrectionConstraint = keyboardLayoutView.topAnchor.constraint(equalTo: correctionInputView.bottomAnchor)
-        keyboardTopToPhraseInputConstraint = keyboardLayoutView.topAnchor.constraint(equalTo: phraseInputView.bottomAnchor)
-
-        // Lower priority so height constraint wins when system popup stretches inputView
-        keyboardTopToToolbarConstraint?.priority = .defaultHigh
-        keyboardTopToTranslationConstraint?.priority = .defaultHigh
-        keyboardTopToCorrectionConstraint?.priority = .defaultHigh
-        keyboardTopToPhraseInputConstraint?.priority = .defaultHigh
-
-        keyboardTopToToolbarConstraint?.isActive = true
-
-        // Initially hide translation, correction, and phrase input views
-        translationLanguageBar.isHidden = true
-        translationInputView.isHidden = true
-        correctionLanguageBar.isHidden = true
-        correctionInputView.isHidden = true
-        phraseInputHeaderView.isHidden = true
-        phraseInputView.isHidden = true
 
         // Toast — floating on top of everything
         inputView.addSubview(toastLabel)
@@ -416,6 +367,154 @@ class KeyboardViewController: UIInputViewController {
             toastLabel.trailingAnchor.constraint(lessThanOrEqualTo: inputView.trailingAnchor, constant: -24),
             toastLabel.heightAnchor.constraint(equalToConstant: 32),
         ])
+    }
+
+    // MARK: - Lazy View Setup
+
+    private func setupTranslationViewsIfNeeded() {
+        guard translationLanguageBar.superview == nil, let inputView = self.inputView else { return }
+
+        [translationLanguageBar, translationInputView].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            inputView.addSubview($0)
+        }
+
+        translationInputHeightConstraint = translationInputView.heightAnchor.constraint(equalToConstant: Heights.translationInput)
+        keyboardTopToTranslationConstraint = keyboardLayoutView.topAnchor.constraint(equalTo: translationInputView.bottomAnchor)
+        keyboardTopToTranslationConstraint?.priority = .defaultHigh
+
+        NSLayoutConstraint.activate([
+            translationLanguageBar.topAnchor.constraint(equalTo: inputView.topAnchor, constant: Heights.topPadding),
+            translationLanguageBar.leadingAnchor.constraint(equalTo: inputView.leadingAnchor),
+            translationLanguageBar.trailingAnchor.constraint(equalTo: inputView.trailingAnchor),
+            translationLanguageBar.heightAnchor.constraint(equalToConstant: Heights.translationLanguageBar),
+            translationInputView.topAnchor.constraint(equalTo: translationLanguageBar.bottomAnchor),
+            translationInputView.leadingAnchor.constraint(equalTo: inputView.leadingAnchor),
+            translationInputView.trailingAnchor.constraint(equalTo: inputView.trailingAnchor),
+            translationInputHeightConstraint!,
+        ])
+
+        // Callbacks (moved from setupCallbacks)
+        translationInputView.onCloseTranslation = { [weak self] in
+            self?.exitTranslationMode()
+        }
+        translationInputView.onHeightChanged = { [weak self] newHeight in
+            self?.updateInputHeight(newHeight, isTranslation: true)
+        }
+        translationLanguageBar.onSourceTap = { [weak self] in
+            self?.showLanguagePicker(initialTab: .source)
+        }
+        translationLanguageBar.onTargetTap = { [weak self] in
+            self?.showLanguagePicker(initialTab: .target)
+        }
+        translationLanguageBar.onSwapTap = { [weak self] in
+            self?.swapLanguages()
+        }
+        translationLanguageBar.onCloseTap = { [weak self] in
+            self?.exitTranslationMode()
+        }
+
+        // 뷰 추가 직후 커스텀 테마 + 언어 라벨 즉시 반영
+        let theme = KeyboardTheme.currentTheme()
+        let isDark = textDocumentProxy.keyboardAppearance == .dark
+        translationLanguageBar.applyTheme(theme)
+        translationLanguageBar.updateAppearance(isDark: isDark)
+        translationInputView.applyTheme(theme)
+        translationInputView.updateAppearance(isDark: isDark)
+        updateLanguageLabels()
+    }
+
+    private func setupCorrectionViewsIfNeeded() {
+        guard correctionLanguageBar.superview == nil, let inputView = self.inputView else { return }
+
+        [correctionLanguageBar, correctionInputView].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            inputView.addSubview($0)
+        }
+
+        correctionInputTopConstraint = correctionInputView.topAnchor.constraint(equalTo: correctionLanguageBar.bottomAnchor)
+        correctionInputHeightConstraint = correctionInputView.heightAnchor.constraint(equalToConstant: Heights.translationInput)
+        keyboardTopToCorrectionConstraint = keyboardLayoutView.topAnchor.constraint(equalTo: correctionInputView.bottomAnchor)
+        keyboardTopToCorrectionConstraint?.priority = .defaultHigh
+
+        NSLayoutConstraint.activate([
+            correctionLanguageBar.topAnchor.constraint(equalTo: inputView.topAnchor, constant: Heights.topPadding),
+            correctionLanguageBar.leadingAnchor.constraint(equalTo: inputView.leadingAnchor),
+            correctionLanguageBar.trailingAnchor.constraint(equalTo: inputView.trailingAnchor),
+            correctionLanguageBar.heightAnchor.constraint(equalToConstant: Heights.translationLanguageBar),
+            correctionInputView.leadingAnchor.constraint(equalTo: inputView.leadingAnchor),
+            correctionInputView.trailingAnchor.constraint(equalTo: inputView.trailingAnchor),
+            correctionInputTopConstraint!,
+            correctionInputHeightConstraint!,
+        ])
+
+        // Callbacks (moved from setupCallbacks)
+        correctionLanguageBar.onLanguageTap = { [weak self] in
+            self?.showCorrectionLanguagePicker()
+        }
+        correctionLanguageBar.onToneTap = { [weak self] in
+            self?.toggleTonePicker()
+        }
+        correctionInputView.setPlaceholder(L("correction.placeholder"))
+        correctionInputView.onCloseTranslation = { [weak self] in
+            self?.exitCorrectionMode()
+        }
+        correctionInputView.onHeightChanged = { [weak self] newHeight in
+            self?.updateInputHeight(newHeight, isTranslation: false)
+        }
+
+        // 뷰 추가 직후 커스텀 테마 즉시 반영
+        let theme = KeyboardTheme.currentTheme()
+        let isDark = textDocumentProxy.keyboardAppearance == .dark
+        correctionLanguageBar.applyTheme(theme)
+        correctionLanguageBar.updateAppearance(isDark: isDark)
+        correctionInputView.applyTheme(theme)
+        correctionInputView.updateAppearance(isDark: isDark)
+    }
+
+    private func setupPhraseViewsIfNeeded() {
+        guard phraseInputHeaderView.superview == nil, let inputView = self.inputView else { return }
+
+        [phraseInputHeaderView, phraseInputView].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            inputView.addSubview($0)
+        }
+
+        phraseInputHeightConstraint = phraseInputView.heightAnchor.constraint(equalToConstant: Heights.translationInput)
+        keyboardTopToPhraseInputConstraint = keyboardLayoutView.topAnchor.constraint(equalTo: phraseInputView.bottomAnchor)
+        keyboardTopToPhraseInputConstraint?.priority = .defaultHigh
+
+        NSLayoutConstraint.activate([
+            phraseInputHeaderView.topAnchor.constraint(equalTo: inputView.topAnchor, constant: Heights.topPadding),
+            phraseInputHeaderView.leadingAnchor.constraint(equalTo: inputView.leadingAnchor),
+            phraseInputHeaderView.trailingAnchor.constraint(equalTo: inputView.trailingAnchor),
+            phraseInputHeaderView.heightAnchor.constraint(equalToConstant: Heights.translationLanguageBar),
+            phraseInputView.topAnchor.constraint(equalTo: phraseInputHeaderView.bottomAnchor),
+            phraseInputView.leadingAnchor.constraint(equalTo: inputView.leadingAnchor),
+            phraseInputView.trailingAnchor.constraint(equalTo: inputView.trailingAnchor),
+            phraseInputHeightConstraint!,
+        ])
+
+        // Callbacks (moved from setupCallbacks)
+        phraseInputHeaderView.onCancel = { [weak self] in
+            self?.exitPhraseInputMode()
+        }
+        phraseInputHeaderView.onSave = { [weak self] in
+            self?.saveNewPhrase()
+        }
+        phraseInputView.setPlaceholder(L("phrase.placeholder"))
+        phraseInputView.onHeightChanged = { [weak self] newHeight in
+            self?.phraseInputHeightConstraint?.constant = newHeight
+            self?.updateHeight(for: .phraseInputMode, animated: true)
+        }
+
+        // 뷰 추가 직후 커스텀 테마 즉시 반영
+        let theme = KeyboardTheme.currentTheme()
+        let isDark = textDocumentProxy.keyboardAppearance == .dark
+        phraseInputHeaderView.applyTheme(theme)
+        phraseInputHeaderView.updateAppearance(isDark: isDark)
+        phraseInputView.applyTheme(theme)
+        phraseInputView.updateAppearance(isDark: isDark)
     }
 
     // MARK: - Delegates
@@ -458,58 +557,6 @@ class KeyboardViewController: UIInputViewController {
             self?.dismissSuggestions()
         }
 
-        // Translation Input — close button + dynamic height
-        translationInputView.onCloseTranslation = { [weak self] in
-            self?.exitTranslationMode()
-        }
-        translationInputView.onHeightChanged = { [weak self] newHeight in
-            self?.updateInputHeight(newHeight, isTranslation: true)
-        }
-
-        // Translation Language Bar
-        translationLanguageBar.onSourceTap = { [weak self] in
-            self?.showLanguagePicker(initialTab: .source)
-        }
-        translationLanguageBar.onTargetTap = { [weak self] in
-            self?.showLanguagePicker(initialTab: .target)
-        }
-        translationLanguageBar.onSwapTap = { [weak self] in
-            self?.swapLanguages()
-        }
-        translationLanguageBar.onCloseTap = { [weak self] in
-            self?.exitTranslationMode()
-        }
-
-        // Correction Language Bar
-        correctionLanguageBar.onLanguageTap = { [weak self] in
-            self?.showCorrectionLanguagePicker()
-        }
-        correctionLanguageBar.onToneTap = { [weak self] in
-            self?.toggleTonePicker()
-        }
-
-        // Correction Input — close button + dynamic height
-        correctionInputView.setPlaceholder(L("correction.placeholder"))
-        correctionInputView.onCloseTranslation = { [weak self] in
-            self?.exitCorrectionMode()
-        }
-        correctionInputView.onHeightChanged = { [weak self] newHeight in
-            self?.updateInputHeight(newHeight, isTranslation: false)
-        }
-
-        // Phrase input mode
-        phraseInputHeaderView.onCancel = { [weak self] in
-            self?.exitPhraseInputMode()
-        }
-        phraseInputHeaderView.onSave = { [weak self] in
-            self?.saveNewPhrase()
-        }
-        phraseInputView.setPlaceholder(L("phrase.placeholder"))
-        phraseInputView.onHeightChanged = { [weak self] newHeight in
-            self?.phraseInputHeightConstraint?.constant = newHeight
-            self?.updateHeight(for: .phraseInputMode, animated: true)
-        }
-
         // Keyboard layout
         keyboardLayoutView.onKeyTap = { [weak self] key in
             self?.handleKeyTap(key)
@@ -538,6 +585,10 @@ class KeyboardViewController: UIInputViewController {
         }
         if let targetLang = AppGroupManager.shared.string(forKey: AppConstants.UserDefaultsKeys.targetLanguage) {
             targetLanguageCode = targetLang
+        }
+        // 입력언어 = 출력언어인 경우 안전장치
+        if sourceLanguageCode == targetLanguageCode {
+            targetLanguageCode = sourceLanguageCode == "en" ? "ko" : "en"
         }
         correctionLanguageCode = sourceLanguageCode
         translationManager.setLanguages(source: sourceLanguageCode, target: targetLanguageCode)
@@ -572,37 +623,53 @@ class KeyboardViewController: UIInputViewController {
         switch mode {
         case .defaultMode:
             toolbarView.isHidden = false
-            translationLanguageBar.isHidden = true
-            translationInputView.isHidden = true
-            correctionLanguageBar.isHidden = true
-            correctionInputView.isHidden = true
-            phraseInputHeaderView.isHidden = true
-            phraseInputView.isHidden = true
+            if translationLanguageBar.superview != nil {
+                translationLanguageBar.isHidden = true
+                translationInputView.isHidden = true
+            }
+            if correctionLanguageBar.superview != nil {
+                correctionLanguageBar.isHidden = true
+                correctionInputView.isHidden = true
+            }
+            if phraseInputHeaderView.superview != nil {
+                phraseInputHeaderView.isHidden = true
+                phraseInputView.isHidden = true
+            }
             translationManager.cancelPending()
             textProxyManager.reset()
             keyboardTopToToolbarConstraint?.isActive = true
 
         case .translationMode:
+            setupTranslationViewsIfNeeded()
             toolbarView.isHidden = true
             translationLanguageBar.isHidden = false
             translationInputView.isHidden = false
-            correctionLanguageBar.isHidden = true
-            correctionInputView.isHidden = true
-            phraseInputHeaderView.isHidden = true
-            phraseInputView.isHidden = true
+            if correctionLanguageBar.superview != nil {
+                correctionLanguageBar.isHidden = true
+                correctionInputView.isHidden = true
+            }
+            if phraseInputHeaderView.superview != nil {
+                phraseInputHeaderView.isHidden = true
+                phraseInputView.isHidden = true
+            }
             modeTextInputHandler.clear()
             translationInputView.clear()
             toolbarView.hideSuggestions()
             keyboardTopToTranslationConstraint?.isActive = true
 
         case .correctionMode:
+            setupCorrectionViewsIfNeeded()
             toolbarView.isHidden = true
-            translationLanguageBar.isHidden = true
-            translationInputView.isHidden = true
+            if translationLanguageBar.superview != nil {
+                translationLanguageBar.isHidden = true
+                translationInputView.isHidden = true
+            }
             correctionLanguageBar.isHidden = false
             correctionInputView.isHidden = false
-            phraseInputHeaderView.isHidden = true
-            phraseInputView.isHidden = true
+            if phraseInputHeaderView.superview != nil {
+                phraseInputHeaderView.isHidden = true
+                phraseInputView.isHidden = true
+            }
             modeTextInputHandler.clear()
             correctionInputView.clear()
             correctionManager.reset()
@@ -611,11 +678,16 @@ class KeyboardViewController: UIInputViewController {
             keyboardTopToCorrectionConstraint?.isActive = true
 
         case .phraseInputMode:
+            setupPhraseViewsIfNeeded()
             toolbarView.isHidden = true
-            translationLanguageBar.isHidden = true
-            translationInputView.isHidden = true
-            correctionLanguageBar.isHidden = true
-            correctionInputView.isHidden = true
+            if translationLanguageBar.superview != nil {
+                translationLanguageBar.isHidden = true
+                translationInputView.isHidden = true
+            }
+            if correctionLanguageBar.superview != nil {
+                correctionLanguageBar.isHidden = true
+                correctionInputView.isHidden = true
+            }
             phraseInputHeaderView.isHidden = false
             phraseInputView.isHidden = false
             modeTextInputHandler.clear()
@@ -698,6 +770,7 @@ class KeyboardViewController: UIInputViewController {
         }
         CompositionSessionManager.shared.startSession(mode: .correct)
 
+        setupCorrectionViewsIfNeeded()
         let langName = languageDisplayName(for: correctionLanguageCode)
         correctionLanguageBar.updateLanguageName(langName)
         correctionManager.setLanguage(correctionLanguageCode)
@@ -1116,9 +1189,11 @@ class KeyboardViewController: UIInputViewController {
     }
 
     private func updateLanguageLabels() {
-        let sourceName = languageDisplayName(for: sourceLanguageCode)
-        let targetName = languageDisplayName(for: targetLanguageCode)
-        translationLanguageBar.updateLanguageNames(source: sourceName, target: targetName)
+        if translationLanguageBar.superview != nil {
+            let sourceName = languageDisplayName(for: sourceLanguageCode)
+            let targetName = languageDisplayName(for: targetLanguageCode)
+            translationLanguageBar.updateLanguageNames(source: sourceName, target: targetName)
+        }
     }
 
     private func languageDisplayName(for code: String) -> String {
@@ -1576,22 +1651,34 @@ class KeyboardViewController: UIInputViewController {
         toolbarView.applyTheme(theme)
         toolbarView.updateAppearance(isDark: isDark)
         emojiKeyboardView?.updateAppearance(isDark: isDark)
-        translationLanguageBar.applyTheme(theme)
-        translationLanguageBar.updateAppearance(isDark: isDark)
-        translationInputView.applyTheme(theme)
-        translationInputView.updateAppearance(isDark: isDark)
-        correctionLanguageBar.applyTheme(theme)
-        correctionLanguageBar.updateAppearance(isDark: isDark)
-        correctionInputView.applyTheme(theme)
-        correctionInputView.updateAppearance(isDark: isDark)
+        if translationLanguageBar.superview != nil {
+            translationLanguageBar.applyTheme(theme)
+            translationLanguageBar.updateAppearance(isDark: isDark)
+        }
+        if translationInputView.superview != nil {
+            translationInputView.applyTheme(theme)
+            translationInputView.updateAppearance(isDark: isDark)
+        }
+        if correctionLanguageBar.superview != nil {
+            correctionLanguageBar.applyTheme(theme)
+            correctionLanguageBar.updateAppearance(isDark: isDark)
+        }
+        if correctionInputView.superview != nil {
+            correctionInputView.applyTheme(theme)
+            correctionInputView.updateAppearance(isDark: isDark)
+        }
         tonePickerView?.applyTheme(theme)
         tonePickerView?.updateAppearance(isDark: isDark)
         savedPhrasesView?.updateAppearance(isDark: isDark)
         clipboardHistoryView?.updateAppearance(isDark: isDark)
-        phraseInputHeaderView.applyTheme(theme)
-        phraseInputHeaderView.updateAppearance(isDark: isDark)
-        phraseInputView.applyTheme(theme)
-        phraseInputView.updateAppearance(isDark: isDark)
+        if phraseInputHeaderView.superview != nil {
+            phraseInputHeaderView.applyTheme(theme)
+            phraseInputHeaderView.updateAppearance(isDark: isDark)
+        }
+        if phraseInputView.superview != nil {
+            phraseInputView.applyTheme(theme)
+            phraseInputView.updateAppearance(isDark: isDark)
+        }
     }
 
     // MARK: - Status Popup (Proposal 02)
@@ -1748,12 +1835,18 @@ extension KeyboardViewController: TextInputHandlerDelegate {
         let displayText = handler.fullText
         switch currentMode {
         case .correctionMode:
-            correctionInputView.setDisplayText(displayText)
+            if correctionInputView.superview != nil {
+                correctionInputView.setDisplayText(displayText)
+            }
             correctionManager.requestCorrection(text: displayText)
         case .phraseInputMode:
-            phraseInputView.setDisplayText(displayText)
+            if phraseInputView.superview != nil {
+                phraseInputView.setDisplayText(displayText)
+            }
         case .translationMode:
-            translationInputView.setDisplayText(displayText)
+            if translationInputView.superview != nil {
+                translationInputView.setDisplayText(displayText)
+            }
             translationManager.requestTranslation(text: displayText)
         case .defaultMode:
             break
@@ -1765,12 +1858,18 @@ extension KeyboardViewController: TextInputHandlerDelegate {
         let displayText = handler.fullText
         switch currentMode {
         case .correctionMode:
-            correctionInputView.setDisplayText(displayText)
+            if correctionInputView.superview != nil {
+                correctionInputView.setDisplayText(displayText)
+            }
             correctionManager.requestCorrection(text: displayText)
         case .phraseInputMode:
-            phraseInputView.setDisplayText(displayText)
+            if phraseInputView.superview != nil {
+                phraseInputView.setDisplayText(displayText)
+            }
         case .translationMode:
-            translationInputView.setDisplayText(displayText)
+            if translationInputView.superview != nil {
+                translationInputView.setDisplayText(displayText)
+            }
             translationManager.requestTranslation(text: displayText)
         case .defaultMode:
             break
