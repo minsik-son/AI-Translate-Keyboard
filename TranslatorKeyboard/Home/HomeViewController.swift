@@ -215,10 +215,15 @@ class HomeViewController: UIViewController {
         topRow.addArrangedSubview(badgeWrapper)
 
         // Pro link button
-        proLinkButton.setTitle("Pro \(L("home.plan.subscribe")) \u{2192}", for: .normal)
-        proLinkButton.titleLabel?.font = .systemFont(ofSize: 14, weight: .medium)
-        proLinkButton.setTitleColor(AppColors.accent, for: .normal)
+        proLinkButton.setImage(UIImage(named: "ProIcon")?.withRenderingMode(.alwaysOriginal), for: .normal)
+        proLinkButton.imageView?.contentMode = .scaleAspectFit
+        proLinkButton.setTitle(nil, for: .normal)
         proLinkButton.addTarget(self, action: #selector(subscribeTapped), for: .touchUpInside)
+        proLinkButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            proLinkButton.heightAnchor.constraint(equalToConstant: 40),
+            proLinkButton.widthAnchor.constraint(equalToConstant: 78)
+        ])
         topRow.addArrangedSubview(proLinkButton)
 
         mainStack.addArrangedSubview(topRow)
@@ -548,11 +553,11 @@ class HomeViewController: UIViewController {
         clipboardCountLabel.text = "0"
         phrasesCountLabel.text = "0"
 
-        let rows: [(icon: String, color: UIColor, title: String, subtitle: String, valueLabel: UILabel, action: Selector)] = [
-            ("pencil", AppColors.orange, L("home.stat.corrections"), L("home.stat.this_week"), correctionCountLabel, #selector(correctionCardTapped)),
-            ("globe", AppColors.accent, L("home.stat.translations"), L("home.stat.this_week"), translationCountLabel, #selector(translationCardTapped)),
-            ("doc.on.clipboard", AppColors.green, L("home.stat.clipboard"), L("home.stat.saved"), clipboardCountLabel, #selector(clipboardCardTapped)),
-            ("bookmark.fill", AppColors.pink, L("home.stat.phrases"), L("home.stat.saved"), phrasesCountLabel, #selector(phrasesCardTapped)),
+        let rows: [(icon: String, color: UIColor, title: String, subtitle: String, valueLabel: UILabel, action: Selector, isCustomImage: Bool)] = [
+            ("CorrectionIcon", AppColors.orange, L("home.stat.corrections"), L("home.stat.this_week"), correctionCountLabel, #selector(correctionCardTapped), true),
+            ("TranslationIcon", AppColors.accent, L("home.stat.translations"), L("home.stat.this_week"), translationCountLabel, #selector(translationCardTapped), true),
+            ("ClipboardIcon", AppColors.green, L("home.stat.clipboard"), L("home.stat.saved"), clipboardCountLabel, #selector(clipboardCardTapped), true),
+            ("PhrasesIcon", AppColors.pink, L("home.stat.phrases"), L("home.stat.saved"), phrasesCountLabel, #selector(phrasesCardTapped), true),
         ]
 
         for (i, row) in rows.enumerated() {
@@ -562,7 +567,8 @@ class HomeViewController: UIViewController {
                 title: row.title,
                 subtitle: row.subtitle,
                 valueLabel: row.valueLabel,
-                action: row.action
+                action: row.action,
+                isCustomImage: row.isCustomImage
             )
             stack.addArrangedSubview(rowView)
 
@@ -589,7 +595,7 @@ class HomeViewController: UIViewController {
         return card
     }
 
-    private func makeActivityRow(icon: String, color: UIColor, title: String, subtitle: String, valueLabel: UILabel, action: Selector) -> UIView {
+    private func makeActivityRow(icon: String, color: UIColor, title: String, subtitle: String, valueLabel: UILabel, action: Selector, isCustomImage: Bool = false) -> UIView {
         let container = UIView()
         container.isUserInteractionEnabled = true
         let tap = UITapGestureRecognizer(target: self, action: action)
@@ -597,20 +603,31 @@ class HomeViewController: UIViewController {
 
         // Icon area (40x40 with colored background)
         let iconBg = UIView()
-        iconBg.backgroundColor = color.withAlphaComponent(0.12)
+        iconBg.backgroundColor = UIColor { traitCollection in
+            if traitCollection.userInterfaceStyle == .dark {
+                return UIColor(red: 44/255, green: 44/255, blue: 46/255, alpha: 1.0)
+            } else {
+                return UIColor(red: 242/255, green: 243/255, blue: 245/255, alpha: 1.0)
+            }
+        }
         iconBg.layer.cornerRadius = 12
         iconBg.translatesAutoresizingMaskIntoConstraints = false
 
-        let iconImage = UIImageView(image: UIImage(systemName: icon))
-        iconImage.tintColor = color
+        let iconImage: UIImageView
+        if isCustomImage {
+            iconImage = UIImageView(image: UIImage(named: icon))
+        } else {
+            iconImage = UIImageView(image: UIImage(systemName: icon))
+            iconImage.tintColor = color
+        }
         iconImage.contentMode = .scaleAspectFit
         iconImage.translatesAutoresizingMaskIntoConstraints = false
         iconBg.addSubview(iconImage)
         NSLayoutConstraint.activate([
             iconImage.centerXAnchor.constraint(equalTo: iconBg.centerXAnchor),
             iconImage.centerYAnchor.constraint(equalTo: iconBg.centerYAnchor),
-            iconImage.widthAnchor.constraint(equalToConstant: 18),
-            iconImage.heightAnchor.constraint(equalToConstant: 18),
+            iconImage.widthAnchor.constraint(equalToConstant: 24),
+            iconImage.heightAnchor.constraint(equalToConstant: 24),
         ])
 
         // Title + subtitle stack

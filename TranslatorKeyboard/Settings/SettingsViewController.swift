@@ -363,13 +363,12 @@ private class PlanBannerCell: UITableViewCell {
         return label
     }()
 
-    private let upgradeButton: UILabel = {
-        let label = UILabel()
-        label.text = L("settings.plan.upgrade") + " →"
-        label.font = .systemFont(ofSize: 14, weight: .medium)
-        label.textColor = AppColors.accent
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
+    private let upgradeImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(named: "ProIcon")
+        imageView.contentMode = .scaleAspectFit
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
     }()
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -388,7 +387,7 @@ private class PlanBannerCell: UITableViewCell {
         leftStack.translatesAutoresizingMaskIntoConstraints = false
 
         contentView.addSubview(leftStack)
-        contentView.addSubview(upgradeButton)
+        contentView.addSubview(upgradeImageView)
 
         NSLayoutConstraint.activate([
             leftStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
@@ -396,8 +395,10 @@ private class PlanBannerCell: UITableViewCell {
             leftStack.topAnchor.constraint(greaterThanOrEqualTo: contentView.topAnchor, constant: 12),
             leftStack.bottomAnchor.constraint(lessThanOrEqualTo: contentView.bottomAnchor, constant: -12),
 
-            upgradeButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            upgradeButton.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            upgradeImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            upgradeImageView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            upgradeImageView.heightAnchor.constraint(equalToConstant: 40),
+            upgradeImageView.widthAnchor.constraint(equalToConstant: 78)
         ])
 
         updatePlanStatus()
@@ -408,13 +409,13 @@ private class PlanBannerCell: UITableViewCell {
         switch tier {
         case .free:
             planNameLabel.text = L("home.plan.free")
-            upgradeButton.isHidden = false
+            upgradeImageView.isHidden = false
         case .pro:
             planNameLabel.text = L("home.plan.pro")
-            upgradeButton.isHidden = true
+            upgradeImageView.isHidden = true
         case .premium:
             planNameLabel.text = L("home.plan.premium")
-            upgradeButton.isHidden = true
+            upgradeImageView.isHidden = true
         }
     }
 }
