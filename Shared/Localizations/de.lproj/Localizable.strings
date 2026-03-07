@@ -87,7 +87,7 @@
 "keyboard.status.remaining_today" = "Heute verbleibend";
 "keyboard.status.plan" = "Plan";
 "keyboard.status.upgrade_pro" = " upgraden";
-"keyboard.menu.settings" = "Tastatureinstellungen";
+"keyboard.menu.settings" = "Einstellungen";
 "keyboard.menu.help" = "Hilfe";
 "keyboard.suggestion.recommended" = "Empfohlen";
 "keyboard.suggestion.alternative" = "Alternative";
@@ -363,3 +363,7 @@
 "paywall.benefit.no_ads_desc" = "Alle Werbung entfernen";
 "paywall.promo_code" = "Haben Sie einen Promo-Code?";
 "paywall.cancel_anytime" = "Jederzeit kündbar";
+
+// === Paste Guide Banner ===
+"home.paste_guide_banner.title" = "Einfüge-Hinweis deaktivieren";
+"home.paste_guide_banner.desc" = "Deaktivieren Sie die Zwischenablage-Benachrichtigung";

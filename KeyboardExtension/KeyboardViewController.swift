@@ -530,21 +530,32 @@ class KeyboardViewController: UIInputViewController {
     private func setupCallbacks() {
         // Toolbar — default mode only
         toolbarView.onTranslateToggle = { [weak self] in
+            self?.hideContextMenu()
+            self?.hideStatusPopup()
             self?.toggleTranslationMode()
         }
         toolbarView.onEmojiKeyboardToggle = { [weak self] in
+            self?.hideContextMenu()
+            self?.hideStatusPopup()
             self?.toggleEmojiKeyboard()
         }
         toolbarView.onCorrectionToggle = { [weak self] in
+            self?.hideContextMenu()
+            self?.hideStatusPopup()
             self?.toggleCorrectionMode()
         }
         toolbarView.onSavedPhrasesTap = { [weak self] in
+            self?.hideContextMenu()
+            self?.hideStatusPopup()
             self?.showSavedPhrases()
         }
         toolbarView.onClipboardTap = { [weak self] in
+            self?.hideContextMenu()
+            self?.hideStatusPopup()
             self?.toggleClipboardHistory()
         }
         toolbarView.onLogoTap = { [weak self] in
+            self?.hideContextMenu()
             self?.showStatusPopup()
         }
         toolbarView.onLogoLongPress = { [weak self] in
@@ -909,6 +920,14 @@ class KeyboardViewController: UIInputViewController {
         if existing.first?.text == trimmed { return }
 
         ClipboardHistoryManager.shared.addItem(trimmed)
+
+        // 메인앱 히스토리 탭에도 저장
+        HistoryManager.shared.addItem(
+            type: .clipboard,
+            original: trimmed,
+            result: nil,
+            metadata: nil
+        )
     }
 
     private func insertPhrase(_ phrase: String) {

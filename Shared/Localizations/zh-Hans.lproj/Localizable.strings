@@ -87,7 +87,7 @@
 "keyboard.status.remaining_today" = "今日剩余次数";
 "keyboard.status.plan" = "套餐";
 "keyboard.status.upgrade_pro" = "升级";
-"keyboard.menu.settings" = "键盘设置";
+"keyboard.menu.settings" = "设置";
 "keyboard.menu.help" = "帮助";
 "keyboard.suggestion.recommended" = "推荐";
 "keyboard.suggestion.alternative" = "备选";
@@ -363,3 +363,7 @@
 "paywall.benefit.no_ads_desc" = "移除所有广告";
 "paywall.promo_code" = "有促销码？";
 "paywall.cancel_anytime" = "随时可以取消";
+
+// === Paste Guide Banner ===
+"home.paste_guide_banner.title" = "关闭粘贴通知";
+"home.paste_guide_banner.desc" = "了解如何关闭剪贴板访问提示";

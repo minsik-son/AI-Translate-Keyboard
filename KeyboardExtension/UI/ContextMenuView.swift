@@ -123,19 +123,23 @@ class ContextMenuView: UIView {
 
     private func makeMenuRow(icon: String, iconColor: UIColor, title: String, action: Selector) -> UIView {
         let container = UIView()
+        container.backgroundColor = .clear
         container.translatesAutoresizingMaskIntoConstraints = false
         container.heightAnchor.constraint(equalToConstant: 40).isActive = true
 
         let iconView = UIImageView()
-        let config = UIImage.SymbolConfiguration(pointSize: 16, weight: .regular)
-        iconView.image = UIImage(systemName: icon, withConfiguration: config)
-        iconView.tintColor = iconColor
+        let config = UIImage.SymbolConfiguration(pointSize: 16, weight: .regular, scale: .medium)
+        let symbolConfig = config.applying(UIImage.SymbolConfiguration(hierarchicalColor: iconColor))
+        iconView.image = UIImage(systemName: icon, withConfiguration: symbolConfig)
         iconView.contentMode = .scaleAspectFit
+        iconView.backgroundColor = .clear
+        iconView.clipsToBounds = true
         iconView.translatesAutoresizingMaskIntoConstraints = false
 
         let titleLabel = UILabel()
         titleLabel.text = title
         titleLabel.font = .systemFont(ofSize: 15, weight: .medium)
+        titleLabel.backgroundColor = .clear
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
 
         container.addSubview(iconView)

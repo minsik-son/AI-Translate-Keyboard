@@ -87,7 +87,7 @@
 "keyboard.status.remaining_today" = "오늘 남은 횟수";
 "keyboard.status.plan" = "플랜";
 "keyboard.status.upgrade_pro" = "로 업그레이드";
-"keyboard.menu.settings" = "키보드 설정";
+"keyboard.menu.settings" = "설정";
 "keyboard.menu.help" = "도움말";
 "keyboard.suggestion.recommended" = "추천";
 "keyboard.suggestion.alternative" = "대안";
@@ -363,3 +363,7 @@
 "paywall.benefit.no_ads_desc" = "모든 광고 제거";
 "paywall.promo_code" = "프로모 코드가 있으신가요?";
 "paywall.cancel_anytime" = "언제든지 해지할 수 있어요";
+
+// === Paste Guide Banner ===
+"home.paste_guide_banner.title" = "붙여넣기 알림 해제";
+"home.paste_guide_banner.desc" = "클립보드 접근 시 나타나는 알림을 해제하세요";

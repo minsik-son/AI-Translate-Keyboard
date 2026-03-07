@@ -31,6 +31,7 @@ class HomeViewController: UIViewController {
     // MARK: - AI Writer Banner
 
     private let aiWriterBanner = UIView()
+    private let pasteGuideBanner = UIView()
 
     // MARK: - Weekly Activity
 
@@ -112,6 +113,10 @@ class HomeViewController: UIViewController {
         buildAIWriterBanner()
         contentStack.addArrangedSubview(aiWriterBanner)
         contentStack.setCustomSpacing(24, after: aiWriterBanner)
+
+        buildPasteGuideBanner()
+        contentStack.addArrangedSubview(pasteGuideBanner)
+        contentStack.setCustomSpacing(24, after: pasteGuideBanner)
 
         // 4. Weekly Activity
         let activityHeader = UILabel()
@@ -516,14 +521,77 @@ class HomeViewController: UIViewController {
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        // Resize gradient layer of AI Writer banner
         if let gradientLayer = aiWriterBanner.layer.sublayers?.first as? CAGradientLayer {
             gradientLayer.frame = aiWriterBanner.bounds
+        }
+        if let gradientLayer = pasteGuideBanner.layer.sublayers?.first as? CAGradientLayer {
+            gradientLayer.frame = pasteGuideBanner.bounds
         }
     }
 
     @objc private func aiWriterBannerTapped() {
         tabBarController?.selectedIndex = 1
+    }
+
+    private func buildPasteGuideBanner() {
+        pasteGuideBanner.layer.cornerRadius = AppRadius.md
+        pasteGuideBanner.clipsToBounds = true
+
+        let gradientLayer = CAGradientLayer()
+        gradientLayer.colors = [
+            UIColor(red: 0.0, green: 0.808, blue: 0.706, alpha: 1).cgColor,
+            UIColor(red: 0.0, green: 0.624, blue: 0.576, alpha: 1).cgColor,
+        ]
+        gradientLayer.startPoint = CGPoint(x: 0, y: 0)
+        gradientLayer.endPoint = CGPoint(x: 1, y: 1)
+        gradientLayer.frame = CGRect(x: 0, y: 0, width: 1000, height: 200)
+        pasteGuideBanner.layer.insertSublayer(gradientLayer, at: 0)
+
+        let decorCircle = UIView()
+        decorCircle.backgroundColor = UIColor.white.withAlphaComponent(0.1)
+        decorCircle.layer.cornerRadius = 50
+        decorCircle.translatesAutoresizingMaskIntoConstraints = false
+        pasteGuideBanner.addSubview(decorCircle)
+        NSLayoutConstraint.activate([
+            decorCircle.widthAnchor.constraint(equalToConstant: 100),
+            decorCircle.heightAnchor.constraint(equalToConstant: 100),
+            decorCircle.topAnchor.constraint(equalTo: pasteGuideBanner.topAnchor, constant: -30),
+            decorCircle.trailingAnchor.constraint(equalTo: pasteGuideBanner.trailingAnchor, constant: 30),
+        ])
+
+        let titleLabel = UILabel()
+        titleLabel.text = L("home.paste_guide_banner.title")
+        titleLabel.font = .systemFont(ofSize: 18, weight: .bold)
+        titleLabel.textColor = .white
+
+        let subtitleLabel = UILabel()
+        subtitleLabel.text = L("home.paste_guide_banner.desc")
+        subtitleLabel.font = .systemFont(ofSize: 14, weight: .regular)
+        subtitleLabel.textColor = UIColor.white.withAlphaComponent(0.8)
+        subtitleLabel.numberOfLines = 0
+
+        let textStack = UIStackView(arrangedSubviews: [titleLabel, subtitleLabel])
+        textStack.axis = .vertical
+        textStack.spacing = 4
+        textStack.translatesAutoresizingMaskIntoConstraints = false
+        pasteGuideBanner.addSubview(textStack)
+        NSLayoutConstraint.activate([
+            textStack.topAnchor.constraint(equalTo: pasteGuideBanner.topAnchor, constant: 20),
+            textStack.leadingAnchor.constraint(equalTo: pasteGuideBanner.leadingAnchor, constant: 20),
+            textStack.trailingAnchor.constraint(equalTo: pasteGuideBanner.trailingAnchor, constant: -20),
+            textStack.bottomAnchor.constraint(equalTo: pasteGuideBanner.bottomAnchor, constant: -20),
+        ])
+
+        let tap = UITapGestureRecognizer(target: self, action: #selector(pasteGuideBannerTapped))
+        pasteGuideBanner.addGestureRecognizer(tap)
+        pasteGuideBanner.isUserInteractionEnabled = true
+
+        pasteGuideBanner.tag = 9998
+    }
+
+    @objc private func pasteGuideBannerTapped() {
+        let vc = PasteGuideViewController()
+        navigationController?.pushViewController(vc, animated: true)
     }
 
     // MARK: - 4. Weekly Activity Card
@@ -770,6 +838,8 @@ class HomeViewController: UIViewController {
         planCard.layer.sublayers?.removeAll()
         aiWriterBanner.subviews.forEach { $0.removeFromSuperview() }
         aiWriterBanner.layer.sublayers?.removeAll()
+        pasteGuideBanner.subviews.forEach { $0.removeFromSuperview() }
+        pasteGuideBanner.layer.sublayers?.removeAll()
         corrTrackLayer.removeFromSuperlayer()
         corrProgressLayer.removeFromSuperlayer()
         transTrackLayer.removeFromSuperlayer()

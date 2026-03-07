@@ -986,6 +986,11 @@ class KeyboardLayoutView: UIView {
                 isShifted = false
                 buildKeyboard()
             }
+            // ' 키 입력 후 자동으로 문자 키보드로 복귀
+            if key == "'" && (currentPage == .symbols1 || currentPage == .symbols2) {
+                currentPage = .letters
+                buildKeyboard()
+            }
         }
     }
 

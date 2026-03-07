@@ -87,7 +87,7 @@
 "keyboard.status.remaining_today" = "Restant aujourd'hui";
 "keyboard.status.plan" = "Forfait";
 "keyboard.status.upgrade_pro" = " passer";
-"keyboard.menu.settings" = "Paramètres du clavier";
+"keyboard.menu.settings" = "Paramètres";
 "keyboard.menu.help" = "Aide";
 "keyboard.suggestion.recommended" = "Recommandé";
 "keyboard.suggestion.alternative" = "Alternative";
@@ -363,3 +363,7 @@
 "paywall.benefit.no_ads_desc" = "Supprimez toutes les publicités";
 "paywall.promo_code" = "Avez-vous un code promo ?";
 "paywall.cancel_anytime" = "Annulez à tout moment";
+
+// === Paste Guide Banner ===
+"home.paste_guide_banner.title" = "Désactiver la notification";
+"home.paste_guide_banner.desc" = "Désactivez l'alerte de collage du presse-papiers";

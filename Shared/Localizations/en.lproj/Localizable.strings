@@ -87,7 +87,7 @@
 "keyboard.status.remaining_today" = "Remaining Today";
 "keyboard.status.plan" = "Plan";
 "keyboard.status.upgrade_pro" = " Upgrade";
-"keyboard.menu.settings" = "Keyboard Settings";
+"keyboard.menu.settings" = "Settings";
 "keyboard.menu.help" = "Help";
 "keyboard.suggestion.recommended" = "Recommended";
 "keyboard.suggestion.alternative" = "Alternative";
@@ -363,3 +363,7 @@
 "paywall.benefit.no_ads_desc" = "Remove all advertisements";
 "paywall.promo_code" = "Have a promo code?";
 "paywall.cancel_anytime" = "Cancel anytime";
+
+// === Paste Guide Banner ===
+"home.paste_guide_banner.title" = "Disable Paste Notification";
+"home.paste_guide_banner.desc" = "Learn how to turn off clipboard access alerts";

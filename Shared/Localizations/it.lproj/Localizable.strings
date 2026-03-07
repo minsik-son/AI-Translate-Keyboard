@@ -87,7 +87,7 @@
 "keyboard.status.remaining_today" = "Rimanenti oggi";
 "keyboard.status.plan" = "Piano";
 "keyboard.status.upgrade_pro" = " aggiornare";
-"keyboard.menu.settings" = "Impostazioni tastiera";
+"keyboard.menu.settings" = "Impostazioni";
 "keyboard.menu.help" = "Aiuto";
 "keyboard.suggestion.recommended" = "Consigliato";
 "keyboard.suggestion.alternative" = "Alternativa";
@@ -363,3 +363,7 @@
 "paywall.benefit.no_ads_desc" = "Rimuovi tutta la pubblicità";
 "paywall.promo_code" = "Hai un codice promozionale?";
 "paywall.cancel_anytime" = "Annulla in qualsiasi momento";
+
+// === Paste Guide Banner ===
+"home.paste_guide_banner.title" = "Disattiva notifica incolla";
+"home.paste_guide_banner.desc" = "Disattiva l'avviso di accesso agli appunti";

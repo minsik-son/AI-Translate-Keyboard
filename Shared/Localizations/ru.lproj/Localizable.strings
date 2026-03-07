@@ -87,7 +87,7 @@
 "keyboard.status.remaining_today" = "Осталось сегодня";
 "keyboard.status.plan" = "План";
 "keyboard.status.upgrade_pro" = " обновить";
-"keyboard.menu.settings" = "Настройки клавиатуры";
+"keyboard.menu.settings" = "Настройки";
 "keyboard.menu.help" = "Помощь";
 "keyboard.suggestion.recommended" = "Рекомендуемый";
 "keyboard.suggestion.alternative" = "Альтернатива";
@@ -363,3 +363,7 @@
 "paywall.benefit.no_ads_desc" = "Удалить всю рекламу";
 "paywall.promo_code" = "Есть промо-код?";
 "paywall.cancel_anytime" = "Отмена в любое время";
+
+// === Paste Guide Banner ===
+"home.paste_guide_banner.title" = "Отключить уведомление";
+"home.paste_guide_banner.desc" = "Отключите уведомление о доступе к буферу обмена";
