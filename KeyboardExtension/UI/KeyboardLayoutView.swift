@@ -232,6 +232,7 @@ class KeyboardLayoutView: UIView {
     }()
 
     private var allKeyButtons: [UIButton] = []
+    private var isRebuilding = false
 
     // MARK: - Init
 
@@ -295,6 +296,7 @@ class KeyboardLayoutView: UIView {
 
     private func buildKeyboard() {
         guard !isTrackpadMode else { return }  // 트랙패드 중 재빌드 방지
+        isRebuilding = true
         keyboardContainer.subviews.forEach { $0.removeFromSuperview() }
         allKeyButtons.removeAll()
 
@@ -336,6 +338,9 @@ class KeyboardLayoutView: UIView {
         if let lastRow = previousRowView {
             lastRow.bottomAnchor.constraint(equalTo: keyboardContainer.bottomAnchor, constant: -Layout.bottomInset).isActive = true
         }
+
+        keyboardContainer.layoutIfNeeded()
+        isRebuilding = false
     }
 
     private func buildRow(keys: [String], rowIndex: Int, totalRows: Int) -> UIView {
@@ -998,10 +1003,13 @@ class KeyboardLayoutView: UIView {
 
     /// Find the button at a given point (or nearest button for gap touches)
     private func findButtonAt(_ point: CGPoint) -> UIButton? {
+        guard !isRebuilding else { return nil }
+
         // Direct hit — check each button's frame
         for button in allKeyButtons {
             guard let sv = button.superview else { continue }
             let frame = sv.convert(button.frame, to: self)
+            guard frame.width > 0 && frame.height > 0 else { continue }
             if frame.contains(point) {
                 return button
             }
@@ -1012,7 +1020,9 @@ class KeyboardLayoutView: UIView {
         var minDistSq: CGFloat = .greatestFiniteMagnitude
         for button in allKeyButtons {
             guard let sv = button.superview else { continue }
-            let center = sv.convert(button.center, to: self)
+            let frame = sv.convert(button.frame, to: self)
+            guard frame.width > 0 && frame.height > 0 else { continue }
+            let center = CGPoint(x: frame.midX, y: frame.midY)
             let dx = point.x - center.x
             let dy = point.y - center.y
             let distSq = dx * dx + dy * dy
