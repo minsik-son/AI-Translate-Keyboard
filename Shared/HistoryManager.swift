@@ -2,6 +2,7 @@ import Foundation
 
 extension Notification.Name {
     static let historyDidChange = Notification.Name("historyDidChange")
+    static let savedPhrasesDidChange = Notification.Name("savedPhrasesDidChange")
 }
 
 final class HistoryManager {
@@ -51,6 +52,11 @@ final class HistoryManager {
         saveItems([])
     }
 
+    /// 특정 타입의 전체 아이템 수 (주간 제한 없이)
+    func totalCount(ofType type: HistoryType) -> Int {
+        return loadItems().filter { $0.type == type }.count
+    }
+
     func weeklyCount(ofType type: HistoryType) -> Int {
         var calendar = Calendar.current
         calendar.firstWeekday = 2 // Monday
@@ -71,6 +77,9 @@ final class HistoryManager {
     private func saveItems(_ items: [HistoryItem]) {
         guard let data = try? JSONEncoder().encode(items) else { return }
         defaults?.set(data, forKey: historyKey)
-        NotificationCenter.default.post(name: .historyDidChange, object: nil)
+        // 메인앱에서만 노티 발송 (키보드 익스텐션에서는 옵저버가 없으므로 불필요)
+        if Bundle.main.bundlePath.hasSuffix(".app") {
+            NotificationCenter.default.post(name: .historyDidChange, object: nil)
+        }
     }
 }

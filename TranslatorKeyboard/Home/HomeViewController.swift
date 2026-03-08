@@ -40,6 +40,12 @@ class HomeViewController: UIViewController {
     private let clipboardCountLabel = UILabel()
     private let phrasesCountLabel = UILabel()
 
+    // Stats 캐시 — refreshStats에서 계산, animateCountUp에서 재사용
+    private var cachedCorrectionCount = 0
+    private var cachedTranslationCount = 0
+    private var cachedClipboardCount = 0
+    private var cachedPhrasesCount = 0
+
     // MARK: - Lifecycle
 
     override func viewDidLoad() {
@@ -50,6 +56,8 @@ class HomeViewController: UIViewController {
         buildContent()
         NotificationCenter.default.addObserver(self, selector: #selector(handleHistoryChange), name: .historyDidChange, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleLanguageChange), name: .languageDidChange, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleAppWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleHistoryChange), name: .savedPhrasesDidChange, object: nil)
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -836,6 +844,11 @@ class HomeViewController: UIViewController {
         refreshStats()
     }
 
+    @objc private func handleAppWillEnterForeground() {
+        StatsManager.shared.checkAndResetWeeklyStats()
+        refreshStats()
+    }
+
     @objc private func handleLanguageChange() {
         title = L("home.title")
         contentStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
@@ -881,25 +894,19 @@ class HomeViewController: UIViewController {
         correctionCountLabel.text = "\(stats.weeklyCorrections)"
         translationCountLabel.text = "\(stats.weeklyTranslations)"
 
-        // Clipboard items count
-        let clipboardData = UserDefaults(suiteName: AppConstants.appGroupIdentifier)?.data(forKey: AppConstants.UserDefaultsKeys.clipboardHistory)
-        let clipboardCount: Int
-        if let data = clipboardData, let items = try? JSONDecoder().decode([ClipboardItem].self, from: data) {
-            clipboardCount = items.count
-        } else {
-            clipboardCount = 0
-        }
+        // Clipboard items count — HistoryManager 기반
+        let clipboardCount = HistoryManager.shared.totalCount(ofType: .clipboard)
         clipboardCountLabel.text = "\(clipboardCount)"
 
-        // Saved phrases count
-        let phrasesData = UserDefaults(suiteName: AppConstants.appGroupIdentifier)?.data(forKey: AppConstants.UserDefaultsKeys.savedPhrases)
-        let phrasesCount: Int
-        if let data = phrasesData, let items = try? JSONDecoder().decode([String].self, from: data) {
-            phrasesCount = items.count
-        } else {
-            phrasesCount = 0
-        }
+        // Saved phrases count — SavedPhrasesManager 기반
+        let phrasesCount = SavedPhrasesManager.shared.getPhrases().count
         phrasesCountLabel.text = "\(phrasesCount)"
+
+        // 캐시 업데이트
+        cachedCorrectionCount = stats.weeklyCorrections
+        cachedTranslationCount = stats.weeklyTranslations
+        cachedClipboardCount = clipboardCount
+        cachedPhrasesCount = phrasesCount
     }
 
     private func updateDateLabel() {
@@ -960,27 +967,11 @@ class HomeViewController: UIViewController {
     }
 
     private func animateCountUp() {
-        let stats = StatsManager.shared
-        animateLabel(correctionCountLabel, to: stats.weeklyCorrections)
-        animateLabel(translationCountLabel, to: stats.weeklyTranslations)
-
-        let clipboardData = UserDefaults(suiteName: AppConstants.appGroupIdentifier)?.data(forKey: AppConstants.UserDefaultsKeys.clipboardHistory)
-        let clipCount: Int
-        if let data = clipboardData, let items = try? JSONDecoder().decode([ClipboardItem].self, from: data) {
-            clipCount = items.count
-        } else {
-            clipCount = 0
-        }
-        animateLabel(clipboardCountLabel, to: clipCount)
-
-        let phrasesData = UserDefaults(suiteName: AppConstants.appGroupIdentifier)?.data(forKey: AppConstants.UserDefaultsKeys.savedPhrases)
-        let phrasesCount: Int
-        if let data = phrasesData, let items = try? JSONDecoder().decode([String].self, from: data) {
-            phrasesCount = items.count
-        } else {
-            phrasesCount = 0
-        }
-        animateLabel(phrasesCountLabel, to: phrasesCount)
+        // 캐시된 값 사용 — 중복 디코딩 제거
+        animateLabel(correctionCountLabel, to: cachedCorrectionCount)
+        animateLabel(translationCountLabel, to: cachedTranslationCount)
+        animateLabel(clipboardCountLabel, to: cachedClipboardCount)
+        animateLabel(phrasesCountLabel, to: cachedPhrasesCount)
     }
 
     private func animateLabel(_ label: UILabel, to target: Int) {

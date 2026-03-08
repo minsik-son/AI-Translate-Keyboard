@@ -23,6 +23,18 @@ class HistoryViewController: UIViewController {
         setupTableView()
         setupEmptyState()
         NotificationCenter.default.addObserver(self, selector: #selector(handleLanguageChange), name: .languageDidChange, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleAppWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleSavedPhrasesChange), name: .savedPhrasesDidChange, object: nil)
+    }
+
+    @objc private func handleAppWillEnterForeground() {
+        reloadData()
+    }
+
+    @objc private func handleSavedPhrasesChange() {
+        if showingSavedPhrases {
+            applyFilter()
+        }
     }
 
     @objc private func handleLanguageChange() {

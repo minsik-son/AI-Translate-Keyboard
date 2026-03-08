@@ -33,5 +33,9 @@ final class SavedPhrasesManager {
     private func save(_ phrases: [String]) {
         let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier)
         defaults?.set(phrases, forKey: AppConstants.UserDefaultsKeys.savedPhrases)
+        // 메인앱에서만 노티 발송 (키보드 익스텐션에서는 옵저버가 없으므로 불필요)
+        if Bundle.main.bundlePath.hasSuffix(".app") {
+            NotificationCenter.default.post(name: .savedPhrasesDidChange, object: nil)
+        }
     }
 }
