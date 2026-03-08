@@ -355,6 +355,8 @@
 "paywall.hero.subtitle" = "升级到Pro，解锁所有功能";
 "paywall.benefit.usage" = "每日100次使用";
 "paywall.benefit.usage_desc" = "每天100次纠正/翻译";
+"paywall.benefit.usage.premium" = "无限制使用";
+"paywall.benefit.usage_desc.premium" = "纠正/翻译次数无限制";
 "paywall.benefit.tones" = "所有语气风格";
 "paywall.benefit.tones_desc" = "使用所有写作语气选项";
 "paywall.benefit.themes" = "高级主题";

@@ -19,14 +19,15 @@ final class SuggestionManager {
         context: String?,
         currentWord: String?,
         isComposing: Bool,
-        language: KeyboardLanguage
+        language: KeyboardLanguage,
+        onPrediction: (([String]) -> Void)? = nil
     ) -> SuggestionResult {
         // Korean composing → no suggestions
         if isComposing {
             return SuggestionResult(mode: .none, suggestions: [])
         }
 
-        // Currently typing a word → autocorrect
+        // Currently typing a word → autocorrect (동기, 빠름)
         if let word = currentWord, !word.isEmpty {
             let suggestions = autocorrectEngine.suggestions(for: word, language: language)
             if suggestions.isEmpty {
@@ -35,20 +36,33 @@ final class SuggestionManager {
             return SuggestionResult(mode: .autocorrect, suggestions: suggestions)
         }
 
-        // No current word (after space) → prediction
+        // No current word (after space) → prediction (비동기)
         let langCode = language.rawValue
-        predictionEngine.loadModel(for: langCode)
 
-        let words = extractContextWords(from: context)
-        guard !words.isEmpty else {
-            return SuggestionResult(mode: .none, suggestions: [])
+        // 모델이 이미 로드되어 있으면 즉시 반환
+        if predictionEngine.isModelLoaded {
+            let words = extractContextWords(from: context)
+            guard !words.isEmpty else {
+                return SuggestionResult(mode: .none, suggestions: [])
+            }
+            let predictions = predictionEngine.predict(context: words)
+            if predictions.isEmpty {
+                return SuggestionResult(mode: .none, suggestions: [])
+            }
+            return SuggestionResult(mode: .prediction, suggestions: predictions)
         }
 
-        let predictions = predictionEngine.predict(context: words)
-        if predictions.isEmpty {
-            return SuggestionResult(mode: .none, suggestions: [])
+        // 모델 미로드 → 비동기 로딩 시작, 빈 결과 즉시 반환
+        predictionEngine.loadModel(for: langCode) { [weak self] in
+            guard let self = self else { return }
+            let words = self.extractContextWords(from: context)
+            guard !words.isEmpty else { return }
+            let predictions = self.predictionEngine.predict(context: words)
+            if !predictions.isEmpty {
+                onPrediction?(predictions)
+            }
         }
-        return SuggestionResult(mode: .prediction, suggestions: predictions)
+        return SuggestionResult(mode: .none, suggestions: [])
     }
 
     private func extractContextWords(from context: String?) -> [String] {

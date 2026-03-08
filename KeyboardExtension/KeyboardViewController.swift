@@ -36,7 +36,7 @@ class KeyboardViewController: UIInputViewController {
     private let translationManager = TranslationManager()
     private let correctionManager = CorrectionManager()
     private let sessionManager = SessionManager.shared
-    private let suggestionManager = SuggestionManager()
+    private lazy var suggestionManager = SuggestionManager()
 
     // MARK: - Deferred View Setup Flags
 
@@ -129,14 +129,20 @@ class KeyboardViewController: UIInputViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
-        LocalizationManager.shared.reload()
-        reloadLocalizedStrings()
-        loadNumberRowSetting()
-        loadKeyboardLanguageSetting()
-        setupHeightConstraint()
+        // ── 즉시 필요한 것만 동기 실행 ──
         textProxyManager.updateProxy(textDocumentProxy)
-        updateReturnKeyAppearance()
-        checkAutoCapitalize()
+        setupHeightConstraint()
+
+        // ── 나머지는 다음 런루프에서 실행 (키보드 UI 먼저 표시) ──
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            LocalizationManager.shared.reload()
+            self.reloadLocalizedStrings()
+            self.loadNumberRowSetting()
+            self.loadKeyboardLanguageSetting()
+            self.updateReturnKeyAppearance()
+            self.checkAutoCapitalize()
+        }
 
         hasUserTypedSinceAppeared = false
         toolbarView.hideSuggestions()
@@ -1522,7 +1528,14 @@ class KeyboardViewController: UIInputViewController {
             context: textDocumentProxy.documentContextBeforeInput,
             currentWord: word,
             isComposing: isComposing,
-            language: currentLang
+            language: currentLang,
+            onPrediction: { [weak self] predictions in
+                guard let self = self else { return }
+                // 콜백 시점에 여전히 유효한지 확인
+                guard self.currentMode == .defaultMode,
+                      !self.isSuggestionDismissedForCurrentWord else { return }
+                self.toolbarView.showSuggestions(predictions)
+            }
         )
         switch result.mode {
         case .none: toolbarView.hideSuggestions()

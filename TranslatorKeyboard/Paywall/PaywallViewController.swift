@@ -70,6 +70,9 @@ class PaywallViewController: UIViewController {
     private let monthlyCard = UIView()
     private let premiumCard = UIView()
 
+    // Benefits stack (동적 업데이트용)
+    private let benefitsStack = UIStackView()
+
     // CTA Button
     private let ctaButton: UIButton = {
         let btn = UIButton(type: .system)
@@ -204,12 +207,25 @@ class PaywallViewController: UIViewController {
     // MARK: - Benefits List
 
     private func buildBenefitsList() {
-        let benefitsStack = UIStackView()
         benefitsStack.axis = .vertical
         benefitsStack.spacing = 16
+        updateBenefitsContent()
+        contentStack.addArrangedSubview(benefitsStack)
+    }
+
+    /// 선택된 플랜에 따라 혜택 내용 업데이트
+    private func updateBenefitsContent() {
+        // 기존 내용 제거
+        benefitsStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+
+        let isPremium = (selectedPlan == .premium)
+
+        let usageTitle = isPremium ? L("paywall.benefit.usage.premium") : L("paywall.benefit.usage")
+        let usageDesc = isPremium ? L("paywall.benefit.usage_desc.premium") : L("paywall.benefit.usage_desc")
+        let usageIcon = isPremium ? "infinity" : "infinity"
 
         let benefits: [(icon: String, title: String, desc: String)] = [
-            ("infinity", L("paywall.benefit.usage"), L("paywall.benefit.usage_desc")),
+            (usageIcon, usageTitle, usageDesc),
             ("arrow.right.arrow.left", L("paywall.benefit.tones"), L("paywall.benefit.tones_desc")),
             ("paintpalette", L("paywall.benefit.themes"), L("paywall.benefit.themes_desc")),
             ("slash.circle", L("paywall.benefit.no_ads"), L("paywall.benefit.no_ads_desc")),
@@ -219,8 +235,6 @@ class PaywallViewController: UIViewController {
             let row = makeBenefitRow(icon: benefit.icon, title: benefit.title, desc: benefit.desc)
             benefitsStack.addArrangedSubview(row)
         }
-
-        contentStack.addArrangedSubview(benefitsStack)
     }
 
     private func makeBenefitRow(icon: String, title: String, desc: String) -> UIView {
@@ -527,6 +541,7 @@ class PaywallViewController: UIViewController {
             ctaText = L("paywall.cta_subscribe_premium")
         }
         ctaButton.setTitle(ctaText, for: .normal)
+        updateBenefitsContent()
     }
 
     // MARK: - Pricing

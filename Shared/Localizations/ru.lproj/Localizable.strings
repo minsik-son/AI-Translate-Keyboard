@@ -355,6 +355,8 @@
 "paywall.hero.subtitle" = "Перейдите на Pro и разблокируйте все функции";
 "paywall.benefit.usage" = "100 использований в день";
 "paywall.benefit.usage_desc" = "100 корректировок/переводов в день";
+"paywall.benefit.usage.premium" = "Безлимитное использование";
+"paywall.benefit.usage_desc.premium" = "Без ограничений на корректировки/переводы";
 "paywall.benefit.tones" = "Все стили тона";
 "paywall.benefit.tones_desc" = "Доступ ко всем вариантам стиля";
 "paywall.benefit.themes" = "Премиум-темы";

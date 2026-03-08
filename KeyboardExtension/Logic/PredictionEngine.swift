@@ -5,59 +5,90 @@ final class PredictionEngine {
     private var bigrams: [String: [(String, Int)]] = [:]
     private var unigrams: [(String, Int)] = []
     private var loadedLanguage: String?
+    private var isLoading = false
+    private let loadQueue = DispatchQueue(label: "com.translatorkeyboard.prediction.load",
+                                          qos: .userInitiated)
 
-    func loadModel(for language: String) {
-        guard language != loadedLanguage else { return }
-
-        let fileName = "ngram_\(language)"
-        guard let url = Bundle(for: type(of: self)).url(forResource: fileName, withExtension: "json"),
-              let data = try? Data(contentsOf: url),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            trigrams = [:]
-            bigrams = [:]
-            unigrams = []
-            loadedLanguage = nil
+    /// 비동기 모델 로딩. 완료 시 completion 호출 (메인 스레드).
+    /// ⚠️ 반드시 메인 스레드에서 호출할 것 (isLoading thread safety)
+    func loadModel(for language: String, completion: (() -> Void)? = nil) {
+        assert(Thread.isMainThread, "loadModel must be called on main thread")
+        guard language != loadedLanguage, !isLoading else {
+            completion?()
             return
         }
 
-        if let trigramData = json["trigrams"] as? [String: [[Any]]] {
-            trigrams = trigramData.mapValues { entries in
-                entries.compactMap { entry in
+        isLoading = true
+
+        loadQueue.async { [weak self] in
+            guard let self = self else { return }
+
+            let fileName = "ngram_\(language)"
+            guard let url = Bundle(for: type(of: self)).url(forResource: fileName, withExtension: "json"),
+                  let data = try? Data(contentsOf: url),
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                DispatchQueue.main.async {
+                    self.trigrams = [:]
+                    self.bigrams = [:]
+                    self.unigrams = []
+                    self.loadedLanguage = nil
+                    self.isLoading = false
+                    completion?()
+                }
+                return
+            }
+
+            // 백그라운드에서 파싱
+            var newTrigrams: [String: [(String, Int)]] = [:]
+            var newBigrams: [String: [(String, Int)]] = [:]
+            var newUnigrams: [(String, Int)] = []
+
+            if let trigramData = json["trigrams"] as? [String: [[Any]]] {
+                newTrigrams = trigramData.mapValues { entries in
+                    entries.compactMap { entry in
+                        guard entry.count >= 2,
+                              let word = entry[0] as? String,
+                              let freq = entry[1] as? Int else { return nil }
+                        return (word, freq)
+                    }
+                }
+            }
+
+            if let bigramData = json["bigrams"] as? [String: [[Any]]] {
+                newBigrams = bigramData.mapValues { entries in
+                    entries.compactMap { entry in
+                        guard entry.count >= 2,
+                              let word = entry[0] as? String,
+                              let freq = entry[1] as? Int else { return nil }
+                        return (word, freq)
+                    }
+                }
+            }
+
+            if let unigramData = json["unigrams"] as? [[Any]] {
+                newUnigrams = unigramData.compactMap { entry in
                     guard entry.count >= 2,
                           let word = entry[0] as? String,
                           let freq = entry[1] as? Int else { return nil }
                     return (word, freq)
                 }
             }
-        } else {
-            trigrams = [:]
-        }
 
-        if let bigramData = json["bigrams"] as? [String: [[Any]]] {
-            bigrams = bigramData.mapValues { entries in
-                entries.compactMap { entry in
-                    guard entry.count >= 2,
-                          let word = entry[0] as? String,
-                          let freq = entry[1] as? Int else { return nil }
-                    return (word, freq)
-                }
+            // 메인 스레드에서 데이터 교체
+            DispatchQueue.main.async {
+                self.trigrams = newTrigrams
+                self.bigrams = newBigrams
+                self.unigrams = newUnigrams
+                self.loadedLanguage = language
+                self.isLoading = false
+                completion?()
             }
-        } else {
-            bigrams = [:]
         }
+    }
 
-        if let unigramData = json["unigrams"] as? [[Any]] {
-            unigrams = unigramData.compactMap { entry in
-                guard entry.count >= 2,
-                      let word = entry[0] as? String,
-                      let freq = entry[1] as? Int else { return nil }
-                return (word, freq)
-            }
-        } else {
-            unigrams = []
-        }
-
-        loadedLanguage = language
+    /// 모델이 로드되었는지 확인
+    var isModelLoaded: Bool {
+        return loadedLanguage != nil && !isLoading
     }
 
     func predict(context: [String], limit: Int = 3) -> [String] {

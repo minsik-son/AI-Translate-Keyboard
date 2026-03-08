@@ -355,6 +355,8 @@
 "paywall.hero.subtitle" = "Proにアップグレードして全機能をアンロック";
 "paywall.benefit.usage" = "1日100回使用";
 "paywall.benefit.usage_desc" = "1日100回の校正/翻訳が可能";
+"paywall.benefit.usage.premium" = "無制限使用";
+"paywall.benefit.usage_desc.premium" = "校正/翻訳の回数制限なし";
 "paywall.benefit.tones" = "全トーンスタイル";
 "paywall.benefit.tones_desc" = "すべての文体オプションを使用";
 "paywall.benefit.themes" = "プレミアムテーマ";

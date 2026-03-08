@@ -355,6 +355,8 @@
 "paywall.hero.subtitle" = "Pro로 업그레이드하고 모든 기능을 잠금해제하세요";
 "paywall.benefit.usage" = "일일 100회 사용";
 "paywall.benefit.usage_desc" = "하루 100회 교정/번역 가능";
+"paywall.benefit.usage.premium" = "무제한 사용";
+"paywall.benefit.usage_desc.premium" = "교정/번역 횟수 제한 없음";
 "paywall.benefit.tones" = "모든 톤 스타일";
 "paywall.benefit.tones_desc" = "기본, 반말, 존댓말, 정자체 모두 사용";
 "paywall.benefit.themes" = "프리미엄 테마";

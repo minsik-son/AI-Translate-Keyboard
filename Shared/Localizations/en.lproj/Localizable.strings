@@ -355,6 +355,8 @@
 "paywall.hero.subtitle" = "Upgrade to Pro and unlock all features";
 "paywall.benefit.usage" = "100 daily uses";
 "paywall.benefit.usage_desc" = "100 corrections/translations per day";
+"paywall.benefit.usage.premium" = "Unlimited usage";
+"paywall.benefit.usage_desc.premium" = "No limit on corrections/translations";
 "paywall.benefit.tones" = "All tone styles";
 "paywall.benefit.tones_desc" = "Access all writing tone options";
 "paywall.benefit.themes" = "Premium themes";

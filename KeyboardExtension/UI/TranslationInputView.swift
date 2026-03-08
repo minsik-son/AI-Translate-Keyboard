@@ -79,6 +79,16 @@ class TranslationInputView: UIView {
     private var cursorTop: NSLayoutConstraint?
     private var lastNotifiedHeight: CGFloat = 0
 
+    // MARK: - TextKit Stack (커서 계산용, 재사용)
+    private let cursorTextStorage = NSTextStorage()
+    private let cursorLayoutManager = NSLayoutManager()
+    private lazy var cursorTextContainer: NSTextContainer = {
+        let tc = NSTextContainer(size: .zero)
+        tc.lineFragmentPadding = 0
+        return tc
+    }()
+    private var isCursorTextKitSetUp = false
+
     // MARK: - Init
 
     override init(frame: CGRect) {
@@ -272,6 +282,13 @@ class TranslationInputView: UIView {
         }
     }
 
+    private func setupCursorTextKitIfNeeded() {
+        guard !isCursorTextKitSetUp else { return }
+        cursorTextStorage.addLayoutManager(cursorLayoutManager)
+        cursorLayoutManager.addTextContainer(cursorTextContainer)
+        isCursorTextKitSetUp = true
+    }
+
     private func notifyHeightChangeIfNeeded() {
         layoutIfNeeded()
         let newHeight = idealHeight()
@@ -297,36 +314,36 @@ class TranslationInputView: UIView {
 
         let font = inputLabel.font!
 
-        // ─── TextKit 1 스택 생성 (UILabel과 동일한 레이아웃 엔진) ───
-        let textStorage = NSTextStorage(string: text)
-        let layoutManager = NSLayoutManager()
-        let textContainer = NSTextContainer(size: CGSize(width: maxWidth, height: .greatestFiniteMagnitude))
+        // ─── TextKit 1 스택 재사용 ───
+        setupCursorTextKitIfNeeded()
 
-        textContainer.lineFragmentPadding = 0
-        textContainer.lineBreakMode = inputLabel.lineBreakMode
+        // 텍스트 컨테이너 크기 업데이트
+        cursorTextContainer.size = CGSize(width: maxWidth, height: .greatestFiniteMagnitude)
+        cursorTextContainer.lineBreakMode = inputLabel.lineBreakMode
 
-        textStorage.addLayoutManager(layoutManager)
-        layoutManager.addTextContainer(textContainer)
+        // 텍스트 교체 (기존 내용 제거 후 새 텍스트 설정)
+        let fullRange = NSRange(location: 0, length: cursorTextStorage.length)
+        cursorTextStorage.replaceCharacters(in: fullRange, with: text)
 
         // 폰트 + paragraphStyle 적용
-        let fullRange = NSRange(location: 0, length: textStorage.length)
+        let newFullRange = NSRange(location: 0, length: cursorTextStorage.length)
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.lineBreakMode = inputLabel.lineBreakMode
-        textStorage.addAttribute(.font, value: font, range: fullRange)
-        textStorage.addAttribute(.paragraphStyle, value: paragraphStyle, range: fullRange)
+        cursorTextStorage.addAttribute(.font, value: font, range: newFullRange)
+        cursorTextStorage.addAttribute(.paragraphStyle, value: paragraphStyle, range: newFullRange)
 
         // 레이아웃 강제 계산
-        layoutManager.ensureLayout(for: textContainer)
+        cursorLayoutManager.ensureLayout(for: cursorTextContainer)
 
         // ═══════════════════════════════════════════════════════════
         // CASE 1: 텍스트가 "\n"으로 끝남 → 다음 빈 줄의 맨 앞에 커서
         // ═══════════════════════════════════════════════════════════
         if text.hasSuffix("\n") {
-            let lastCharRange = NSRange(location: max(0, textStorage.length - 1), length: 1)
-            let glyphRange = layoutManager.glyphRange(forCharacterRange: lastCharRange, actualCharacterRange: nil)
+            let lastCharRange = NSRange(location: max(0, cursorTextStorage.length - 1), length: 1)
+            let glyphRange = cursorLayoutManager.glyphRange(forCharacterRange: lastCharRange, actualCharacterRange: nil)
 
             if glyphRange.location != NSNotFound {
-                let lineRect = layoutManager.lineFragmentRect(forGlyphAt: glyphRange.location, effectiveRange: nil)
+                let lineRect = cursorLayoutManager.lineFragmentRect(forGlyphAt: glyphRange.location, effectiveRange: nil)
                 cursorLeading?.constant = 0
                 cursorTop?.constant = lineRect.origin.y + lineRect.size.height
             } else {
@@ -339,7 +356,7 @@ class TranslationInputView: UIView {
         // ═══════════════════════════════════════════════════════════
         // CASE 2: 일반 텍스트 → 마지막 글자 뒤에 커서
         // ═══════════════════════════════════════════════════════════
-        let lastCharIndex = textStorage.length - 1
+        let lastCharIndex = cursorTextStorage.length - 1
         guard lastCharIndex >= 0 else {
             cursorLeading?.constant = 0
             cursorTop?.constant = 0
@@ -347,7 +364,7 @@ class TranslationInputView: UIView {
         }
 
         let lastCharRange = NSRange(location: lastCharIndex, length: 1)
-        let glyphRange = layoutManager.glyphRange(forCharacterRange: lastCharRange, actualCharacterRange: nil)
+        let glyphRange = cursorLayoutManager.glyphRange(forCharacterRange: lastCharRange, actualCharacterRange: nil)
 
         guard glyphRange.length > 0, glyphRange.location != NSNotFound else {
             cursorLeading?.constant = 0
@@ -358,10 +375,10 @@ class TranslationInputView: UIView {
         let lastGlyphIndex = glyphRange.location
 
         // 마지막 글리프가 속한 줄의 프레임
-        let lineFragmentRect = layoutManager.lineFragmentRect(forGlyphAt: lastGlyphIndex, effectiveRange: nil)
+        let lineFragmentRect = cursorLayoutManager.lineFragmentRect(forGlyphAt: lastGlyphIndex, effectiveRange: nil)
 
         // 마지막 글리프의 줄 내 위치 (advance 기반 좌표)
-        let glyphLocation = layoutManager.location(forGlyphAt: lastGlyphIndex)
+        let glyphLocation = cursorLayoutManager.location(forGlyphAt: lastGlyphIndex)
 
         // X: CTFont의 advance width 사용 (ink bounds가 아닌 타이포그래피 전진 너비)
         let ctFont = font as CTFont
@@ -376,7 +393,7 @@ class TranslationInputView: UIView {
         } else {
             // Fallback: surrogate pair 등 BMP 밖 문자 (이모지 등)
             let singleGlyphRange = NSRange(location: lastGlyphIndex, length: 1)
-            let rect = layoutManager.boundingRect(forGlyphRange: singleGlyphRange, in: textContainer)
+            let rect = cursorLayoutManager.boundingRect(forGlyphRange: singleGlyphRange, in: cursorTextContainer)
             cursorX = rect.maxX
         }
 

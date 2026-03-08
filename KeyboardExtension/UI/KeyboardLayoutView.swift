@@ -145,23 +145,23 @@ class KeyboardLayoutView: UIView {
 
     // ── Letter layouts ──
 
-    private let numberRow: [String] = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
+    private static let numberRow: [String] = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
 
-    private let englishRows: [[String]] = [
+    private static let englishRows: [[String]] = [
         ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
         ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
         ["\u{21E7}", "z", "x", "c", "v", "b", "n", "m", "\u{232B}"],
         ["+=♥", "__GLOBE_A__", " ", ".", "\u{23CE}"]
     ]
 
-    private let englishShiftRows: [[String]] = [
+    private static let englishShiftRows: [[String]] = [
         ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
         ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
         ["\u{21E7}", "Z", "X", "C", "V", "B", "N", "M", "\u{232B}"],
         ["+=♥", "__GLOBE_A__", " ", ".", "\u{23CE}"]
     ]
 
-    private let koreanRows: [[String]] = [
+    private static let koreanRows: [[String]] = [
         ["\u{3142}", "\u{3148}", "\u{3137}", "\u{3131}", "\u{3145}",
          "\u{315B}", "\u{3155}", "\u{3151}", "\u{3150}", "\u{3154}"],
         ["\u{3141}", "\u{3134}", "\u{3147}", "\u{3139}", "\u{314E}",
@@ -171,7 +171,7 @@ class KeyboardLayoutView: UIView {
         ["+=♥", "__GLOBE_A__", " ", ".", "\u{23CE}"]
     ]
 
-    private let koreanShiftRows: [[String]] = [
+    private static let koreanShiftRows: [[String]] = [
         ["\u{3143}", "\u{3149}", "\u{3138}", "\u{3132}", "\u{3146}",
          "\u{315B}", "\u{3155}", "\u{3151}", "\u{3152}", "\u{3156}"],
         ["\u{3141}", "\u{3134}", "\u{3147}", "\u{3139}", "\u{314E}",
@@ -183,14 +183,14 @@ class KeyboardLayoutView: UIView {
 
     // ── Russian ЙЦУКЕН layouts ──
 
-    private let russianRows: [[String]] = [
+    private static let russianRows: [[String]] = [
         ["й", "ц", "у", "к", "е", "н", "г", "ш", "щ", "з", "х"],
         ["ф", "ы", "в", "а", "п", "р", "о", "л", "д", "ж", "э"],
         ["\u{21E7}", "я", "ч", "с", "м", "и", "т", "ь", "б", "ю", "\u{232B}"],
         ["+=♥", "__GLOBE_A__", " ", ".", "\u{23CE}"]
     ]
 
-    private let russianShiftRows: [[String]] = [
+    private static let russianShiftRows: [[String]] = [
         ["Й", "Ц", "У", "К", "Е", "Н", "Г", "Ш", "Щ", "З", "Х"],
         ["Ф", "Ы", "В", "А", "П", "Р", "О", "Л", "Д", "Ж", "Э"],
         ["\u{21E7}", "Я", "Ч", "С", "М", "И", "Т", "Ь", "Б", "Ю", "\u{232B}"],
@@ -199,14 +199,14 @@ class KeyboardLayoutView: UIView {
 
     // ── Symbol layouts ──
 
-    private let symbolRows1: [[String]] = [
+    private static let symbolRows1: [[String]] = [
         ["$", "€", "£", "¥", "¢", "~", "…", "°", "※", "•"],
         ["-", "/", ":", ";", "(", ")", "₩", "&", "@", "\""],
         ["#+=", ".", ",", "?", "!", "'", "\u{232B}"],
         ["ABC", "__GLOBE_A__", " ", ".", "\u{23CE}"]
     ]
 
-    private let symbolRows2: [[String]] = [
+    private static let symbolRows2: [[String]] = [
         ["[", "]", "{", "}", "#", "%", "^", "*", "+", "="],
         ["_", "\\", "|", "<", ">", "«", "»", "§", "©", "®"],
         ["123", ".", ",", "?", "!", "'", "\u{232B}"],
@@ -216,7 +216,7 @@ class KeyboardLayoutView: UIView {
     // ── Special keys set ──
 
     // Space " " and period "." are NOT special — they render WHITE like letter keys.
-    private let specialKeys: Set<String> = [
+    private static let specialKeys: Set<String> = [
         "\u{21E7}", "\u{232B}", "\u{23CE}",
         "\u{D55C}", "EN",
         "123", "#+=", "ABC",
@@ -268,18 +268,18 @@ class KeyboardLayoutView: UIView {
             let letterRows: [[String]]
             switch currentLanguage {
             case .korean:
-                letterRows = isShifted ? koreanShiftRows : koreanRows
+                letterRows = isShifted ? Self.koreanShiftRows : Self.koreanRows
             case .russian:
-                letterRows = isShifted ? russianShiftRows : russianRows
+                letterRows = isShifted ? Self.russianShiftRows : Self.russianRows
             default:
                 // English, Spanish, French, German, Italian all use QWERTY
-                letterRows = isShifted ? englishShiftRows : englishRows
+                letterRows = isShifted ? Self.englishShiftRows : Self.englishRows
             }
-            return showNumberRow ? [numberRow] + letterRows : letterRows
+            return showNumberRow ? [Self.numberRow] + letterRows : letterRows
         case .symbols1:
-            return showNumberRow ? [numberRow] + symbolRows1 : symbolRows1
+            return showNumberRow ? [Self.numberRow] + Self.symbolRows1 : Self.symbolRows1
         case .symbols2:
-            return showNumberRow ? [numberRow] + symbolRows2 : symbolRows2
+            return showNumberRow ? [Self.numberRow] + Self.symbolRows2 : Self.symbolRows2
         }
     }
 
@@ -605,7 +605,7 @@ class KeyboardLayoutView: UIView {
     }
 
     private func configureButtonAppearance(_ button: UIButton, key: String) {
-        let isSpecial = specialKeys.contains(key)
+        let isSpecial = Self.specialKeys.contains(key)
 
         // Colors
         if let theme = customTheme {
@@ -987,7 +987,7 @@ class KeyboardLayoutView: UIView {
 
         default:
             onKeyTap?(key)
-            if isShifted && !specialKeys.contains(key) && currentPage == .letters {
+            if isShifted && !Self.specialKeys.contains(key) && currentPage == .letters {
                 isShifted = false
                 buildKeyboard()
             }
