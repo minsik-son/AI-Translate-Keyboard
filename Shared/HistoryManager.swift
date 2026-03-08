@@ -52,6 +52,44 @@ final class HistoryManager {
         saveItems([])
     }
 
+    func deleteAllItems(ofType type: HistoryType) {
+        var items = loadItems()
+        items.removeAll { $0.type == type }
+        saveItems(items)
+    }
+
+    /// 기존 ClipboardHistoryManager 데이터를 HistoryManager로 마이그레이션 (1회성)
+    func migrateClipboardHistoryIfNeeded() {
+        let migrationKey = "clipboard_migration_done"
+        guard defaults?.bool(forKey: migrationKey) != true else { return }
+
+        guard let data = defaults?.data(forKey: AppConstants.UserDefaultsKeys.clipboardHistory),
+              let oldItems = try? JSONDecoder().decode([ClipboardItem].self, from: data) else {
+            defaults?.set(true, forKey: migrationKey)
+            return
+        }
+
+        let existingTexts = Set(loadItems(ofType: .clipboard).map { $0.originalText })
+        var currentItems = loadItems()
+
+        for oldItem in oldItems where !existingTexts.contains(oldItem.text) {
+            let historyItem = HistoryItem(
+                id: oldItem.id,
+                type: .clipboard,
+                originalText: oldItem.text,
+                resultText: nil,
+                metadata: nil,
+                createdAt: oldItem.copiedAt
+            )
+            currentItems.append(historyItem)
+        }
+
+        currentItems.sort { $0.createdAt > $1.createdAt }
+        saveItems(currentItems)
+
+        defaults?.set(true, forKey: migrationKey)
+    }
+
     /// 특정 타입의 전체 아이템 수 (주간 제한 없이)
     func totalCount(ofType type: HistoryType) -> Int {
         return loadItems().filter { $0.type == type }.count

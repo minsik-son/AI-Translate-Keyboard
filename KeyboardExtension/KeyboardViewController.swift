@@ -119,6 +119,7 @@ class KeyboardViewController: UIInputViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        HistoryManager.shared.migrateClipboardHistoryIfNeeded()
         setupUI()
         setupDelegates()
         setupCallbacks()
@@ -925,12 +926,11 @@ class KeyboardViewController: UIInputViewController {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
 
-        let existing = ClipboardHistoryManager.shared.getItems()
-        if existing.first?.text == trimmed { return }
+        // 중복 체크 — HistoryManager 기반
+        let existing = HistoryManager.shared.loadItems(ofType: .clipboard)
+        if existing.first?.originalText == trimmed { return }
 
-        ClipboardHistoryManager.shared.addItem(trimmed)
-
-        // 메인앱 히스토리 탭에도 저장
+        // 단일 소스에만 저장
         HistoryManager.shared.addItem(
             type: .clipboard,
             original: trimmed,

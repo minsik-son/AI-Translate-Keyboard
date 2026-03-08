@@ -259,7 +259,7 @@ class ClipboardHistoryView: UIView {
     @objc private func closeTapped() { onDismiss?() }
 
     @objc private func deleteAllTapped() {
-        ClipboardHistoryManager.shared.clearAll()
+        HistoryManager.shared.deleteAllItems(ofType: .clipboard)
         items = []
         tableView.reloadData()
         updateEmptyState()
@@ -280,7 +280,14 @@ class ClipboardHistoryView: UIView {
     // MARK: - Public
 
     func reloadData() {
-        items = ClipboardHistoryManager.shared.getItems()
+        let historyItems = HistoryManager.shared.loadItems(ofType: .clipboard)
+        items = historyItems.map { item in
+            ClipboardItem(
+                id: item.id,
+                text: item.originalText,
+                copiedAt: item.createdAt
+            )
+        }
         tableView.reloadData()
         updateEmptyState()
         checkOnboarding()
@@ -364,7 +371,8 @@ extension ClipboardHistoryView: UITableViewDataSource {
         )
         cell.onDelete = { [weak self] in
             guard let self = self else { return }
-            ClipboardHistoryManager.shared.deleteItem(at: indexPath.row)
+            let itemToDelete = self.items[indexPath.row]
+            HistoryManager.shared.deleteItem(id: itemToDelete.id)
             self.items.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .automatic)
             self.updateEmptyState()
