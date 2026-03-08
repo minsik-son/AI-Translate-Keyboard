@@ -360,15 +360,25 @@ class TranslationInputView: UIView {
         // 마지막 글리프가 속한 줄의 프레임
         let lineFragmentRect = layoutManager.lineFragmentRect(forGlyphAt: lastGlyphIndex, effectiveRange: nil)
 
-        // 마지막 글리프의 줄 내 위치
+        // 마지막 글리프의 줄 내 위치 (advance 기반 좌표)
         let glyphLocation = layoutManager.location(forGlyphAt: lastGlyphIndex)
 
-        // 마지막 글리프의 바운딩 렉트 (너비 계산용)
-        let singleGlyphRange = NSRange(location: lastGlyphIndex, length: 1)
-        let boundingRect = layoutManager.boundingRect(forGlyphRange: singleGlyphRange, in: textContainer)
+        // X: CTFont의 advance width 사용 (ink bounds가 아닌 타이포그래피 전진 너비)
+        let ctFont = font as CTFont
+        var character: UniChar = (text as NSString).character(at: lastCharIndex)
+        var glyph: CGGlyph = 0
+        var advance = CGSize.zero
 
-        // X: 글리프 위치 + 글리프 너비 = 글리프 바로 뒤
-        let cursorX = glyphLocation.x + boundingRect.width
+        var cursorX: CGFloat
+        if CTFontGetGlyphsForCharacters(ctFont, &character, &glyph, 1) {
+            CTFontGetAdvancesForGlyphs(ctFont, .horizontal, &glyph, &advance, 1)
+            cursorX = glyphLocation.x + advance.width
+        } else {
+            // Fallback: surrogate pair 등 BMP 밖 문자 (이모지 등)
+            let singleGlyphRange = NSRange(location: lastGlyphIndex, length: 1)
+            let rect = layoutManager.boundingRect(forGlyphRange: singleGlyphRange, in: textContainer)
+            cursorX = rect.maxX
+        }
 
         // Y: 줄 프레임의 시작 Y
         let cursorY = lineFragmentRect.origin.y
