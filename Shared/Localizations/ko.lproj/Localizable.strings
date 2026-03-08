@@ -219,7 +219,9 @@
 "history.filter.translate" = "번역";
 "history.filter.correct" = "교정";
 "history.filter.clipboard" = "클립보드";
+"history.filter.phrases" = "저장문구";
 "history.empty" = "기록이 없습니다";
+"history.phrases_empty" = "저장된 문구가 없습니다";
 
 // === Settings (new) ===
 "settings.paste_guide" = "붙여넣기 알림 해제 가이드";

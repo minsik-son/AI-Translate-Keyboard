@@ -201,7 +201,7 @@ class HomeViewController: UIViewController {
         planBadgeLabel.textColor = AppColors.accent
         planBadgeLabel.backgroundColor = AppColors.accentSoft
         planBadgeLabel.textAlignment = .center
-        planBadgeLabel.layer.cornerRadius = 20
+        planBadgeLabel.layer.cornerRadius = 16
         planBadgeLabel.clipsToBounds = true
         planBadgeLabel.translatesAutoresizingMaskIntoConstraints = false
 
@@ -367,10 +367,15 @@ class HomeViewController: UIViewController {
             : UIColor(red: 0.910, green: 0.910, blue: 0.929, alpha: 1)
         }
         trackLayer.strokeColor = trackColor.cgColor
-        trackLayer.fillColor = UIColor.clear.cgColor
+        // 라이트 모드: 원 중앙을 흰색으로 채움 / 다크 모드: 투명 유지
+        let fillColor = UIColor { $0.userInterfaceStyle == .dark
+            ? UIColor.clear
+            : UIColor.white
+        }
+        trackLayer.fillColor = fillColor.cgColor
         trackLayer.lineWidth = lineWidth
         trackLayer.lineCap = .round
-        container.layer.addSublayer(trackLayer)
+        container.layer.insertSublayer(trackLayer, at: 0)
 
         // Progress
         progressLayer = CAShapeLayer()
@@ -390,7 +395,7 @@ class HomeViewController: UIViewController {
             progressLayer.strokeColor = color.cgColor
         }
 
-        container.layer.addSublayer(progressLayer)
+        container.layer.insertSublayer(progressLayer, at: 1)
     }
 
     private func updatePlanCard() {
@@ -400,15 +405,15 @@ class HomeViewController: UIViewController {
         // Badge
         switch tier {
         case .free:
-            planBadgeLabel.text = "  Free Plan  "
+            planBadgeLabel.text = "   Free Plan   "
             proLinkButton.isHidden = false
         case .pro:
-            planBadgeLabel.text = "  Pro Plan  "
+            planBadgeLabel.text = "   Pro Plan   "
             proLinkButton.isHidden = true
             rewardCorrectionAdButton.isHidden = true
             rewardTranslationAdButton.isHidden = true
         case .premium:
-            planBadgeLabel.text = "  Premium Plan  "
+            planBadgeLabel.text = "   Premium Plan   "
             proLinkButton.isHidden = true
             rewardCorrectionAdButton.isHidden = true
             rewardTranslationAdButton.isHidden = true

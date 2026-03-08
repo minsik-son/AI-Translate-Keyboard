@@ -219,7 +219,9 @@
 "history.filter.translate" = "Übersetzung";
 "history.filter.correct" = "Korrektur";
 "history.filter.clipboard" = "Zwischenablage";
+"history.filter.phrases" = "Phrasen";
 "history.empty" = "Noch kein Verlauf";
+"history.phrases_empty" = "Keine gespeicherten Phrasen";
 
 // === Settings (new) ===
 "settings.paste_guide" = "Einfüge-Benachrichtigungsanleitung";

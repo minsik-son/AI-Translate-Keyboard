@@ -219,7 +219,9 @@
 "history.filter.translate" = "Перевод";
 "history.filter.correct" = "Исправление";
 "history.filter.clipboard" = "Буфер обмена";
+"history.filter.phrases" = "Фразы";
 "history.empty" = "Нет истории";
+"history.phrases_empty" = "Нет сохранённых фраз";
 
 // === Settings (new) ===
 "settings.paste_guide" = "Отключение уведомления о вставке";

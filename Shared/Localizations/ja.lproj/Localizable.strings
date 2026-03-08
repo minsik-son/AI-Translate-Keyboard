@@ -219,7 +219,9 @@
 "history.filter.translate" = "翻訳";
 "history.filter.correct" = "修正";
 "history.filter.clipboard" = "クリップボード";
+"history.filter.phrases" = "定型文";
 "history.empty" = "履歴がありません";
+"history.phrases_empty" = "保存されたフレーズはありません";
 
 // === Settings (new) ===
 "settings.paste_guide" = "ペースト通知の解除方法";

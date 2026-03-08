@@ -48,7 +48,10 @@ class PaywallViewController: UIViewController {
         let config = UIImage.SymbolConfiguration(pointSize: 13, weight: .semibold)
         btn.setImage(UIImage(systemName: "xmark", withConfiguration: config), for: .normal)
         btn.tintColor = AppColors.textSub
-        btn.backgroundColor = UIColor(red: 0.965, green: 0.965, blue: 0.976, alpha: 1) // #F6F6F9
+        btn.backgroundColor = UIColor { $0.userInterfaceStyle == .dark
+            ? UIColor.white.withAlphaComponent(0.1)
+            : UIColor(red: 0.965, green: 0.965, blue: 0.976, alpha: 1) // #F6F6F9
+        }
         btn.layer.cornerRadius = 16
         btn.translatesAutoresizingMaskIntoConstraints = false
         return btn
@@ -107,7 +110,7 @@ class PaywallViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = AppColors.bg
         setupLayout()
         buildHeroSection()
         buildBenefitsList()
@@ -222,13 +225,12 @@ class PaywallViewController: UIViewController {
 
         let usageTitle = isPremium ? L("paywall.benefit.usage.premium") : L("paywall.benefit.usage")
         let usageDesc = isPremium ? L("paywall.benefit.usage_desc.premium") : L("paywall.benefit.usage_desc")
-        let usageIcon = isPremium ? "infinity" : "infinity"
 
         let benefits: [(icon: String, title: String, desc: String)] = [
-            (usageIcon, usageTitle, usageDesc),
-            ("arrow.right.arrow.left", L("paywall.benefit.tones"), L("paywall.benefit.tones_desc")),
-            ("paintpalette", L("paywall.benefit.themes"), L("paywall.benefit.themes_desc")),
-            ("slash.circle", L("paywall.benefit.no_ads"), L("paywall.benefit.no_ads_desc")),
+            ("일일100회", usageTitle, usageDesc),
+            ("모든톤스타일", L("paywall.benefit.tones"), L("paywall.benefit.tones_desc")),
+            ("프리미엄테마", L("paywall.benefit.themes"), L("paywall.benefit.themes_desc")),
+            ("광고없음", L("paywall.benefit.no_ads"), L("paywall.benefit.no_ads_desc")),
         ]
 
         for benefit in benefits {
@@ -243,25 +245,32 @@ class PaywallViewController: UIViewController {
         row.spacing = 14
         row.alignment = .center
 
-        // Icon area
+        // Icon area — 대시보드(HomeViewController)와 동일한 스타일
         let iconBg = UIView()
-        iconBg.backgroundColor = AppColors.accentSoft
-        iconBg.layer.cornerRadius = 10
+        iconBg.backgroundColor = UIColor { traitCollection in
+            if traitCollection.userInterfaceStyle == .dark {
+                return UIColor(red: 44/255, green: 44/255, blue: 46/255, alpha: 1.0)    // #2C2C2E
+            } else {
+                return UIColor(red: 242/255, green: 243/255, blue: 245/255, alpha: 1.0) // #F2F3F5
+            }
+        }
+        iconBg.layer.cornerRadius = 12
         iconBg.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            iconBg.widthAnchor.constraint(equalToConstant: 36),
-            iconBg.heightAnchor.constraint(equalToConstant: 36),
+            iconBg.widthAnchor.constraint(equalToConstant: 40),
+            iconBg.heightAnchor.constraint(equalToConstant: 40),
         ])
 
-        let iconConfig = UIImage.SymbolConfiguration(pointSize: 16, weight: .medium)
-        let iconView = UIImageView(image: UIImage(systemName: icon, withConfiguration: iconConfig))
-        iconView.tintColor = AppColors.accent
+        // 커스텀 아이콘 이미지
+        let iconView = UIImageView(image: UIImage(named: icon))
         iconView.contentMode = .scaleAspectFit
         iconView.translatesAutoresizingMaskIntoConstraints = false
         iconBg.addSubview(iconView)
         NSLayoutConstraint.activate([
             iconView.centerXAnchor.constraint(equalTo: iconBg.centerXAnchor),
             iconView.centerYAnchor.constraint(equalTo: iconBg.centerYAnchor),
+            iconView.widthAnchor.constraint(equalToConstant: 24),
+            iconView.heightAnchor.constraint(equalToConstant: 24),
         ])
 
         // Text area
@@ -510,7 +519,11 @@ class PaywallViewController: UIViewController {
             let isSelected = plan == selectedPlan
             card.layer.borderWidth = 2
             card.layer.borderColor = isSelected ? AppColors.accent.cgColor : AppColors.border.cgColor
-            card.backgroundColor = isSelected ? AppColors.accentSoft : AppColors.card
+            let selectedCardBg = UIColor { $0.userInterfaceStyle == .dark
+                ? AppColors.accent.withAlphaComponent(0.15)
+                : AppColors.accentSoft
+            }
+            card.backgroundColor = isSelected ? selectedCardBg : AppColors.card
 
             // Radio fill
             radio.layer.borderColor = isSelected ? AppColors.accent.cgColor : AppColors.textMuted.cgColor

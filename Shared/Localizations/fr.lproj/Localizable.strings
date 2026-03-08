@@ -219,7 +219,9 @@
 "history.filter.translate" = "Traduction";
 "history.filter.correct" = "Correction";
 "history.filter.clipboard" = "Presse-papiers";
+"history.filter.phrases" = "Phrases";
 "history.empty" = "Aucun historique";
+"history.phrases_empty" = "Aucune phrase enregistrée";
 
 // === Settings (new) ===
 "settings.paste_guide" = "Guide notification de collage";

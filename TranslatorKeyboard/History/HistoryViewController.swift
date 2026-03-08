@@ -6,6 +6,7 @@ class HistoryViewController: UIViewController {
     private var filteredItems: [HistoryItem] = []
     private var groupedItems: [(title: String, items: [HistoryItem])] = []
     private var selectedFilter: HistoryType?
+    private var showingSavedPhrases = false
 
     private let filterStack = UIStackView()
     private let tableView = UITableView(frame: .zero, style: .grouped)
@@ -26,7 +27,7 @@ class HistoryViewController: UIViewController {
 
     @objc private func handleLanguageChange() {
         title = L("history.title")
-        let filterTitles = [L("history.filter.all"), L("history.filter.translate"), L("history.filter.correct"), L("history.filter.clipboard")]
+        let filterTitles = [L("history.filter.all"), L("history.filter.translate"), L("history.filter.correct"), L("history.filter.clipboard"), L("history.filter.phrases")]
         for (i, view) in filterStack.arrangedSubviews.enumerated() {
             if let btn = view as? UIButton, i < filterTitles.count {
                 btn.setTitle(filterTitles[i], for: .normal)
@@ -62,11 +63,12 @@ class HistoryViewController: UIViewController {
             filterStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
         ])
 
-        let filters: [(String, HistoryType?)] = [
-            (L("history.filter.all"), nil),
-            (L("history.filter.translate"), .translation),
-            (L("history.filter.correct"), .correction),
-            (L("history.filter.clipboard"), .clipboard),
+        let filters: [(String, Int)] = [
+            (L("history.filter.all"), 0),
+            (L("history.filter.translate"), 1),
+            (L("history.filter.correct"), 2),
+            (L("history.filter.clipboard"), 3),
+            (L("history.filter.phrases"), 4),
         ]
 
         for (i, filter) in filters.enumerated() {
@@ -123,8 +125,14 @@ class HistoryViewController: UIViewController {
     }
 
     @objc private func filterTapped(_ sender: UIButton) {
-        let filters: [HistoryType?] = [nil, .translation, .correction, .clipboard]
-        selectedFilter = filters[sender.tag]
+        if sender.tag == 4 {
+            showingSavedPhrases = true
+            selectedFilter = nil
+        } else {
+            showingSavedPhrases = false
+            let filters: [HistoryType?] = [nil, .translation, .correction, .clipboard]
+            selectedFilter = filters[sender.tag]
+        }
         UIView.animate(withDuration: 0.25, delay: 0, options: .curveEaseOut) {
             self.updateFilterAppearance()
         }
@@ -134,7 +142,12 @@ class HistoryViewController: UIViewController {
     private func updateFilterAppearance() {
         let filters: [HistoryType?] = [nil, .translation, .correction, .clipboard]
         for case let btn as UIButton in filterStack.arrangedSubviews {
-            let isSelected = filters[btn.tag] == selectedFilter
+            let isSelected: Bool
+            if btn.tag == 4 {
+                isSelected = showingSavedPhrases
+            } else {
+                isSelected = !showingSavedPhrases && filters[btn.tag] == selectedFilter
+            }
             if isSelected {
                 btn.backgroundColor = AppColors.accent
                 btn.setTitleColor(.white, for: .normal)
@@ -154,6 +167,17 @@ class HistoryViewController: UIViewController {
     }
 
     private func applyFilter() {
+        if showingSavedPhrases {
+            filteredItems = []
+            groupedItems = []
+            tableView.reloadData()
+            let phrases = SavedPhrasesManager.shared.getPhrases()
+            emptyLabel.text = phrases.isEmpty ? L("history.phrases_empty") : nil
+            emptyLabel.isHidden = !phrases.isEmpty
+            tableView.isHidden = phrases.isEmpty
+            return
+        }
+
         if let filter = selectedFilter {
             filteredItems = allItems.filter { $0.type == filter }
         } else {
@@ -161,6 +185,7 @@ class HistoryViewController: UIViewController {
         }
         groupedItems = groupItemsByDate(filteredItems)
         tableView.reloadData()
+        emptyLabel.text = L("history.empty")
         emptyLabel.isHidden = !filteredItems.isEmpty
         tableView.isHidden = filteredItems.isEmpty
     }
@@ -225,14 +250,17 @@ class HistoryViewController: UIViewController {
 extension HistoryViewController: UITableViewDataSource, UITableViewDelegate {
 
     func numberOfSections(in tableView: UITableView) -> Int {
-        groupedItems.count
+        if showingSavedPhrases { return 1 }
+        return groupedItems.count
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        groupedItems[section].items.count
+        if showingSavedPhrases { return SavedPhrasesManager.shared.getPhrases().count }
+        return groupedItems[section].items.count
     }
 
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        if showingSavedPhrases { return nil }
         let header = UIView()
         header.backgroundColor = .clear
 
@@ -253,7 +281,8 @@ extension HistoryViewController: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        36
+        if showingSavedPhrases { return 0 }
+        return 36
     }
 
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
@@ -266,6 +295,12 @@ extension HistoryViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "HistoryCell", for: indexPath) as! HistoryCell
+        if showingSavedPhrases {
+            let phrases = SavedPhrasesManager.shared.getPhrases()
+            let phrase = phrases[indexPath.row]
+            cell.configureAsSavedPhrase(text: phrase)
+            return cell
+        }
         let item = groupedItems[indexPath.section].items[indexPath.row]
         cell.configure(with: item, relativeTime: relativeTime(from: item.createdAt))
         return cell
@@ -273,9 +308,13 @@ extension HistoryViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let item = groupedItems[indexPath.section].items[indexPath.row]
-        let textToCopy = item.resultText ?? item.originalText
-        UIPasteboard.general.string = textToCopy
+        if showingSavedPhrases {
+            let phrases = SavedPhrasesManager.shared.getPhrases()
+            UIPasteboard.general.string = phrases[indexPath.row]
+        } else {
+            let item = groupedItems[indexPath.section].items[indexPath.row]
+            UIPasteboard.general.string = item.resultText ?? item.originalText
+        }
 
         let toast = UILabel()
         toast.text = L("ai_writer.copied")
@@ -301,9 +340,14 @@ extension HistoryViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let delete = UIContextualAction(style: .destructive, title: nil) { [weak self] _, _, completion in
             guard let self else { completion(false); return }
-            let item = self.groupedItems[indexPath.section].items[indexPath.row]
-            HistoryManager.shared.deleteItem(id: item.id)
-            self.reloadData()
+            if self.showingSavedPhrases {
+                SavedPhrasesManager.shared.deletePhrase(at: indexPath.row)
+                self.applyFilter()
+            } else {
+                let item = self.groupedItems[indexPath.section].items[indexPath.row]
+                HistoryManager.shared.deleteItem(id: item.id)
+                self.reloadData()
+            }
             completion(true)
         }
         delete.image = UIImage(systemName: "trash")
@@ -400,6 +444,16 @@ class HistoryCell: UITableViewCell {
             resultLabel.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -14),
             resultLabel.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -12),
         ])
+    }
+
+    func configureAsSavedPhrase(text: String) {
+        tagLabel.text = "  \(L("history.filter.phrases"))  "
+        tagLabel.backgroundColor = AppColors.pink
+        timeLabel.text = nil
+        originalLabel.text = text
+        originalLabel.textColor = AppColors.text
+        separator.isHidden = true
+        resultLabel.isHidden = true
     }
 
     func configure(with item: HistoryItem, relativeTime: String) {

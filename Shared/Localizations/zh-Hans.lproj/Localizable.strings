@@ -219,7 +219,9 @@
 "history.filter.translate" = "翻译";
 "history.filter.correct" = "校正";
 "history.filter.clipboard" = "剪贴板";
+"history.filter.phrases" = "常用语";
 "history.empty" = "暂无记录";
+"history.phrases_empty" = "没有保存的常用语";
 
 // === Settings (new) ===
 "settings.paste_guide" = "粘贴通知关闭指南";

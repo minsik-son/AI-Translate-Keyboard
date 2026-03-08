@@ -219,7 +219,9 @@
 "history.filter.translate" = "Traducción";
 "history.filter.correct" = "Corrección";
 "history.filter.clipboard" = "Portapapeles";
+"history.filter.phrases" = "Frases";
 "history.empty" = "Sin historial";
+"history.phrases_empty" = "No hay frases guardadas";
 
 // === Settings (new) ===
 "settings.paste_guide" = "Guía de notificación de pegado";
