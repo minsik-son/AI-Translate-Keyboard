@@ -307,6 +307,7 @@
 // === Rewarded Ads ===
 "reward.mode.correction" = "Correction";
 "reward.mode.translation" = "Translation";
+"reward.mode.compose" = "AI Writing";
 "reward.title_format" = "Recharge %@ +%d Uses";
 "reward.desc" = "Watch an ad to get %d more uses";
 "reward.progress" = "%d/%d watched today";
@@ -365,6 +366,18 @@
 "paywall.benefit.themes_desc" = "Unlock premium keyboard themes";
 "paywall.benefit.no_ads" = "No ads";
 "paywall.benefit.no_ads_desc" = "Remove all advertisements";
+"paywall.benefit.compose" = "50 daily AI writes";
+"paywall.benefit.compose_desc" = "AI-powered message writing, 50 per day";
+"paywall.benefit.compose.premium" = "Unlimited AI writes";
+"paywall.benefit.compose_desc.premium" = "No limit on AI message writing";
+"compose.limit.title" = "Daily limit reached";
+"compose.limit.free_message" = "You've used all your free AI writes for today. Watch an ad for 3 more or upgrade to Pro.";
+"compose.limit.pro_message" = "You've reached today's %d AI write limit. Upgrade to Premium for unlimited access.";
+"compose.limit.watch_ad" = "Watch Ad (+3 writes)";
+"compose.limit.upgrade" = "Upgrade to Pro";
+"compose.limit.upgrade_premium" = "Upgrade to Premium";
+"common.cancel" = "Cancel";
+"common.ok" = "OK";
 "paywall.promo_code" = "Have a promo code?";
 "paywall.cancel_anytime" = "Cancel anytime";
 

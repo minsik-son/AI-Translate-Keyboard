@@ -266,6 +266,11 @@ class AIWriterViewController: UIViewController {
     // MARK: - API
 
     private func requestCompose(prompt: String) {
+        guard DailyUsageManager.shared.canUseCompose() else {
+            showComposeLimitReachedAlert()
+            return
+        }
+
         resultCard.isHidden = false
         resultLabel.text = nil
         copyButton.isHidden = true
@@ -301,8 +306,70 @@ class AIWriterViewController: UIViewController {
                     return
                 }
                 self?.resultLabel.text = message
+                DailyUsageManager.shared.recordCompose()
             }
         }.resume()
+    }
+
+    private func showComposeLimitReachedAlert() {
+        let tier = SubscriptionStatus.shared.currentTier
+
+        if tier == .free {
+            let alert = UIAlertController(
+                title: L("compose.limit.title"),
+                message: L("compose.limit.free_message"),
+                preferredStyle: .alert
+            )
+            if DailyUsageManager.shared.canWatchComposeRewardedAd {
+                alert.addAction(UIAlertAction(
+                    title: L("compose.limit.watch_ad"),
+                    style: .default
+                ) { [weak self] _ in
+                    self?.showRewardedAdForCompose()
+                })
+            }
+            alert.addAction(UIAlertAction(
+                title: L("compose.limit.upgrade"),
+                style: .default
+            ) { [weak self] _ in
+                self?.presentPaywall()
+            })
+            alert.addAction(UIAlertAction(
+                title: L("common.cancel"),
+                style: .cancel
+            ))
+            present(alert, animated: true)
+        } else {
+            let alert = UIAlertController(
+                title: L("compose.limit.title"),
+                message: String(format: L("compose.limit.pro_message"),
+                              FeatureGate.shared.dailyComposeLimit),
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(
+                title: L("compose.limit.upgrade_premium"),
+                style: .default
+            ) { [weak self] _ in
+                self?.presentPaywall()
+            })
+            alert.addAction(UIAlertAction(
+                title: L("common.ok"),
+                style: .cancel
+            ))
+            present(alert, animated: true)
+        }
+    }
+
+    private func showRewardedAdForCompose() {
+        let rewardVC = RewardedAdsViewController(mode: .compose)
+        rewardVC.modalPresentationStyle = .fullScreen
+        present(rewardVC, animated: true)
+    }
+
+    private func presentPaywall() {
+        let paywallVC = PaywallViewController()
+        paywallVC.modalPresentationStyle = .pageSheet
+        present(paywallVC, animated: true)
     }
 }
 

@@ -307,6 +307,7 @@
 // === Rewarded Ads ===
 "reward.mode.correction" = "Corrección";
 "reward.mode.translation" = "Traducción";
+"reward.mode.compose" = "Escritura IA";
 "reward.title_format" = "Ver anuncio para %@ +%d usos";
 "reward.desc" = "Ve un anuncio para obtener %d usos más";
 "reward.progress" = "Hoy %d/%d vistos";
@@ -365,6 +366,18 @@
 "paywall.benefit.themes_desc" = "Desbloquea temas premium de teclado";
 "paywall.benefit.no_ads" = "Sin anuncios";
 "paywall.benefit.no_ads_desc" = "Elimina todos los anuncios";
+"paywall.benefit.compose" = "50 escrituras IA al día";
+"paywall.benefit.compose_desc" = "Escritura de mensajes con IA, 50 al día";
+"paywall.benefit.compose.premium" = "Escrituras IA ilimitadas";
+"paywall.benefit.compose_desc.premium" = "Sin límite en escritura de mensajes con IA";
+"compose.limit.title" = "Límite diario alcanzado";
+"compose.limit.free_message" = "Has agotado tus escrituras IA gratuitas de hoy. Ve un anuncio para 3 más o mejora a Pro.";
+"compose.limit.pro_message" = "Has alcanzado el límite de %d escrituras IA de hoy. Mejora a Premium para acceso ilimitado.";
+"compose.limit.watch_ad" = "Ver anuncio (+3)";
+"compose.limit.upgrade" = "Mejorar a Pro";
+"compose.limit.upgrade_premium" = "Mejorar a Premium";
+"common.cancel" = "Cancelar";
+"common.ok" = "Aceptar";
 "paywall.promo_code" = "¿Tienes un código promocional?";
 "paywall.cancel_anytime" = "Cancela en cualquier momento";
 

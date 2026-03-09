@@ -307,6 +307,7 @@
 // === Rewarded Ads ===
 "reward.mode.correction" = "纠正";
 "reward.mode.translation" = "翻译";
+"reward.mode.compose" = "AI写作";
 "reward.title_format" = "看广告充电 %@ +%d次";
 "reward.desc" = "看广告可获得%d次额外使用";
 "reward.progress" = "今日已看 %d/%d次";
@@ -365,6 +366,18 @@
 "paywall.benefit.themes_desc" = "解锁高级键盘主题";
 "paywall.benefit.no_ads" = "无广告";
 "paywall.benefit.no_ads_desc" = "移除所有广告";
+"paywall.benefit.compose" = "每日50次AI写作";
+"paywall.benefit.compose_desc" = "AI消息写作每天50次";
+"paywall.benefit.compose.premium" = "无限AI写作";
+"paywall.benefit.compose_desc.premium" = "AI消息写作无次数限制";
+"compose.limit.title" = "已达每日上限";
+"compose.limit.free_message" = "今天的免费AI写作次数已用完。观看广告可获得3次额外使用。";
+"compose.limit.pro_message" = "今天已达AI写作%d次上限。升级Premium可无限使用。";
+"compose.limit.watch_ad" = "观看广告 (+3次)";
+"compose.limit.upgrade" = "升级Pro";
+"compose.limit.upgrade_premium" = "升级Premium";
+"common.cancel" = "取消";
+"common.ok" = "确定";
 "paywall.promo_code" = "有促销码？";
 "paywall.cancel_anytime" = "随时可以取消";
 

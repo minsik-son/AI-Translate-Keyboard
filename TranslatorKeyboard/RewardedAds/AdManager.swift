@@ -42,7 +42,13 @@ final class AdManager: NSObject {
             loadRewardedAd()
             return
         }
-        guard DailyUsageManager.shared.canWatchRewardedAd(for: mode) else {
+        let canWatch: Bool
+        if mode == .compose {
+            canWatch = DailyUsageManager.shared.canWatchComposeRewardedAd
+        } else {
+            canWatch = DailyUsageManager.shared.canWatchRewardedAd(for: mode)
+        }
+        guard canWatch else {
             delegate?.adManagerReachedDailyLimit(self)
             return
         }
@@ -51,11 +57,19 @@ final class AdManager: NSObject {
     }
 
     func canShowAd(for mode: RewardMode) -> Bool {
+        if mode == .compose {
+            return isAdReady && DailyUsageManager.shared.canWatchComposeRewardedAd
+        }
         return isAdReady && DailyUsageManager.shared.canWatchRewardedAd(for: mode)
     }
 
     private func grantReward(mode: RewardMode) {
-        DailyUsageManager.shared.recordRewardedAd(for: mode)
+        switch mode {
+        case .compose:
+            DailyUsageManager.shared.recordComposeRewardedAd()
+        case .correction, .translation:
+            DailyUsageManager.shared.recordRewardedAd(for: mode)
+        }
         delegate?.adManagerDidRewardUser(self)
         isAdReady = false
         loadRewardedAd()

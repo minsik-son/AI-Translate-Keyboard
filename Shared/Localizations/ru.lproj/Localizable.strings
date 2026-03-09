@@ -307,6 +307,7 @@
 // === Rewarded Ads ===
 "reward.mode.correction" = "Исправление";
 "reward.mode.translation" = "Перевод";
+"reward.mode.compose" = "ИИ-тексты";
 "reward.title_format" = "Посмотрите рекламу для %@ +%d использований";
 "reward.desc" = "Посмотрите рекламу чтобы получить %d дополнительных использований";
 "reward.progress" = "Сегодня %d/%d просмотрено";
@@ -365,6 +366,18 @@
 "paywall.benefit.themes_desc" = "Разблокировать премиум-темы клавиатуры";
 "paywall.benefit.no_ads" = "Без рекламы";
 "paywall.benefit.no_ads_desc" = "Удалить всю рекламу";
+"paywall.benefit.compose" = "50 ИИ-текстов в день";
+"paywall.benefit.compose_desc" = "Написание сообщений с ИИ, 50 в день";
+"paywall.benefit.compose.premium" = "Безлимитные ИИ-тексты";
+"paywall.benefit.compose_desc.premium" = "Без ограничений на написание сообщений с ИИ";
+"compose.limit.title" = "Дневной лимит достигнут";
+"compose.limit.free_message" = "Вы использовали все бесплатные ИИ-тексты на сегодня. Посмотрите рекламу для 3 дополнительных или перейдите на Pro.";
+"compose.limit.pro_message" = "Вы достигли лимита %d ИИ-текстов на сегодня. Перейдите на Premium для безлимитного доступа.";
+"compose.limit.watch_ad" = "Смотреть рекламу (+3)";
+"compose.limit.upgrade" = "Перейти на Pro";
+"compose.limit.upgrade_premium" = "Перейти на Premium";
+"common.cancel" = "Отмена";
+"common.ok" = "ОК";
 "paywall.promo_code" = "Есть промо-код?";
 "paywall.cancel_anytime" = "Отмена в любое время";
 

@@ -5,8 +5,12 @@ class RewardedAdsViewController: UIViewController, AdManagerDelegate {
     // MARK: - Properties
 
     private let mode: RewardMode
-    private let maxAds = FeatureGate.shared.maxDailyRewardedAds
-    private let bonus = FeatureGate.shared.rewardedAdBonusCount
+    private var maxAds: Int {
+        mode == .compose ? FeatureGate.shared.maxDailyComposeAds : FeatureGate.shared.maxDailyRewardedAds
+    }
+    private var bonus: Int {
+        mode == .compose ? FeatureGate.shared.composeRewardPerAd : FeatureGate.shared.rewardedAdBonusCount
+    }
 
     // MARK: - UI Elements
 
@@ -218,11 +222,23 @@ class RewardedAdsViewController: UIViewController, AdManagerDelegate {
     // MARK: - Update UI
 
     private func updateUI() {
-        let watched = DailyUsageManager.shared.rewardedAdCount(for: mode)
-        let canWatch = DailyUsageManager.shared.canWatchRewardedAd(for: mode)
+        let watched: Int
+        let canWatch: Bool
+        if mode == .compose {
+            watched = DailyUsageManager.shared.composeRewardedAdCount
+            canWatch = DailyUsageManager.shared.canWatchComposeRewardedAd
+        } else {
+            watched = DailyUsageManager.shared.rewardedAdCount(for: mode)
+            canWatch = DailyUsageManager.shared.canWatchRewardedAd(for: mode)
+        }
 
         // Title
-        let modeText = mode == .correction ? L("reward.mode.correction") : L("reward.mode.translation")
+        let modeText: String
+        switch mode {
+        case .correction: modeText = L("reward.mode.correction")
+        case .translation: modeText = L("reward.mode.translation")
+        case .compose: modeText = L("reward.mode.compose")
+        }
         titleLabel.text = String(format: L("reward.title_format"), modeText, bonus)
 
         // Description
@@ -285,7 +301,9 @@ class RewardedAdsViewController: UIViewController, AdManagerDelegate {
 
     func adManagerDidRewardUser(_ manager: AdManager) {
         // Animate the newly filled dot
-        let watched = DailyUsageManager.shared.rewardedAdCount(for: mode)
+        let watched = mode == .compose
+            ? DailyUsageManager.shared.composeRewardedAdCount
+            : DailyUsageManager.shared.rewardedAdCount(for: mode)
         let dotIndex = watched - 1
         if dotIndex >= 0, dotIndex < dotViews.count {
             let dot = dotViews[dotIndex]

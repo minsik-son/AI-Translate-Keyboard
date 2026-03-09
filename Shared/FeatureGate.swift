@@ -15,7 +15,7 @@ final class FeatureGate {
         switch currentTier {
         case .free: return 10
         case .pro: return 100
-        case .premium: return 300
+        case .premium: return Int.max  // 무제한
         }
     }
 
@@ -24,7 +24,7 @@ final class FeatureGate {
         switch currentTier {
         case .free: return 10
         case .pro: return 100
-        case .premium: return 300
+        case .premium: return Int.max  // 무제한
         }
     }
 
@@ -61,15 +61,11 @@ final class FeatureGate {
     // MARK: - Feature Locks
 
     var availableTones: [ToneStyle] {
-        if AdminMode.shared.isEnabled { return ToneStyle.allCases }
-        switch currentTier {
-        case .free: return [.none]
-        case .pro, .premium: return ToneStyle.allCases
-        }
+        return ToneStyle.allCases  // 전 티어 개방
     }
 
     func isToneLocked(_ tone: ToneStyle) -> Bool {
-        return !availableTones.contains(tone)
+        return false  // 더 이상 잠금 없음
     }
 
     // MARK: - AI Model
@@ -79,6 +75,31 @@ final class FeatureGate {
         case .free: return "gemini-2.5-flash-lite"
         case .pro, .premium: return "gemini-2.5-flash"
         }
+    }
+
+    // MARK: - AI 메시지 작성 제한
+
+    var dailyComposeLimit: Int {
+        if AdminMode.shared.isEnabled { return Int.max }
+        switch currentTier {
+        case .free: return 5      // 하루 최대 5회 (광고 기반)
+        case .pro: return 50      // 하루 50회
+        case .premium: return Int.max  // 무제한
+        }
+    }
+
+    var isComposeUnlimited: Bool {
+        return currentTier == .premium || AdminMode.shared.isEnabled
+    }
+
+    /// Free 유저: 광고 1회 시청 → AI 작성 3회 충전
+    var composeRewardPerAd: Int {
+        return 3
+    }
+
+    /// Free 유저: 하루 광고 시청 최대 횟수
+    var maxDailyComposeAds: Int {
+        return 2
     }
 
     // MARK: - Rewarded Ads

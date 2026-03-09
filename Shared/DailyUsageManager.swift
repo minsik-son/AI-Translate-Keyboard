@@ -3,6 +3,7 @@ import Foundation
 enum RewardMode: String {
     case correction
     case translation
+    case compose
 }
 
 final class DailyUsageManager {
@@ -16,6 +17,9 @@ final class DailyUsageManager {
     private let rewardedAdTranslationCountKey = "daily_rewarded_ad_translation_count"
     private let bonusCorrectionKey = "bonus_correction_count"
     private let bonusTranslationKey = "bonus_translation_count"
+    private let composeCountKey = "daily_compose_count"
+    private let rewardedAdComposeCountKey = "daily_rewarded_ad_compose_count"
+    private let bonusComposeKey = "bonus_compose_count"
     private let lastResetDateKey = "daily_usage_last_reset"
 
     private let keychainUsageDataKey = "kc_daily_usage_data"
@@ -80,6 +84,55 @@ final class DailyUsageManager {
         return remainingTranslations > 0
     }
 
+    // MARK: - AI 작성 사용량
+
+    var composeCount: Int {
+        resetIfNewDay()
+        return defaults?.integer(forKey: composeCountKey) ?? 0
+    }
+
+    var remainingComposes: Int {
+        if FeatureGate.shared.isComposeUnlimited { return Int.max }
+        let limit = FeatureGate.shared.dailyComposeLimit
+        let bonus = defaults?.integer(forKey: bonusComposeKey) ?? 0
+        let used = composeCount
+        return max(0, (limit + bonus) - used)
+    }
+
+    func recordCompose() {
+        resetIfNewDay()
+        let count = (defaults?.integer(forKey: composeCountKey) ?? 0) + 1
+        defaults?.set(count, forKey: composeCountKey)
+        syncToKeychain()
+    }
+
+    func canUseCompose() -> Bool {
+        if FeatureGate.shared.isComposeUnlimited { return true }
+        return remainingComposes > 0
+    }
+
+    /// 리워드 광고 시청 완료 → AI 작성 3회 충전
+    func recordComposeRewardedAd() {
+        resetIfNewDay()
+        let count = (defaults?.integer(forKey: rewardedAdComposeCountKey) ?? 0) + 1
+        defaults?.set(count, forKey: rewardedAdComposeCountKey)
+
+        let bonus = FeatureGate.shared.composeRewardPerAd
+        let currentBonus = defaults?.integer(forKey: bonusComposeKey) ?? 0
+        defaults?.set(currentBonus + bonus, forKey: bonusComposeKey)
+        syncToKeychain()
+    }
+
+    var composeRewardedAdCount: Int {
+        resetIfNewDay()
+        return defaults?.integer(forKey: rewardedAdComposeCountKey) ?? 0
+    }
+
+    var canWatchComposeRewardedAd: Bool {
+        return FeatureGate.shared.canShowRewardedAd
+            && composeRewardedAdCount < FeatureGate.shared.maxDailyComposeAds
+    }
+
     // MARK: - Rewarded Ads (Mode-specific)
 
     func rewardedAdCount(for mode: RewardMode) -> Int {
@@ -118,6 +171,9 @@ final class DailyUsageManager {
             defaults?.set(0, forKey: rewardedAdTranslationCountKey)
             defaults?.set(0, forKey: bonusCorrectionKey)
             defaults?.set(0, forKey: bonusTranslationKey)
+            defaults?.set(0, forKey: composeCountKey)
+            defaults?.set(0, forKey: rewardedAdComposeCountKey)
+            defaults?.set(0, forKey: bonusComposeKey)
             defaults?.set(today, forKey: lastResetDateKey)
             syncToKeychain()
         }
@@ -145,6 +201,9 @@ final class DailyUsageManager {
             defaults?.set(usageData.bonusTranslation, forKey: bonusTranslationKey)
             defaults?.set(usageData.rewardedAdCorrection, forKey: rewardedAdCorrectionCountKey)
             defaults?.set(usageData.rewardedAdTranslation, forKey: rewardedAdTranslationCountKey)
+            defaults?.set(usageData.composeCount, forKey: composeCountKey)
+            defaults?.set(usageData.bonusCompose, forKey: bonusComposeKey)
+            defaults?.set(usageData.rewardedAdCompose, forKey: rewardedAdComposeCountKey)
             defaults?.synchronize()
         }
         // 날짜가 오늘이 아니면 → 리셋 대상이므로 복원하지 않음 (resetIfNewDay가 처리)
@@ -158,7 +217,10 @@ final class DailyUsageManager {
             bonusCorrection: defaults?.integer(forKey: bonusCorrectionKey) ?? 0,
             bonusTranslation: defaults?.integer(forKey: bonusTranslationKey) ?? 0,
             rewardedAdCorrection: defaults?.integer(forKey: rewardedAdCorrectionCountKey) ?? 0,
-            rewardedAdTranslation: defaults?.integer(forKey: rewardedAdTranslationCountKey) ?? 0
+            rewardedAdTranslation: defaults?.integer(forKey: rewardedAdTranslationCountKey) ?? 0,
+            composeCount: defaults?.integer(forKey: composeCountKey) ?? 0,
+            bonusCompose: defaults?.integer(forKey: bonusComposeKey) ?? 0,
+            rewardedAdCompose: defaults?.integer(forKey: rewardedAdComposeCountKey) ?? 0
         )
 
         DispatchQueue.global(qos: .utility).async {

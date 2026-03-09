@@ -26,6 +26,11 @@ class PaywallViewController: UIViewController {
     private var selectedPlan: SelectedPlan = .yearlyPro
     private var isLoading = false
 
+    // CTA 버튼에 표시할 가격 캐시
+    private var yearlyDisplayPrice = "$47.99/yr"
+    private var monthlyDisplayPrice = "$7.99/mo"
+    private var premiumDisplayPrice = "$14.99/mo"
+
     // MARK: - UI Components
 
     private let scrollView: UIScrollView = {
@@ -226,9 +231,13 @@ class PaywallViewController: UIViewController {
         let usageTitle = isPremium ? L("paywall.benefit.usage.premium") : L("paywall.benefit.usage")
         let usageDesc = isPremium ? L("paywall.benefit.usage_desc.premium") : L("paywall.benefit.usage_desc")
 
+        // AI 메시지 작성 (톤 스타일 대체)
+        let composeTitle = isPremium ? L("paywall.benefit.compose.premium") : L("paywall.benefit.compose")
+        let composeDesc = isPremium ? L("paywall.benefit.compose_desc.premium") : L("paywall.benefit.compose_desc")
+
         let benefits: [(icon: String, title: String, desc: String)] = [
             ("일일100회", usageTitle, usageDesc),
-            ("모든톤스타일", L("paywall.benefit.tones"), L("paywall.benefit.tones_desc")),
+            ("모든톤스타일", composeTitle, composeDesc),
             ("프리미엄테마", L("paywall.benefit.themes"), L("paywall.benefit.themes_desc")),
             ("광고없음", L("paywall.benefit.no_ads"), L("paywall.benefit.no_ads_desc")),
         ]
@@ -547,11 +556,11 @@ class PaywallViewController: UIViewController {
         let ctaText: String
         switch selectedPlan {
         case .yearlyPro:
-            ctaText = L("paywall.cta_subscribe_yearly")
+            ctaText = L("paywall.cta_subscribe_yearly") + " — " + yearlyDisplayPrice
         case .monthlyPro:
-            ctaText = L("paywall.cta_subscribe_monthly")
+            ctaText = L("paywall.cta_subscribe_monthly") + " — " + monthlyDisplayPrice
         case .premium:
-            ctaText = L("paywall.cta_subscribe_premium")
+            ctaText = L("paywall.cta_subscribe_premium") + " — " + premiumDisplayPrice
         }
         ctaButton.setTitle(ctaText, for: .normal)
         updateBenefitsContent()
@@ -568,6 +577,10 @@ class PaywallViewController: UIViewController {
         yearlyBilledLabel.text = L("paywall.billed_yearly")
         monthlyPriceLabel.text = String(format: L("paywall.per_month"), "$7.99")
         premiumPriceLabel.text = String(format: L("paywall.per_month"), "$14.99")
+
+        yearlyDisplayPrice = "$47.99/yr"
+        monthlyDisplayPrice = "$7.99/mo"
+        premiumDisplayPrice = "$14.99/mo"
     }
 
     private func loadProducts() {
@@ -593,17 +606,21 @@ class PaywallViewController: UIViewController {
                     yearlyPriceLabel.text = String(format: L("paywall.per_month"), formatted)
                 }
                 yearlyBilledLabel.text = product.displayPrice
+                yearlyDisplayPrice = "\(product.displayPrice)/yr"
 
             case StoreKitManager.ProductID.monthlyPro.rawValue:
                 monthlyPriceLabel.text = String(format: L("paywall.per_month"), product.displayPrice)
+                monthlyDisplayPrice = "\(product.displayPrice)/mo"
 
             case StoreKitManager.ProductID.monthlyPremium.rawValue:
                 premiumPriceLabel.text = String(format: L("paywall.per_month"), product.displayPrice)
+                premiumDisplayPrice = "\(product.displayPrice)/mo"
 
             default:
                 break
             }
         }
+        updateSelectionState()
     }
 
     // MARK: - Loading State

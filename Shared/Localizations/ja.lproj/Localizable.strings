@@ -307,6 +307,7 @@
 // === Rewarded Ads ===
 "reward.mode.correction" = "修正";
 "reward.mode.translation" = "翻訳";
+"reward.mode.compose" = "AI作成";
 "reward.title_format" = "広告を見て %@ +%d回充電";
 "reward.desc" = "広告を視聴すると%d回が追加されます";
 "reward.progress" = "本日 %d/%d回視聴済み";
@@ -365,6 +366,18 @@
 "paywall.benefit.themes_desc" = "プレミアムキーボードテーマをアンロック";
 "paywall.benefit.no_ads" = "広告なし";
 "paywall.benefit.no_ads_desc" = "すべての広告を削除";
+"paywall.benefit.compose" = "AI作成 1日50回";
+"paywall.benefit.compose_desc" = "AIメッセージ作成 1日50回";
+"paywall.benefit.compose.premium" = "AI作成 無制限";
+"paywall.benefit.compose_desc.premium" = "AIメッセージ作成の回数制限なし";
+"compose.limit.title" = "1日の上限に達しました";
+"compose.limit.free_message" = "今日の無料AI作成をすべて使用しました。広告を見ると3回追加されます。";
+"compose.limit.pro_message" = "今日のAI作成%d回の上限に達しました。Premiumにアップグレードすると無制限で使用できます。";
+"compose.limit.watch_ad" = "広告を見る (+3回)";
+"compose.limit.upgrade" = "Proにアップグレード";
+"compose.limit.upgrade_premium" = "Premiumにアップグレード";
+"common.cancel" = "キャンセル";
+"common.ok" = "OK";
 "paywall.promo_code" = "プロモコードをお持ちですか？";
 "paywall.cancel_anytime" = "いつでも解約できます";
 

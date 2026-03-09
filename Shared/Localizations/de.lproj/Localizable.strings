@@ -307,6 +307,7 @@
 // === Rewarded Ads ===
 "reward.mode.correction" = "Korrektur";
 "reward.mode.translation" = "Übersetzung";
+"reward.mode.compose" = "KI-Texte";
 "reward.title_format" = "Werbung ansehen für %@ +%d Nutzungen";
 "reward.desc" = "Sehen Sie eine Werbung für %d weitere Nutzungen";
 "reward.progress" = "Heute %d/%d angesehen";
@@ -365,6 +366,18 @@
 "paywall.benefit.themes_desc" = "Premium-Tastatur-Themen freischalten";
 "paywall.benefit.no_ads" = "Keine Werbung";
 "paywall.benefit.no_ads_desc" = "Alle Werbung entfernen";
+"paywall.benefit.compose" = "50 KI-Texte pro Tag";
+"paywall.benefit.compose_desc" = "KI-Nachrichtenerstellung, 50 pro Tag";
+"paywall.benefit.compose.premium" = "Unbegrenzte KI-Texte";
+"paywall.benefit.compose_desc.premium" = "Keine Begrenzung bei KI-Nachrichtenerstellung";
+"compose.limit.title" = "Tageslimit erreicht";
+"compose.limit.free_message" = "Sie haben alle kostenlosen KI-Texte für heute verbraucht. Sehen Sie eine Werbung für 3 weitere oder upgraden Sie auf Pro.";
+"compose.limit.pro_message" = "Sie haben das heutige Limit von %d KI-Texten erreicht. Upgraden Sie auf Premium für unbegrenzten Zugang.";
+"compose.limit.watch_ad" = "Werbung ansehen (+3)";
+"compose.limit.upgrade" = "Auf Pro upgraden";
+"compose.limit.upgrade_premium" = "Auf Premium upgraden";
+"common.cancel" = "Abbrechen";
+"common.ok" = "OK";
 "paywall.promo_code" = "Haben Sie einen Promo-Code?";
 "paywall.cancel_anytime" = "Jederzeit kündbar";
 
