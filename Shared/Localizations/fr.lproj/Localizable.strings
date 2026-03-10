@@ -400,6 +400,7 @@
 "quicknote.copy" = "Copier";
 "quicknote.copied" = "Copié !";
 "quicknote.done" = "Terminé";
+"quicknote.edit_button" = "Modifier";
 "quicknote.delete" = "Supprimer";
 "quicknote.char_count" = "%d/500";
 "quicknote.auto_saved" = "Sauvegardé";

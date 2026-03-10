@@ -400,6 +400,7 @@
 "quicknote.copy" = "Копировать";
 "quicknote.copied" = "Скопировано!";
 "quicknote.done" = "Готово";
+"quicknote.edit_button" = "Редактировать";
 "quicknote.delete" = "Удалить";
 "quicknote.char_count" = "%d/500";
 "quicknote.auto_saved" = "Автосохранение";

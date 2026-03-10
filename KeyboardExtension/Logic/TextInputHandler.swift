@@ -27,6 +27,9 @@ class TextInputHandler: TextInputHandling {
     private(set) var buffer: String = ""
     private(set) var composingText: String = ""
 
+    var maxNewlineCount: Int = 10
+    var maxLength: Int = Int.max
+
     // Hangul composition state
     private var hangulState: HangulState = .empty
 
@@ -129,11 +132,10 @@ class TextInputHandler: TextInputHandling {
     }
 
     func handleKey(_ key: Character, isKorean: Bool) {
-        guard totalLength < AppConstants.Limits.maxCharacters || !composingText.isEmpty else { return }
-
         if isKorean {
             handleKoreanKey(key)
         } else {
+            guard (buffer.count + (composingText.isEmpty ? 0 : 1) + 1) <= maxLength else { return }
             commitComposing()
             buffer.append(key)
             delegate?.textInputHandler(self, didUpdateBuffer: buffer)
@@ -150,14 +152,16 @@ class TextInputHandler: TextInputHandling {
     }
 
     func handleSpace() {
+        guard (buffer.count + (composingText.isEmpty ? 0 : 1) + 1) <= maxLength else { return }
         commitComposing()
         buffer.append(" ")
         delegate?.textInputHandler(self, didUpdateBuffer: buffer)
     }
 
     func handleNewline() {
+        guard (buffer.count + (composingText.isEmpty ? 0 : 1) + 1) <= maxLength else { return }
         let lineCount = buffer.components(separatedBy: "\n").count
-        guard lineCount < 10 else { return }
+        guard lineCount < maxNewlineCount else { return }
         commitComposing()
         buffer.append("\n")
         delegate?.textInputHandler(self, didUpdateBuffer: buffer)
@@ -191,11 +195,13 @@ class TextInputHandler: TextInputHandling {
         switch hangulState {
         case .empty:
             if isConsonant {
+                guard (buffer.count + 1) <= maxLength else { return }
                 if let initialIdx = Self.initialConsonants[key] {
                     hangulState = .initial(initialIdx)
                     composingText = String(key)
                 }
             } else if isVowel {
+                guard (buffer.count + 1) <= maxLength else { return }
                 commitComposing()
                 buffer.append(key)
                 delegate?.textInputHandler(self, didUpdateBuffer: buffer)
@@ -204,12 +210,14 @@ class TextInputHandler: TextInputHandling {
 
         case .initial(let initial):
             if isVowel {
+                // 중성 추가 → 조합만 변경, 글자 수 변화 없음
                 if let vowelIdx = Self.vowels[key] {
                     hangulState = .initialVowel(initial, vowelIdx)
                     composingText = composeSyllable(initial: initial, vowel: vowelIdx, final: 0)
                 }
             } else {
-                // Another consonant - commit current and start new
+                // Another consonant - commit current and start new → 글자 수 +1
+                guard (buffer.count + 1 + 1) <= maxLength else { return }
                 commitComposing()
                 if let initialIdx = Self.initialConsonants[key] {
                     hangulState = .initial(initialIdx)
@@ -222,10 +230,12 @@ class TextInputHandler: TextInputHandling {
                 // Try compound vowel
                 if let vowelChar = Self.vowelIndex[vowel],
                    let compoundIdx = Self.compoundVowels[String(vowelChar) + String(key)] {
+                    // 복합 모음 → 조합만 변경, 글자 수 변화 없음
                     hangulState = .initialVowel(initial, compoundIdx)
                     composingText = composeSyllable(initial: initial, vowel: compoundIdx, final: 0)
                 } else {
-                    // Can't compound - commit and start fresh
+                    // Can't compound - commit and start fresh → 글자 수 +1
+                    guard (buffer.count + 1 + 1) <= maxLength else { return }
                     commitComposing()
                     buffer.append(key)
                     hangulState = .empty
@@ -235,9 +245,12 @@ class TextInputHandler: TextInputHandling {
                 }
             } else if isConsonant {
                 if let finalIdx = Self.finalConsonants[key] {
+                    // 종성 추가 → 조합만 변경, 글자 수 변화 없음
                     hangulState = .complete(initial, vowel, finalIdx)
                     composingText = composeSyllable(initial: initial, vowel: vowel, final: finalIdx)
                 } else {
+                    // 종성이 될 수 없는 자음 → commit + new → 글자 수 +1
+                    guard (buffer.count + 1 + 1) <= maxLength else { return }
                     commitComposing()
                     if let initialIdx = Self.initialConsonants[key] {
                         hangulState = .initial(initialIdx)
@@ -260,17 +273,18 @@ class TextInputHandler: TextInputHandling {
                 }
 
                 if let split = splitFinal, let vowelIdx = Self.vowels[key] {
-                    // Commit current syllable with first part of compound final
+                    // 복합 종성 분리 → 글자 수 +1
+                    guard (buffer.count + 1 + 1) <= maxLength else { return }
                     let syllable = composeSyllable(initial: initial, vowel: vowel, final: split.first)
                     buffer.append(syllable)
 
-                    // Start new syllable with second part as initial
                     hangulState = .initialVowel(split.secondInitial, vowelIdx)
                     composingText = composeSyllable(initial: split.secondInitial, vowel: vowelIdx, final: 0)
                     delegate?.textInputHandler(self, didUpdateBuffer: buffer)
                 } else if let newInitial = Self.finalToInitial[final_],
                           let vowelIdx = Self.vowels[key] {
-                    // Simple final consonant becomes initial of next syllable
+                    // 단순 종성 → 다음 글자 초성으로 → 글자 수 +1
+                    guard (buffer.count + 1 + 1) <= maxLength else { return }
                     let syllable = composeSyllable(initial: initial, vowel: vowel, final: 0)
                     buffer.append(syllable)
 
@@ -278,6 +292,7 @@ class TextInputHandler: TextInputHandling {
                     composingText = composeSyllable(initial: newInitial, vowel: vowelIdx, final: 0)
                     delegate?.textInputHandler(self, didUpdateBuffer: buffer)
                 } else {
+                    guard (buffer.count + 1 + 1) <= maxLength else { return }
                     commitComposing()
                     buffer.append(key)
                     hangulState = .empty
@@ -290,10 +305,12 @@ class TextInputHandler: TextInputHandling {
                 if let finalChar = Self.finalIndex[final_] {
                     let compoundKey = String(finalChar) + String(key)
                     if let compound = Self.compoundFinals[compoundKey] {
+                        // 복합 종성 → 조합만 변경, 글자 수 변화 없음
                         hangulState = .complete(initial, vowel, compound.compound)
                         composingText = composeSyllable(initial: initial, vowel: vowel, final: compound.compound)
                     } else {
-                        // Can't compound - commit and start new
+                        // Can't compound - commit and start new → 글자 수 +1
+                        guard (buffer.count + 1 + 1) <= maxLength else { return }
                         commitComposing()
                         if let initialIdx = Self.initialConsonants[key] {
                             hangulState = .initial(initialIdx)
@@ -301,6 +318,7 @@ class TextInputHandler: TextInputHandling {
                         }
                     }
                 } else {
+                    guard (buffer.count + 1 + 1) <= maxLength else { return }
                     commitComposing()
                     if let initialIdx = Self.initialConsonants[key] {
                         hangulState = .initial(initialIdx)
@@ -331,6 +349,12 @@ class TextInputHandler: TextInputHandling {
 
     func resetBuffer() {
         buffer = ""
+    }
+
+    func setInitialText(_ text: String) {
+        buffer = text
+        composingText = ""
+        hangulState = .empty
     }
 
     private func removeLastComposingUnit() {

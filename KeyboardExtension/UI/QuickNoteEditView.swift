@@ -182,6 +182,20 @@ class QuickNoteEditView: UIView {
         updateCharCount()
     }
 
+    func setDisplayText(_ text: String) {
+        noteInputView.setDisplayText(text)
+    }
+
+    func updateCharCount(_ count: Int) {
+        let max = AppConstants.Limits.quickNoteMaxLength
+        charCountLabel.text = "\(count)/\(max)"
+        if count >= max {
+            charCountLabel.textColor = .systemRed
+        } else {
+            charCountLabel.textColor = isDark ? UIColor(white: 0.5, alpha: 1) : .secondaryLabel
+        }
+    }
+
     func idealHeight() -> CGFloat {
         return 44 + (inputHeightConstraint?.constant ?? 44) + 20 + 36
     }
@@ -233,10 +247,6 @@ class QuickNoteEditView: UIView {
     // MARK: - Actions
 
     @objc private func doneTapped() {
-        let content = noteInputView.currentText
-        if !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            onSave?(content)
-        }
         onClose?()
     }
 

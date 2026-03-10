@@ -7,6 +7,7 @@ class QuickNoteListView: UIView {
     var onNoteTap: ((QuickNote) -> Void)?
     var onNewNote: (() -> Void)?
     var onDeleteNote: ((UUID) -> Void)?
+    var onClose: (() -> Void)?
 
     // MARK: - Data
 
@@ -26,6 +27,14 @@ class QuickNoteListView: UIView {
         l.font = .systemFont(ofSize: 16, weight: .bold)
         l.translatesAutoresizingMaskIntoConstraints = false
         return l
+    }()
+
+    private let closeButton: UIButton = {
+        let btn = UIButton(type: .system)
+        let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .medium)
+        btn.setImage(UIImage(systemName: "chevron.left", withConfiguration: config), for: .normal)
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        return btn
     }()
 
     private let addButton: UIButton = {
@@ -85,12 +94,14 @@ class QuickNoteListView: UIView {
 
     private func setupViews() {
         addSubview(headerView)
+        headerView.addSubview(closeButton)
         headerView.addSubview(titleLabel)
         headerView.addSubview(addButton)
         addSubview(tableView)
         addSubview(emptyTitleLabel)
         addSubview(emptySubtitleLabel)
 
+        closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
         addButton.addTarget(self, action: #selector(addTapped), for: .touchUpInside)
 
         tableView.dataSource = self
@@ -103,7 +114,12 @@ class QuickNoteListView: UIView {
             headerView.trailingAnchor.constraint(equalTo: trailingAnchor),
             headerView.heightAnchor.constraint(equalToConstant: 44),
 
-            titleLabel.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
+            closeButton.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 8),
+            closeButton.centerYAnchor.constraint(equalTo: headerView.centerYAnchor),
+            closeButton.widthAnchor.constraint(equalToConstant: 36),
+            closeButton.heightAnchor.constraint(equalToConstant: 34),
+
+            titleLabel.leadingAnchor.constraint(equalTo: closeButton.trailingAnchor, constant: 4),
             titleLabel.centerYAnchor.constraint(equalTo: headerView.centerYAnchor),
 
             addButton.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -12),
@@ -145,11 +161,13 @@ class QuickNoteListView: UIView {
             textColor = theme.keyTextColor
             mutedColor = theme.keyTextColor.withAlphaComponent(0.5)
             addButton.tintColor = theme.keyTextColor
+            closeButton.tintColor = theme.keyTextColor
         } else {
             backgroundColor = isDark ? UIColor(white: 0.12, alpha: 1) : UIColor(white: 0.95, alpha: 1)
             textColor = isDark ? .white : .label
             mutedColor = isDark ? UIColor(white: 0.5, alpha: 1) : .secondaryLabel
             addButton.tintColor = textColor
+            closeButton.tintColor = textColor
         }
 
         titleLabel.textColor = textColor
@@ -165,6 +183,10 @@ class QuickNoteListView: UIView {
         emptyTitleLabel.isHidden = !empty
         emptySubtitleLabel.isHidden = !empty
         tableView.isHidden = empty
+    }
+
+    @objc private func closeTapped() {
+        onClose?()
     }
 
     @objc private func addTapped() {

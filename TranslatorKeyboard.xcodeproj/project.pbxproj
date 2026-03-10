@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -43,6 +43,7 @@
 		6FE3B87EDD24F6A31686E9FF /* PaywallViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4D8415F1183E7FDB8673AA /* PaywallViewController.swift */; };
 		701F1B0B63878CAE70A94BE1 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE5340DD9626EF86A34FB07 /* SettingsViewController.swift */; };
 		7237963120014F2EB5E42F8B /* DailyUsageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA63F578073C4EA0A059B928 /* DailyUsageManager.swift */; };
+		7CD69FD82FE167B78EE20C64 /* QuickNoteReadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210C063F672C0FE7A648C646 /* QuickNoteReadView.swift */; };
 		88DD1D3326500D609D9E2862 /* AutocorrectEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FCBC8FB5D66C494D8A053A0 /* AutocorrectEngine.swift */; };
 		8BA039CD34B039DFEC28E82E /* SubscriptionStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE58C410E1EB49722CC53E86 /* SubscriptionStatus.swift */; };
 		8D33983765C32F421690890B /* QuickNoteEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2447A0D66729D36830A99707 /* QuickNoteEditView.swift */; };
@@ -144,11 +145,12 @@
 		0820E5AB84FA14646AEE72A2 /* TranslationLanguageBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationLanguageBar.swift; sourceTree = "<group>"; };
 		0EB1A6F9708C27789DA90C42 /* QuickNoteManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QuickNoteManager.swift; sourceTree = "<group>"; };
 		11AE8D80E15CF01D67DFD7C3 /* TranslationCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationCache.swift; sourceTree = "<group>"; };
-		15F02063B8037FB8B731BEE2 /* KeyboardExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = KeyboardExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		15F02063B8037FB8B731BEE2 /* KeyboardExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = KeyboardExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		18696B8A35AF16A2C1D48EE8 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1F99A6C778738429BC6EC5C3 /* StoreKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreKitManager.swift; sourceTree = "<group>"; };
 		1FCBC8FB5D66C494D8A053A0 /* AutocorrectEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutocorrectEngine.swift; sourceTree = "<group>"; };
 		2074DF00A0D06308149CC621 /* KeyboardLayoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardLayoutView.swift; sourceTree = "<group>"; };
+		210C063F672C0FE7A648C646 /* QuickNoteReadView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QuickNoteReadView.swift; sourceTree = "<group>"; };
 		2447A0D66729D36830A99707 /* QuickNoteEditView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QuickNoteEditView.swift; sourceTree = "<group>"; };
 		28A9A5F9D37A7DA5CBD32D56 /* QuickEmojiBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickEmojiBar.swift; sourceTree = "<group>"; };
 		33DDEB1B46819A80FA123ADC /* AdManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdManager.swift; sourceTree = "<group>"; };
@@ -213,7 +215,7 @@
 		CB01AA11BB22CC33DD440011 /* ClipboardHistoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardHistoryManager.swift; sourceTree = "<group>"; };
 		CB01AA11BB22CC33DD440012 /* ClipboardHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardHistoryView.swift; sourceTree = "<group>"; };
 		CC33DD44EE5500080002 /* ThemeSelectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeSelectionViewController.swift; sourceTree = "<group>"; };
-		CEFCD59B19D6B214370C504C /* TranslatorKeyboard.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = TranslatorKeyboard.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CEFCD59B19D6B214370C504C /* TranslatorKeyboard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TranslatorKeyboard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CM01AA11BB22CC33DD440001 /* ContextMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextMenuView.swift; sourceTree = "<group>"; };
 		D466482591CD18ACB2300B2B /* ContextBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextBuffer.swift; sourceTree = "<group>"; };
 		D8941463AB792555551ECC46 /* PredictionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PredictionEngine.swift; sourceTree = "<group>"; };
@@ -352,6 +354,7 @@
 				0820E5AB84FA14646AEE72A2 /* TranslationLanguageBar.swift */,
 				5E0E5D3FC75131189BB4EAA0 /* QuickNoteListView.swift */,
 				2447A0D66729D36830A99707 /* QuickNoteEditView.swift */,
+				210C063F672C0FE7A648C646 /* QuickNoteReadView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -518,16 +521,6 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
-				TargetAttributes = {
-					53523E59F5FAF74EDD233DC1 = {
-						DevelopmentTeam = 3Q2D38NW4X;
-						ProvisioningStyle = Automatic;
-					};
-					D81D87B5BB079D15C73B530B = {
-						DevelopmentTeam = 3Q2D38NW4X;
-						ProvisioningStyle = Automatic;
-					};
-				};
 			};
 			buildConfigurationList = 6B62E4FA60A7E8D8993D4B05 /* Build configuration list for PBXProject "TranslatorKeyboard" */;
 			compatibilityVersion = "Xcode 14.0";
@@ -547,7 +540,6 @@
 			);
 			mainGroup = 92E5E26A9636677CC0F735FC;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
 			productRefGroup = 306EA16641B37F317462C1B4 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -639,6 +631,7 @@
 				52160BF718EFB08AA19013B4 /* QuickNoteManager.swift in Sources */,
 				4B67AEF0C78D2D12FE40B605 /* QuickNoteListView.swift in Sources */,
 				8D33983765C32F421690890B /* QuickNoteEditView.swift in Sources */,
+				7CD69FD82FE167B78EE20C64 /* QuickNoteReadView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -729,6 +722,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = KeyboardExtension/KeyboardExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 3Q2D38NW4X;
 				INFOPLIST_FILE = KeyboardExtension/Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -737,6 +732,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.translatorkeyboard.app.keyboard;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -747,7 +743,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = TranslatorKeyboard/TranslatorKeyboard.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 3Q2D38NW4X;
 				INFOPLIST_FILE = TranslatorKeyboard/Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -755,6 +752,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.translatorkeyboard.app;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -764,6 +762,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = KeyboardExtension/KeyboardExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 3Q2D38NW4X;
 				INFOPLIST_FILE = KeyboardExtension/Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -772,6 +772,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.translatorkeyboard.app.keyboard;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -905,7 +906,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = TranslatorKeyboard/TranslatorKeyboard.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 3Q2D38NW4X;
 				INFOPLIST_FILE = TranslatorKeyboard/Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -913,6 +915,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.translatorkeyboard.app;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -928,7 +931,7 @@
 				73C6956E3EA6543795916132 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 		6B62E4FA60A7E8D8993D4B05 /* Build configuration list for PBXProject "TranslatorKeyboard" */ = {
 			isa = XCConfigurationList;
@@ -937,7 +940,7 @@
 				8C6DA7645D22348B673C22D4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 		9D3D6648925293CE63CA9778 /* Build configuration list for PBXNativeTarget "TranslatorKeyboard" */ = {
 			isa = XCConfigurationList;
@@ -946,7 +949,7 @@
 				674EFDBB8B4D7519F6B95AFC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

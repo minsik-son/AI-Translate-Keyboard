@@ -10,6 +10,7 @@ enum KeyboardMode {
 
 enum QuickNoteSubState {
     case list
+    case reading(QuickNote)
     case editing(QuickNote?)
 }
 
@@ -35,7 +36,9 @@ class KeyboardViewController: UIInputViewController {
 
     // MARK: - QuickNote (CC-2: Optional + Lazy)
     private var quickNoteListView: QuickNoteListView?
+    private var quickNoteReadView: QuickNoteReadView?
     private var quickNoteEditView: QuickNoteEditView?
+    private var quickNoteTextInputHandler: TextInputHandler?
     private var quickNoteSubState: QuickNoteSubState = .list
     private var editingNote: QuickNote?
     private var quickNoteTopConstraint: NSLayoutConstraint?
@@ -285,10 +288,10 @@ class KeyboardViewController: UIInputViewController {
         case .quickNoteMode:
             switch quickNoteSubState {
             case .list:
-                // 리스트 모드: 키보드 전체 높이 사용
+                newHeight = Heights.topPadding + Heights.toolbar + keyArea
+            case .reading:
                 newHeight = Heights.topPadding + Heights.toolbar + keyArea
             case .editing:
-                // 편집 모드: 헤더 + 편집 영역 + 키보드
                 let editH = quickNoteEditView?.idealHeight() ?? 130
                 newHeight = Heights.topPadding + editH + keyArea
             }
@@ -660,6 +663,22 @@ class KeyboardViewController: UIInputViewController {
     // MARK: - Mode Switching
 
     func switchMode(to mode: KeyboardMode) {
+        let previousMode = currentMode
+
+        // QuickNote 모드 이탈 시 전체 정리
+        if previousMode == .quickNoteMode && mode != .quickNoteMode {
+            autoSaveIfNeeded()
+            quickNoteReadView?.removeFromSuperview()
+            quickNoteReadView = nil
+            quickNoteListView?.removeFromSuperview()
+            quickNoteListView = nil
+            quickNoteEditView?.removeFromSuperview()
+            quickNoteEditView = nil
+            quickNoteTextInputHandler = nil
+            quickNoteSubState = .list
+            editingNote = nil
+        }
+
         currentMode = mode
         hideEmojiKeyboard()
 
@@ -686,7 +705,10 @@ class KeyboardViewController: UIInputViewController {
                 phraseInputHeaderView.isHidden = true
                 phraseInputView.isHidden = true
             }
-            // CC-2: QuickNote 뷰 메모리 반환
+            // CC-2: QuickNote 뷰 메모리 반환 (보험용)
+            quickNoteTextInputHandler = nil
+            quickNoteReadView?.removeFromSuperview()
+            quickNoteReadView = nil
             quickNoteListView?.removeFromSuperview()
             quickNoteListView = nil
             quickNoteEditView?.removeFromSuperview()
@@ -1772,6 +1794,8 @@ class KeyboardViewController: UIInputViewController {
         }
         quickNoteListView?.applyTheme(theme)
         quickNoteListView?.updateAppearance(isDark: isDark)
+        quickNoteReadView?.applyTheme(theme)
+        quickNoteReadView?.updateAppearance(isDark: isDark)
         quickNoteEditView?.applyTheme(theme)
         quickNoteEditView?.updateAppearance(isDark: isDark)
     }
@@ -1937,7 +1961,12 @@ extension KeyboardViewController: TextInputHandlerDelegate {
         case .translationMode:
             translationInputView.setDisplayText(displayText)
             translationManager.requestTranslation(text: displayText)
-        case .defaultMode, .quickNoteMode:
+        case .quickNoteMode:
+            if handler === quickNoteTextInputHandler, case .editing = quickNoteSubState {
+                quickNoteEditView?.setDisplayText(displayText)
+                quickNoteEditView?.updateCharCount(displayText.count)
+            }
+        case .defaultMode:
             break
         }
         updateReturnKeyForCurrentMode()
@@ -1954,7 +1983,12 @@ extension KeyboardViewController: TextInputHandlerDelegate {
         case .translationMode:
             translationInputView.setDisplayText(displayText)
             translationManager.requestTranslation(text: displayText)
-        case .defaultMode, .quickNoteMode:
+        case .quickNoteMode:
+            if handler === quickNoteTextInputHandler, case .editing = quickNoteSubState {
+                quickNoteEditView?.setDisplayText(displayText)
+                quickNoteEditView?.updateCharCount(displayText.count)
+            }
+        case .defaultMode:
             break
         }
         updateReturnKeyForCurrentMode()
@@ -2031,9 +2065,12 @@ extension KeyboardViewController {
     private func showQuickNoteList() {
         guard let inputView = self.inputView else { return }
 
-        // CC-2: 편집 뷰가 있으면 제거
+        // CC-2: 편집/읽기 뷰가 있으면 제거
         quickNoteEditView?.removeFromSuperview()
         quickNoteEditView = nil
+        quickNoteReadView?.removeFromSuperview()
+        quickNoteReadView = nil
+        quickNoteTextInputHandler = nil
         editingNote = nil
         quickNoteSubState = .list
 
@@ -2063,7 +2100,7 @@ extension KeyboardViewController {
     private func setupQuickNoteListCallbacks() {
         // CC-3: [weak self]
         quickNoteListView?.onNoteTap = { [weak self] note in
-            self?.enterQuickNoteEdit(note: note)
+            self?.enterQuickNoteRead(note: note)
         }
         quickNoteListView?.onNewNote = { [weak self] in
             self?.enterQuickNoteEdit(note: nil)
@@ -2072,10 +2109,76 @@ extension KeyboardViewController {
             QuickNoteManager.shared.deleteNote(id: noteId)
             self?.quickNoteListView?.reloadNotes()
         }
+        quickNoteListView?.onClose = { [weak self] in
+            self?.toggleQuickNoteMode()
+        }
+    }
+
+    private func enterQuickNoteRead(note: QuickNote) {
+        guard let inputView = self.inputView else { return }
+
+        quickNoteSubState = .reading(note)
+
+        // 리스트 뷰 제거
+        quickNoteListView?.removeFromSuperview()
+        quickNoteListView = nil
+
+        // 읽기 뷰 생성
+        let readView = QuickNoteReadView()
+        readView.translatesAutoresizingMaskIntoConstraints = false
+        readView.configure(with: note)
+        inputView.addSubview(readView)
+        quickNoteReadView = readView
+
+        setupQuickNoteReadCallbacks(readView, note: note)
+
+        // 키보드 숨김 상태 유지
+        keyboardLayoutView.isHidden = true
+
+        NSLayoutConstraint.activate([
+            readView.topAnchor.constraint(equalTo: inputView.topAnchor, constant: Heights.topPadding),
+            readView.leadingAnchor.constraint(equalTo: inputView.leadingAnchor),
+            readView.trailingAnchor.constraint(equalTo: inputView.trailingAnchor),
+            readView.bottomAnchor.constraint(equalTo: inputView.bottomAnchor),
+        ])
+
+        applyQuickNoteTheme()
+        inputView.bringSubviewToFront(toastLabel)
+    }
+
+    private func setupQuickNoteReadCallbacks(_ readView: QuickNoteReadView, note: QuickNote) {
+        readView.onBack = { [weak self] in
+            self?.returnToQuickNoteList()
+        }
+        readView.onEdit = { [weak self] note in
+            self?.transitionFromReadToEdit(note: note)
+        }
+        readView.onPaste = { [weak self] content in
+            self?.textDocumentProxy.insertText(content)
+        }
+        readView.onCopy = { [weak self] content in
+            guard let self = self else { return }
+            if self.hasFullAccess() {
+                UIPasteboard.general.string = content
+                self.showStatusMessage(L("quicknote.copied"))
+            } else {
+                self.showStatusMessage(L("keyboard.error.full_access"))
+            }
+        }
+    }
+
+    private func transitionFromReadToEdit(note: QuickNote) {
+        quickNoteReadView?.removeFromSuperview()
+        quickNoteReadView = nil
+        enterQuickNoteEdit(note: note)
     }
 
     private func enterQuickNoteEdit(note: QuickNote?) {
         guard let inputView = self.inputView else { return }
+
+        // READ 뷰가 남아있으면 제거
+        quickNoteReadView?.removeFromSuperview()
+        quickNoteReadView = nil
 
         editingNote = note
         quickNoteSubState = .editing(note)
@@ -2083,6 +2186,15 @@ extension KeyboardViewController {
         // CC-2: 리스트 뷰 제거
         quickNoteListView?.removeFromSuperview()
         quickNoteListView = nil
+
+        // TextInputHandler 초기화
+        quickNoteTextInputHandler = TextInputHandler()
+        quickNoteTextInputHandler?.delegate = self
+        quickNoteTextInputHandler?.maxNewlineCount = 50
+        quickNoteTextInputHandler?.maxLength = AppConstants.Limits.quickNoteMaxLength
+        if let existingText = note?.content {
+            quickNoteTextInputHandler?.setInitialText(existingText)
+        }
 
         // 편집 뷰 생성
         let editView = QuickNoteEditView()
@@ -2116,15 +2228,7 @@ extension KeyboardViewController {
     }
 
     private func setupQuickNoteEditCallbacks() {
-        // CC-3: [weak self]
-        quickNoteEditView?.onSave = { [weak self] content in
-            guard !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-            if let existingNote = self?.editingNote {
-                QuickNoteManager.shared.updateNote(id: existingNote.id, content: content)
-            } else {
-                QuickNoteManager.shared.addNote(content)
-            }
-        }
+        // CC-3: [weak self] — onSave 제거 (autoSaveIfNeeded에서 일원화)
         quickNoteEditView?.onPaste = { [weak self] content in
             self?.textDocumentProxy.insertText(content)
         }
@@ -2148,11 +2252,14 @@ extension KeyboardViewController {
         editingNote = nil
         quickNoteSubState = .list
 
-        // CC-2: 편집 뷰 메모리 반환
+        // CC-2: 뷰 메모리 반환
         quickNoteTopConstraint?.isActive = false
         quickNoteTopConstraint = nil
+        quickNoteReadView?.removeFromSuperview()
+        quickNoteReadView = nil
         quickNoteEditView?.removeFromSuperview()
         quickNoteEditView = nil
+        quickNoteTextInputHandler = nil
 
         showQuickNoteList()
         updateHeight(for: .quickNoteMode, animated: true)
@@ -2161,15 +2268,18 @@ extension KeyboardViewController {
     // CC-4: 자동 저장
     private func autoSaveIfNeeded() {
         guard case .editing = quickNoteSubState,
-              let editView = quickNoteEditView,
-              let content = editView.getCurrentText(),
-              !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+              let handler = quickNoteTextInputHandler else { return }
+
+        handler.commitComposing()
+
+        let content = handler.fullText
+        guard !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
 
         if let existingNote = editingNote {
             QuickNoteManager.shared.updateNote(id: existingNote.id, content: content)
         } else {
             QuickNoteManager.shared.addNote(content)
-            editingNote = nil // 새 노트 저장 후 중복 방지
+            editingNote = nil
         }
     }
 
@@ -2179,25 +2289,28 @@ extension KeyboardViewController {
 
         quickNoteListView?.applyTheme(theme)
         quickNoteListView?.updateAppearance(isDark: isDark)
+        quickNoteReadView?.applyTheme(theme)
+        quickNoteReadView?.updateAppearance(isDark: isDark)
         quickNoteEditView?.applyTheme(theme)
         quickNoteEditView?.updateAppearance(isDark: isDark)
     }
 
     func handleQuickNoteModeKey(_ key: String) {
-        guard case .editing = quickNoteSubState, let editView = quickNoteEditView else { return }
+        guard case .editing = quickNoteSubState else { return }
+        guard let handler = quickNoteTextInputHandler else { return }
 
         switch key {
         case KeyboardLayoutView.backKey:
-            editView.deleteBackward()
-
+            handler.handleBackspace()
         case KeyboardLayoutView.returnKey:
-            editView.insertText("\n")
-
+            handler.handleNewline()
         case " ":
-            editView.insertText(" ")
-
+            handler.handleSpace()
         default:
-            editView.insertText(key)
+            let isKorean = isKoreanJamo(key)
+            if let char = key.first {
+                handler.handleKey(char, isKorean: isKorean)
+            }
         }
     }
 }

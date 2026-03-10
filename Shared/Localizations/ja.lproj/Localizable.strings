@@ -400,6 +400,7 @@
 "quicknote.copy" = "コピー";
 "quicknote.copied" = "コピーしました！";
 "quicknote.done" = "完了";
+"quicknote.edit_button" = "編集";
 "quicknote.delete" = "削除";
 "quicknote.char_count" = "%d/500";
 "quicknote.auto_saved" = "自動保存しました";
