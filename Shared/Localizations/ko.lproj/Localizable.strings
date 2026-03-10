@@ -150,7 +150,7 @@
 // === Tab Bar ===
 "tab.home" = "홈";
 "tab.ai_writer" = "AI 작성";
-"tab.history" = "히스토리";
+"tab.history" = "기록";
 "tab.theme" = "테마";
 "tab.settings" = "설정";
 
@@ -193,7 +193,7 @@
 "home.watch_ad" = "광고 보고 충전하기";
 "home.activity.title" = "주간 활동";
 "home.ai_banner.title" = "AI 메시지 작성";
-"home.ai_banner.desc" = "Gemini가 상황에 맞는 메시지를 작성해드려요";
+"home.ai_banner.desc" = "AI가 상황에 맞는 메시지를 작성해드려요";
 "home.daily.corrections" = "교정";
 "home.daily.translations" = "번역";
 "home.reward_ad.cta" = "광고 보고 충전하기";
@@ -203,14 +203,15 @@
 
 // === AI Writer ===
 "ai_writer.title" = "AI 메시지 작성";
-"ai_writer.subtitle" = "Gemini가 톤에 맞게 작성해드립니다";
+"ai_writer.subtitle" = "AI가 원하는 톤으로 작성합니다";
 "ai_writer.placeholder" = "어떤 메시지를 작성할까요?";
 "ai_writer.generate" = "작성하기";
 "ai_writer.generating" = "생성 중...";
-"ai_writer.result" = "Gemini 결과";
+"ai_writer.result" = "결과";
 "ai_writer.copy" = "복사";
 "ai_writer.copied" = "복사됨";
 "ai_writer.regenerate" = "다시 생성";
+"ai_writer.watch_ad_to_write" = "광고 보고 작성하기";
 
 // === History ===
 "history.title" = "히스토리";
@@ -226,8 +227,8 @@
 // === Settings (new) ===
 "settings.paste_guide" = "붙여넣기 알림 해제 가이드";
 "settings.section.ai" = "AI 기능";
-"settings.ai_correction" = "Gemini AI 교정";
-"settings.ai_translation" = "Gemini AI 번역";
+"settings.ai_correction" = "AI 교정";
+"settings.ai_translation" = "AI 번역";
 "settings.section.privacy" = "개인정보";
 "settings.privacy_dashboard" = "개인정보 대시보드";
 "settings.full_access_explain" = "전체 접근 설명";
@@ -277,7 +278,7 @@
 "full_access.go_settings" = "설정으로 이동";
 
 // === AI Correction Info ===
-"ai_correction.description" = "Gemini AI가 입력한 텍스트의 맞춤법과 문법을 실시간으로 교정합니다.";
+"ai_correction.description" = "AI가 입력한 텍스트의 맞춤법과 문법을 실시간으로 교정합니다.";
 "ai_correction.engine" = "AI 엔진";
 "ai_correction.supported" = "지원 기능";
 "ai_correction.supported_detail" = "맞춤법, 띄어쓰기, 문법 교정";
@@ -287,7 +288,7 @@
 "ai_correction.privacy_detail" = "교정 요청만 서버로 전송되며 저장되지 않습니다";
 
 // === AI Translation Info ===
-"ai_translation.description" = "Gemini AI가 입력한 텍스트를 선택한 언어로 실시간 번역합니다.";
+"ai_translation.description" = "AI가 입력한 텍스트를 선택한 언어로 실시간 번역합니다.";
 "ai_translation.engine" = "AI 엔진";
 "ai_translation.languages" = "지원 언어";
 "ai_translation.languages_detail" = "한국어, 영어, 일본어, 중국어 등 13개 언어";
@@ -344,6 +345,9 @@
 "paywall.cta_subscribe_yearly" = "Pro 연간 구독 시작하기";
 "paywall.cta_subscribe_monthly" = "Pro 월간 구독 시작하기";
 "paywall.cta_subscribe_premium" = "Premium 구독 시작하기";
+"paywall.cta_yearly" = "Pro 1년 %@에 구독";
+"paywall.cta_monthly" = "Pro 1개월 %@에 구독";
+"paywall.cta_premium" = "Premium 1개월 %@에 구독";
 "paywall.error_loading" = "상품 정보를 불러올 수 없습니다";
 "paywall.error_purchase" = "결제에 실패했습니다. 다시 시도해주세요";
 "paywall.error_restore" = "복원에 실패했습니다";

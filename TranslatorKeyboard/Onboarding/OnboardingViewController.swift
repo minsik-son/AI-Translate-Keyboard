@@ -14,7 +14,7 @@ class OnboardingViewController: UIViewController {
 
     private let pageControl: UIPageControl = {
         let pc = UIPageControl()
-        pc.numberOfPages = 5
+        pc.numberOfPages = 4
         pc.currentPage = 0
         pc.currentPageIndicatorTintColor = .systemBlue
         pc.pageIndicatorTintColor = .systemGray4
@@ -63,7 +63,6 @@ class OnboardingViewController: UIViewController {
             makeSetupPage(),             // 1
             makeVerificationPage(),      // 2
             makeFeaturesPage(),          // 3
-            makeSubscriptionPage()       // 4
         ]
     }
 
@@ -146,8 +145,8 @@ class OnboardingViewController: UIViewController {
                 goToPage(3)
             }
             return
-        case 4:
-            completeOnboarding()
+        case 3:
+            showPaywallAfterOnboarding()
             return
         default:
             goToPage(currentIndex + 1)
@@ -170,9 +169,8 @@ class OnboardingViewController: UIViewController {
     }
 
     private func updateCTAForCurrentPage() {
-        let isSubscriptionPage = currentIndex == 4
-        ctaButton.isHidden = isSubscriptionPage
-        pageControl.isHidden = isSubscriptionPage
+        ctaButton.isHidden = false
+        pageControl.isHidden = false
 
         switch currentIndex {
         case 0:
@@ -188,7 +186,7 @@ class OnboardingViewController: UIViewController {
             ctaButton.isEnabled = verificationPassed
             ctaButton.backgroundColor = verificationPassed ? .systemBlue : .systemGray4
         case 3:
-            ctaButton.setTitle(L("onboarding.cta.next"), for: .normal)
+            ctaButton.setTitle(L("onboarding.cta.start"), for: .normal)
             ctaButton.isEnabled = true
             ctaButton.backgroundColor = .systemBlue
         default:
@@ -202,6 +200,21 @@ class OnboardingViewController: UIViewController {
         defaults.removeObject(forKey: "onboarding_current_page")
         defaults.removeObject(forKey: "onboarding_returned_from_settings")
         dismiss(animated: true)
+    }
+
+    private func showPaywallAfterOnboarding() {
+        let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier) ?? UserDefaults.standard
+        defaults.set(true, forKey: AppConstants.UserDefaultsKeys.hasCompletedOnboarding)
+        defaults.removeObject(forKey: "onboarding_current_page")
+        defaults.removeObject(forKey: "onboarding_returned_from_settings")
+        dismiss(animated: true) {
+            guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                  let rootVC = windowScene.windows.first?.rootViewController else { return }
+            let topVC = rootVC.presentedViewController ?? rootVC
+            let paywallVC = PaywallViewController()
+            paywallVC.modalPresentationStyle = .pageSheet
+            topVC.present(paywallVC, animated: true)
+        }
     }
 
     // MARK: - Keyboard Detection
@@ -762,195 +775,6 @@ private extension OnboardingViewController {
     }
 }
 
-// MARK: - Subscription Page
-
-private extension OnboardingViewController {
-    func makeSubscriptionPage() -> UIViewController {
-        let vc = UIViewController()
-        vc.view.backgroundColor = .systemBackground
-
-        let closeButton = UIButton(type: .system)
-        closeButton.setImage(UIImage(systemName: "xmark"), for: .normal)
-        closeButton.tintColor = .label
-        closeButton.translatesAutoresizingMaskIntoConstraints = false
-        closeButton.addTarget(self, action: #selector(subscriptionCloseTapped), for: .touchUpInside)
-
-        let restoreButton = UIButton(type: .system)
-        restoreButton.setTitle(L("onboarding.subscription.restore"), for: .normal)
-        restoreButton.titleLabel?.font = .systemFont(ofSize: 15)
-        restoreButton.translatesAutoresizingMaskIntoConstraints = false
-
-        let titleLabel = UILabel()
-        titleLabel.text = L("onboarding.subscription.title")
-        titleLabel.font = .systemFont(ofSize: 28, weight: .bold)
-        titleLabel.textAlignment = .center
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-
-        let benefits = [
-            ("checkmark.circle.fill", L("onboarding.subscription.benefit.unlimited")),
-            ("sparkles", L("onboarding.subscription.benefit.quality")),
-            ("nosign", L("onboarding.subscription.benefit.no_ads")),
-            ("paintpalette.fill", L("onboarding.subscription.benefit.themes")),
-        ]
-
-        let benefitStack = UIStackView()
-        benefitStack.axis = .vertical
-        benefitStack.spacing = 12
-        benefitStack.translatesAutoresizingMaskIntoConstraints = false
-
-        for (icon, text) in benefits {
-            let row = makeBenefitRow(icon: icon, text: text)
-            benefitStack.addArrangedSubview(row)
-        }
-
-        let trialBadge = UILabel()
-        trialBadge.text = L("onboarding.subscription.trial_badge")
-        trialBadge.font = .systemFont(ofSize: 14, weight: .semibold)
-        trialBadge.textColor = .systemBlue
-        trialBadge.backgroundColor = .systemBlue.withAlphaComponent(0.12)
-        trialBadge.layer.cornerRadius = 12
-        trialBadge.layer.masksToBounds = true
-        trialBadge.textAlignment = .center
-        trialBadge.translatesAutoresizingMaskIntoConstraints = false
-
-        let monthlyCard = makeSubscriptionCard(price: "$9.99/월", subtitle: L("onboarding.subscription.monthly"), isBest: false)
-        let yearlyCard = makeSubscriptionCard(price: "$99.99/년", subtitle: L("onboarding.subscription.yearly"), isBest: true)
-
-        let cardStack = UIStackView(arrangedSubviews: [monthlyCard, yearlyCard])
-        cardStack.axis = .horizontal
-        cardStack.spacing = 12
-        cardStack.distribution = .fillEqually
-        cardStack.translatesAutoresizingMaskIntoConstraints = false
-
-        let startButton = UIButton(type: .system)
-        startButton.setTitle(L("onboarding.subscription.start_trial"), for: .normal)
-        startButton.titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
-        startButton.backgroundColor = .systemBlue
-        startButton.setTitleColor(.white, for: .normal)
-        startButton.layer.cornerRadius = 14
-        startButton.translatesAutoresizingMaskIntoConstraints = false
-        startButton.addTarget(self, action: #selector(subscriptionStartTapped), for: .touchUpInside)
-
-        vc.view.addSubview(closeButton)
-        vc.view.addSubview(restoreButton)
-        vc.view.addSubview(titleLabel)
-        vc.view.addSubview(benefitStack)
-        vc.view.addSubview(trialBadge)
-        vc.view.addSubview(cardStack)
-        vc.view.addSubview(startButton)
-
-        NSLayoutConstraint.activate([
-            closeButton.topAnchor.constraint(equalTo: vc.view.safeAreaLayoutGuide.topAnchor, constant: 12),
-            closeButton.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 20),
-            closeButton.widthAnchor.constraint(equalToConstant: 32),
-            closeButton.heightAnchor.constraint(equalToConstant: 32),
-
-            restoreButton.centerYAnchor.constraint(equalTo: closeButton.centerYAnchor),
-            restoreButton.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor, constant: -20),
-
-            titleLabel.topAnchor.constraint(equalTo: closeButton.bottomAnchor, constant: 24),
-            titleLabel.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 24),
-            titleLabel.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor, constant: -24),
-
-            benefitStack.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 28),
-            benefitStack.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 40),
-            benefitStack.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor, constant: -40),
-
-            trialBadge.topAnchor.constraint(equalTo: benefitStack.bottomAnchor, constant: 24),
-            trialBadge.centerXAnchor.constraint(equalTo: vc.view.centerXAnchor),
-            trialBadge.heightAnchor.constraint(equalToConstant: 28),
-
-            cardStack.topAnchor.constraint(equalTo: trialBadge.bottomAnchor, constant: 20),
-            cardStack.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 24),
-            cardStack.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor, constant: -24),
-            cardStack.heightAnchor.constraint(equalToConstant: 100),
-
-            startButton.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 24),
-            startButton.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor, constant: -24),
-            startButton.bottomAnchor.constraint(equalTo: vc.view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
-            startButton.heightAnchor.constraint(equalToConstant: 52),
-        ])
-
-        return vc
-    }
-
-    func makeBenefitRow(icon: String, text: String) -> UIView {
-        let container = UIView()
-        container.translatesAutoresizingMaskIntoConstraints = false
-
-        let iconView = UIImageView()
-        iconView.image = UIImage(systemName: icon)
-        iconView.tintColor = .systemBlue
-        iconView.contentMode = .scaleAspectFit
-        iconView.translatesAutoresizingMaskIntoConstraints = false
-
-        let label = UILabel()
-        label.text = text
-        label.font = .systemFont(ofSize: 16)
-        label.translatesAutoresizingMaskIntoConstraints = false
-
-        container.addSubview(iconView)
-        container.addSubview(label)
-
-        NSLayoutConstraint.activate([
-            iconView.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            iconView.centerYAnchor.constraint(equalTo: container.centerYAnchor),
-            iconView.widthAnchor.constraint(equalToConstant: 24),
-            iconView.heightAnchor.constraint(equalToConstant: 24),
-
-            label.leadingAnchor.constraint(equalTo: iconView.trailingAnchor, constant: 12),
-            label.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            label.centerYAnchor.constraint(equalTo: container.centerYAnchor),
-
-            container.heightAnchor.constraint(equalToConstant: 28),
-        ])
-
-        return container
-    }
-
-    func makeSubscriptionCard(price: String, subtitle: String, isBest: Bool) -> UIView {
-        let card = UIView()
-        card.backgroundColor = .secondarySystemBackground
-        card.layer.cornerRadius = 12
-        card.layer.borderWidth = isBest ? 2 : 1
-        card.layer.borderColor = isBest ? UIColor.systemBlue.cgColor : UIColor.systemGray4.cgColor
-        card.translatesAutoresizingMaskIntoConstraints = false
-
-        let priceLabel = UILabel()
-        priceLabel.text = price
-        priceLabel.font = .systemFont(ofSize: 18, weight: .bold)
-        priceLabel.textAlignment = .center
-        priceLabel.translatesAutoresizingMaskIntoConstraints = false
-
-        let subtitleLabel = UILabel()
-        subtitleLabel.text = isBest ? "\(subtitle) \(L("onboarding.subscription.best_label"))" : subtitle
-        subtitleLabel.font = .systemFont(ofSize: 13)
-        subtitleLabel.textColor = .secondaryLabel
-        subtitleLabel.textAlignment = .center
-        subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
-
-        card.addSubview(priceLabel)
-        card.addSubview(subtitleLabel)
-
-        NSLayoutConstraint.activate([
-            priceLabel.centerXAnchor.constraint(equalTo: card.centerXAnchor),
-            priceLabel.centerYAnchor.constraint(equalTo: card.centerYAnchor, constant: -10),
-
-            subtitleLabel.topAnchor.constraint(equalTo: priceLabel.bottomAnchor, constant: 4),
-            subtitleLabel.centerXAnchor.constraint(equalTo: card.centerXAnchor),
-        ])
-
-        return card
-    }
-
-    @objc func subscriptionCloseTapped() {
-        completeOnboarding()
-    }
-
-    @objc func subscriptionStartTapped() {
-        completeOnboarding()
-    }
-}
 
 // MARK: - Collection Safe Subscript
 

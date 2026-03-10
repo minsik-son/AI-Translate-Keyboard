@@ -74,7 +74,7 @@ class HomeViewController: UIViewController {
     // MARK: - Setup
 
     private func setupNavigation() {
-        title = L("home.title")
+        navigationItem.title = L("home.title")
         navigationController?.navigationBar.prefersLargeTitles = false
         let appearance = UINavigationBarAppearance()
         appearance.configureWithTransparentBackground()
@@ -850,7 +850,7 @@ class HomeViewController: UIViewController {
     }
 
     @objc private func handleLanguageChange() {
-        title = L("home.title")
+        navigationItem.title = L("home.title")
         contentStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
         planCard.subviews.forEach { $0.removeFromSuperview() }
         planCard.layer.sublayers?.removeAll()

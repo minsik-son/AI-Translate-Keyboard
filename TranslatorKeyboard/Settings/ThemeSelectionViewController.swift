@@ -22,7 +22,7 @@ class ThemeSelectionViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = L("settings.keyboard_theme")
+        navigationItem.title = L("settings.keyboard_theme")
         view.backgroundColor = AppColors.bg
         navigationController?.navigationBar.prefersLargeTitles = true
 
@@ -39,7 +39,7 @@ class ThemeSelectionViewController: UIViewController {
     }
 
     @objc private func handleLanguageChange() {
-        title = L("settings.keyboard_theme")
+        navigationItem.title = L("settings.keyboard_theme")
         collectionView.reloadData()
     }
 }

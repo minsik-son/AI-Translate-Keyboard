@@ -94,8 +94,9 @@ class LanguageSettingsViewController: UITableViewController {
             label.trailingAnchor.constraint(lessThanOrEqualTo: container.trailingAnchor, constant: -20),
         ])
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
             overlay.removeFromSuperview()
+            self?.navigationController?.popViewController(animated: true)
         }
     }
 }

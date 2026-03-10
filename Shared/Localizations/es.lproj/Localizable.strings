@@ -149,7 +149,7 @@
 
 // === Tab Bar ===
 "tab.home" = "Inicio";
-"tab.ai_writer" = "AI Escritor";
+"tab.ai_writer" = "AI Texto";
 "tab.history" = "Historial";
 "tab.theme" = "Tema";
 "tab.settings" = "Ajustes";
@@ -193,7 +193,7 @@
 "home.watch_ad" = "Ver anuncio para recargar";
 "home.activity.title" = "Actividad semanal";
 "home.ai_banner.title" = "Escritor de mensajes AI";
-"home.ai_banner.desc" = "Deja que Gemini escriba el mensaje perfecto";
+"home.ai_banner.desc" = "Deja que la IA escriba el mensaje perfecto";
 "home.daily.corrections" = "Correcciones";
 "home.daily.translations" = "Traducciones";
 "home.reward_ad.cta" = "Ver anuncio para recargar";
@@ -203,14 +203,15 @@
 
 // === AI Writer ===
 "ai_writer.title" = "Escritor AI";
-"ai_writer.subtitle" = "Gemini escribe en tu tono preferido";
+"ai_writer.subtitle" = "IA escribe en tu tono preferido";
 "ai_writer.placeholder" = "¿Qué mensaje debo escribir?";
 "ai_writer.generate" = "Generar";
 "ai_writer.generating" = "Generando...";
-"ai_writer.result" = "Resultado de Gemini";
+"ai_writer.result" = "Resultado";
 "ai_writer.copy" = "Copiar";
 "ai_writer.copied" = "Copiado";
 "ai_writer.regenerate" = "Regenerar";
+"ai_writer.watch_ad_to_write" = "Ver anuncio para escribir";
 
 // === History ===
 "history.title" = "Historial";
@@ -226,8 +227,8 @@
 // === Settings (new) ===
 "settings.paste_guide" = "Guía de notificación de pegado";
 "settings.section.ai" = "Funciones AI";
-"settings.ai_correction" = "Corrección Gemini AI";
-"settings.ai_translation" = "Traducción Gemini AI";
+"settings.ai_correction" = "Corrección IA";
+"settings.ai_translation" = "Traducción IA";
 "settings.section.privacy" = "Privacidad";
 "settings.privacy_dashboard" = "Panel de privacidad";
 "settings.full_access_explain" = "Acceso completo explicado";
@@ -277,7 +278,7 @@
 "full_access.go_settings" = "Ir a Ajustes";
 
 // === AI Correction Info ===
-"ai_correction.description" = "Gemini AI corrige la ortografía y gramática de tu texto en tiempo real.";
+"ai_correction.description" = "La IA corrige la ortografía y gramática de tu texto en tiempo real.";
 "ai_correction.engine" = "Motor AI";
 "ai_correction.supported" = "Funciones";
 "ai_correction.supported_detail" = "Corrección ortográfica, de espaciado y gramática";
@@ -287,7 +288,7 @@
 "ai_correction.privacy_detail" = "Solo las solicitudes de corrección se envían al servidor y no se almacenan";
 
 // === AI Translation Info ===
-"ai_translation.description" = "Gemini AI traduce tu texto al idioma seleccionado en tiempo real.";
+"ai_translation.description" = "La IA traduce tu texto al idioma seleccionado en tiempo real.";
 "ai_translation.engine" = "Motor AI";
 "ai_translation.languages" = "Idiomas";
 "ai_translation.languages_detail" = "13 idiomas incluyendo coreano, inglés, japonés, chino";
@@ -344,6 +345,9 @@
 "paywall.cta_subscribe_yearly" = "Iniciar Pro Anual";
 "paywall.cta_subscribe_monthly" = "Iniciar Pro Mensual";
 "paywall.cta_subscribe_premium" = "Iniciar Premium";
+"paywall.cta_yearly" = "Obtener Pro 1 año por %@";
+"paywall.cta_monthly" = "Obtener Pro 1 mes por %@";
+"paywall.cta_premium" = "Obtener Premium 1 mes por %@";
 "paywall.error_loading" = "No se puede cargar la info del producto";
 "paywall.error_purchase" = "Compra fallida. Inténtalo de nuevo";
 "paywall.error_restore" = "Restauración fallida";

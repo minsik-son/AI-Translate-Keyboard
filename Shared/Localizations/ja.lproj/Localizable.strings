@@ -193,7 +193,7 @@
 "home.watch_ad" = "広告を見て充電する";
 "home.activity.title" = "週間アクティビティ";
 "home.ai_banner.title" = "AIメッセージ作成";
-"home.ai_banner.desc" = "Geminiがシーンに合ったメッセージを作成します";
+"home.ai_banner.desc" = "AIがシーンに合ったメッセージを作成します";
 "home.daily.corrections" = "校正";
 "home.daily.translations" = "翻訳";
 "home.reward_ad.cta" = "広告を見て充電する";
@@ -203,14 +203,15 @@
 
 // === AI Writer ===
 "ai_writer.title" = "AIメッセージ作成";
-"ai_writer.subtitle" = "Geminiがトーンに合わせて作成します";
+"ai_writer.subtitle" = "AIがお好みのトーンで作成します";
 "ai_writer.placeholder" = "どんなメッセージを作成しますか？";
 "ai_writer.generate" = "作成する";
 "ai_writer.generating" = "生成中...";
-"ai_writer.result" = "Gemini結果";
+"ai_writer.result" = "結果";
 "ai_writer.copy" = "コピー";
 "ai_writer.copied" = "コピー済み";
 "ai_writer.regenerate" = "再生成";
+"ai_writer.watch_ad_to_write" = "広告を見て作成";
 
 // === History ===
 "history.title" = "履歴";
@@ -226,8 +227,8 @@
 // === Settings (new) ===
 "settings.paste_guide" = "ペースト通知の解除方法";
 "settings.section.ai" = "AI機能";
-"settings.ai_correction" = "Gemini AI修正";
-"settings.ai_translation" = "Gemini AI翻訳";
+"settings.ai_correction" = "AI修正";
+"settings.ai_translation" = "AI翻訳";
 "settings.section.privacy" = "プライバシー";
 "settings.privacy_dashboard" = "プライバシーダッシュボード";
 "settings.full_access_explain" = "フルアクセスの説明";
@@ -277,7 +278,7 @@
 "full_access.go_settings" = "設定へ移動";
 
 // === AI Correction Info ===
-"ai_correction.description" = "Gemini AIが入力テキストのスペルと文法をリアルタイムで修正します。";
+"ai_correction.description" = "AIが入力テキストのスペルと文法をリアルタイムで修正します。";
 "ai_correction.engine" = "AIエンジン";
 "ai_correction.supported" = "機能";
 "ai_correction.supported_detail" = "スペル、スペース、文法の修正";
@@ -287,7 +288,7 @@
 "ai_correction.privacy_detail" = "修正リクエストのみサーバーに送信され、保存されません";
 
 // === AI Translation Info ===
-"ai_translation.description" = "Gemini AIが入力テキストを選択した言語にリアルタイムで翻訳します。";
+"ai_translation.description" = "AIが入力テキストを選択した言語にリアルタイムで翻訳します。";
 "ai_translation.engine" = "AIエンジン";
 "ai_translation.languages" = "対応言語";
 "ai_translation.languages_detail" = "韓国語、英語、日本語、中国語など13言語";
@@ -344,6 +345,9 @@
 "paywall.cta_subscribe_yearly" = "Pro年額プランを開始";
 "paywall.cta_subscribe_monthly" = "Pro月額プランを開始";
 "paywall.cta_subscribe_premium" = "Premiumを開始";
+"paywall.cta_yearly" = "Pro 1年間 %@で購読";
+"paywall.cta_monthly" = "Pro 1ヶ月 %@で購読";
+"paywall.cta_premium" = "Premium 1ヶ月 %@で購読";
 "paywall.error_loading" = "商品情報を読み込めません";
 "paywall.error_purchase" = "購入に失敗しました。もう一度お試しください";
 "paywall.error_restore" = "復元に失敗しました";

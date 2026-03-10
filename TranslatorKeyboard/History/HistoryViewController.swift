@@ -17,7 +17,7 @@ class HistoryViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = AppColors.bg
-        title = L("history.title")
+        navigationItem.title = L("history.title")
         setupNavigation()
         setupFilterBar()
         setupTableView()
@@ -38,7 +38,7 @@ class HistoryViewController: UIViewController {
     }
 
     @objc private func handleLanguageChange() {
-        title = L("history.title")
+        navigationItem.title = L("history.title")
         let filterTitles = [L("history.filter.all"), L("history.filter.translate"), L("history.filter.correct"), L("history.filter.clipboard"), L("history.filter.phrases")]
         for (i, view) in filterStack.arrangedSubviews.enumerated() {
             if let btn = view as? UIButton, i < filterTitles.count {

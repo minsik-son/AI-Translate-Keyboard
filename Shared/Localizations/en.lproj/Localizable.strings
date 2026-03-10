@@ -193,7 +193,7 @@
 "home.watch_ad" = "Watch Ad to Recharge";
 "home.activity.title" = "Weekly Activity";
 "home.ai_banner.title" = "AI Message Writer";
-"home.ai_banner.desc" = "Let Gemini craft the perfect message for any situation";
+"home.ai_banner.desc" = "Let AI craft the perfect message for any situation";
 "home.daily.corrections" = "Corrections";
 "home.daily.translations" = "Translations";
 "home.reward_ad.cta" = "Watch Ad to Recharge";
@@ -203,14 +203,15 @@
 
 // === AI Writer ===
 "ai_writer.title" = "AI Message Writer";
-"ai_writer.subtitle" = "Gemini writes in your preferred tone";
+"ai_writer.subtitle" = "AI writes in your preferred tone";
 "ai_writer.placeholder" = "What message should I write?";
 "ai_writer.generate" = "Generate";
 "ai_writer.generating" = "Generating...";
-"ai_writer.result" = "Gemini Result";
+"ai_writer.result" = "Result";
 "ai_writer.copy" = "Copy";
 "ai_writer.copied" = "Copied";
 "ai_writer.regenerate" = "Regenerate";
+"ai_writer.watch_ad_to_write" = "Watch Ad to Write";
 
 // === History ===
 "history.title" = "History";
@@ -226,8 +227,8 @@
 // === Settings (new) ===
 "settings.paste_guide" = "Paste Notification Guide";
 "settings.section.ai" = "AI Features";
-"settings.ai_correction" = "Gemini AI Correction";
-"settings.ai_translation" = "Gemini AI Translation";
+"settings.ai_correction" = "AI Correction";
+"settings.ai_translation" = "AI Translation";
 "settings.section.privacy" = "Privacy";
 "settings.privacy_dashboard" = "Privacy Dashboard";
 "settings.full_access_explain" = "Full Access Explained";
@@ -277,7 +278,7 @@
 "full_access.go_settings" = "Go to Settings";
 
 // === AI Correction Info ===
-"ai_correction.description" = "Gemini AI corrects spelling and grammar of your text in real-time.";
+"ai_correction.description" = "AI corrects spelling and grammar of your text in real-time.";
 "ai_correction.engine" = "AI Engine";
 "ai_correction.supported" = "Features";
 "ai_correction.supported_detail" = "Spelling, spacing, grammar correction";
@@ -287,7 +288,7 @@
 "ai_correction.privacy_detail" = "Only correction requests are sent to the server and not stored";
 
 // === AI Translation Info ===
-"ai_translation.description" = "Gemini AI translates your text into the selected language in real-time.";
+"ai_translation.description" = "AI translates your text into the selected language in real-time.";
 "ai_translation.engine" = "AI Engine";
 "ai_translation.languages" = "Languages";
 "ai_translation.languages_detail" = "13 languages including Korean, English, Japanese, Chinese";
@@ -344,6 +345,9 @@
 "paywall.cta_subscribe_yearly" = "Start Pro Yearly";
 "paywall.cta_subscribe_monthly" = "Start Pro Monthly";
 "paywall.cta_subscribe_premium" = "Start Premium";
+"paywall.cta_yearly" = "Get Pro 1 year for %@";
+"paywall.cta_monthly" = "Get Pro 1 month for %@";
+"paywall.cta_premium" = "Get Premium 1 month for %@";
 "paywall.error_loading" = "Unable to load product info";
 "paywall.error_purchase" = "Purchase failed. Please try again";
 "paywall.error_restore" = "Restore failed";

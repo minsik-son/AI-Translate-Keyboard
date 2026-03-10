@@ -5,6 +5,7 @@ enum ToneStyle: String, CaseIterable {
     case casual = "casual"
     case formal = "formal"
     case polished = "polished"
+    case friendly = "friendly"
 
     var displayName: String {
         switch self {
@@ -12,6 +13,7 @@ enum ToneStyle: String, CaseIterable {
         case .casual: return L("tone.casual")
         case .formal: return L("tone.formal")
         case .polished: return L("tone.polished")
+        case .friendly: return L("tone.friendly")
         }
     }
 }

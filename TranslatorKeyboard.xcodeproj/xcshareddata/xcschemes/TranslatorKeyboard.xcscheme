@@ -66,8 +66,12 @@
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES"
       launchAutomaticallySubstyle = "2">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <RemoteRunnable
+         runnableDebuggingMode = "0"
+         BundleIdentifier = "com.translatorkeyboard.app"
+         RemotePath = "/var/containers/Bundle/Application/5859CB07-EF30-4F92-B7B3-EAA6B2FA9827/TranslatorKeyboard.app">
+      </RemoteRunnable>
+      <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "D81D87B5BB079D15C73B530B"
@@ -75,7 +79,7 @@
             BlueprintName = "KeyboardExtension"
             ReferencedContainer = "container:TranslatorKeyboard.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </MacroExpansion>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

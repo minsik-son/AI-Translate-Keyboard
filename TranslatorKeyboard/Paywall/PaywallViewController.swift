@@ -26,10 +26,10 @@ class PaywallViewController: UIViewController {
     private var selectedPlan: SelectedPlan = .yearlyPro
     private var isLoading = false
 
-    // CTA 버튼에 표시할 가격 캐시
-    private var yearlyDisplayPrice = "$47.99/yr"
-    private var monthlyDisplayPrice = "$7.99/mo"
-    private var premiumDisplayPrice = "$14.99/mo"
+    // CTA 버튼에 표시할 가격 (StoreKit 로드 전 폴백)
+    private var yearlyCtaPrice = "$47.99"
+    private var monthlyCtaPrice = "$7.99"
+    private var premiumCtaPrice = "$14.99"
 
     // MARK: - UI Components
 
@@ -556,11 +556,11 @@ class PaywallViewController: UIViewController {
         let ctaText: String
         switch selectedPlan {
         case .yearlyPro:
-            ctaText = L("paywall.cta_subscribe_yearly") + " — " + yearlyDisplayPrice
+            ctaText = String(format: L("paywall.cta_yearly"), yearlyCtaPrice)
         case .monthlyPro:
-            ctaText = L("paywall.cta_subscribe_monthly") + " — " + monthlyDisplayPrice
+            ctaText = String(format: L("paywall.cta_monthly"), monthlyCtaPrice)
         case .premium:
-            ctaText = L("paywall.cta_subscribe_premium") + " — " + premiumDisplayPrice
+            ctaText = String(format: L("paywall.cta_premium"), premiumCtaPrice)
         }
         ctaButton.setTitle(ctaText, for: .normal)
         updateBenefitsContent()
@@ -578,9 +578,9 @@ class PaywallViewController: UIViewController {
         monthlyPriceLabel.text = String(format: L("paywall.per_month"), "$7.99")
         premiumPriceLabel.text = String(format: L("paywall.per_month"), "$14.99")
 
-        yearlyDisplayPrice = "$47.99/yr"
-        monthlyDisplayPrice = "$7.99/mo"
-        premiumDisplayPrice = "$14.99/mo"
+        yearlyCtaPrice = "$47.99"
+        monthlyCtaPrice = "$7.99"
+        premiumCtaPrice = "$14.99"
     }
 
     private func loadProducts() {
@@ -606,15 +606,15 @@ class PaywallViewController: UIViewController {
                     yearlyPriceLabel.text = String(format: L("paywall.per_month"), formatted)
                 }
                 yearlyBilledLabel.text = product.displayPrice
-                yearlyDisplayPrice = "\(product.displayPrice)/yr"
+                yearlyCtaPrice = product.displayPrice
 
             case StoreKitManager.ProductID.monthlyPro.rawValue:
                 monthlyPriceLabel.text = String(format: L("paywall.per_month"), product.displayPrice)
-                monthlyDisplayPrice = "\(product.displayPrice)/mo"
+                monthlyCtaPrice = product.displayPrice
 
             case StoreKitManager.ProductID.monthlyPremium.rawValue:
                 premiumPriceLabel.text = String(format: L("paywall.per_month"), product.displayPrice)
-                premiumDisplayPrice = "\(product.displayPrice)/mo"
+                premiumCtaPrice = product.displayPrice
 
             default:
                 break

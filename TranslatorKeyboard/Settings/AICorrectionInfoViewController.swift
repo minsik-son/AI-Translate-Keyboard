@@ -64,7 +64,7 @@ class AICorrectionInfoViewController: UIViewController {
 
         // Info cards
         let items: [(String, String)] = [
-            (L("ai_correction.engine"), "Gemini 2.5 Flash"),
+            (L("ai_correction.engine"), "AI"),
             (L("ai_correction.supported"), L("ai_correction.supported_detail")),
             (L("ai_correction.tone"), L("ai_correction.tone_detail")),
             (L("ai_correction.privacy"), L("ai_correction.privacy_detail")),

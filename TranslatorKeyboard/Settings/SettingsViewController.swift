@@ -117,7 +117,7 @@ class SettingsViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = L("settings.title")
+        navigationItem.title = L("settings.title")
         navigationController?.navigationBar.prefersLargeTitles = false
 
         let titleFont = UIFont.boldSystemFont(ofSize: 18)
@@ -130,7 +130,7 @@ class SettingsViewController: UITableViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        title = L("settings.title")
+        navigationItem.title = L("settings.title")
         updateAdminBadge()
         tableView.reloadData()
     }

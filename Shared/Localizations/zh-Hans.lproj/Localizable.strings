@@ -193,7 +193,7 @@
 "home.watch_ad" = "看广告充电";
 "home.activity.title" = "本周活动";
 "home.ai_banner.title" = "AI消息撰写";
-"home.ai_banner.desc" = "让Gemini为您撰写完美的消息";
+"home.ai_banner.desc" = "让AI为您撰写完美的消息";
 "home.daily.corrections" = "校正";
 "home.daily.translations" = "翻译";
 "home.reward_ad.cta" = "看广告充电";
@@ -203,14 +203,15 @@
 
 // === AI Writer ===
 "ai_writer.title" = "AI消息写作";
-"ai_writer.subtitle" = "Gemini以您喜欢的语气撰写";
+"ai_writer.subtitle" = "AI以您偏好的语气写作";
 "ai_writer.placeholder" = "需要写什么消息？";
 "ai_writer.generate" = "生成";
 "ai_writer.generating" = "生成中...";
-"ai_writer.result" = "Gemini结果";
+"ai_writer.result" = "结果";
 "ai_writer.copy" = "复制";
 "ai_writer.copied" = "已复制";
 "ai_writer.regenerate" = "重新生成";
+"ai_writer.watch_ad_to_write" = "看广告后写作";
 
 // === History ===
 "history.title" = "历史";
@@ -226,8 +227,8 @@
 // === Settings (new) ===
 "settings.paste_guide" = "粘贴通知关闭指南";
 "settings.section.ai" = "AI功能";
-"settings.ai_correction" = "Gemini AI校正";
-"settings.ai_translation" = "Gemini AI翻译";
+"settings.ai_correction" = "AI校正";
+"settings.ai_translation" = "AI翻译";
 "settings.section.privacy" = "隐私";
 "settings.privacy_dashboard" = "隐私面板";
 "settings.full_access_explain" = "完全访问说明";
@@ -277,7 +278,7 @@
 "full_access.go_settings" = "前往设置";
 
 // === AI Correction Info ===
-"ai_correction.description" = "Gemini AI实时校正您文本的拼写和语法。";
+"ai_correction.description" = "AI实时校正您文本的拼写和语法。";
 "ai_correction.engine" = "AI引擎";
 "ai_correction.supported" = "功能";
 "ai_correction.supported_detail" = "拼写、间距、语法校正";
@@ -287,7 +288,7 @@
 "ai_correction.privacy_detail" = "仅校正请求发送到服务器，不会被存储";
 
 // === AI Translation Info ===
-"ai_translation.description" = "Gemini AI将您的文本实时翻译为所选语言。";
+"ai_translation.description" = "AI将您的文本实时翻译为所选语言。";
 "ai_translation.engine" = "AI引擎";
 "ai_translation.languages" = "语言";
 "ai_translation.languages_detail" = "支持韩语、英语、日语、中文等13种语言";
@@ -344,6 +345,9 @@
 "paywall.cta_subscribe_yearly" = "开始Pro年付";
 "paywall.cta_subscribe_monthly" = "开始Pro月付";
 "paywall.cta_subscribe_premium" = "开始Premium";
+"paywall.cta_yearly" = "以%@订阅Pro 1年";
+"paywall.cta_monthly" = "以%@订阅Pro 1个月";
+"paywall.cta_premium" = "以%@订阅Premium 1个月";
 "paywall.error_loading" = "无法加载产品信息";
 "paywall.error_purchase" = "购买失败，请重试";
 "paywall.error_restore" = "恢复失败";

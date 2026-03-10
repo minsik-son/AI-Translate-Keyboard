@@ -6,7 +6,6 @@ class AIWriterViewController: UIViewController {
 
     private let scrollView = UIScrollView()
     private let contentStack = UIStackView()
-    private let toneStack = UIStackView()
     private let inputTextView = UITextView()
     private let generateButton = UIButton(type: .system)
     private let resultCard = UIView()
@@ -16,15 +15,50 @@ class AIWriterViewController: UIViewController {
     private let regenerateButton = UIButton(type: .system)
     private var lastPrompt = ""
 
+    // Part A: 수평 스크롤 톤 pill
+    private lazy var toneScrollView: UIScrollView = {
+        let sv = UIScrollView()
+        sv.showsHorizontalScrollIndicator = false
+        sv.showsVerticalScrollIndicator = false
+        sv.translatesAutoresizingMaskIntoConstraints = false
+        return sv
+    }()
+
+    private lazy var toneStack: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.spacing = 8
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
+    }()
+
+    // Part E: 남은 횟수 배지
+    private lazy var remainingBadge: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 11, weight: .bold)
+        label.textColor = .white
+        label.backgroundColor = UIColor.white.withAlphaComponent(0.3)
+        label.textAlignment = .center
+        label.layer.cornerRadius = 10
+        label.clipsToBounds = true
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+
     // MARK: - Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = AppColors.bg
-        title = L("ai_writer.title")
+        navigationItem.title = L("ai_writer.title")
         setupNavigation()
         setupUI()
-        updateGenerateButtonState()
+        updateGenerateButton()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        updateGenerateButton()
     }
 
     // MARK: - Setup
@@ -69,10 +103,10 @@ class AIWriterViewController: UIViewController {
         subtitle.textColor = AppColors.textSub
         contentStack.addArrangedSubview(subtitle)
 
-        // Tone pills
+        // Tone pills (수평 스크롤)
         setupTonePills()
-        contentStack.addArrangedSubview(toneStack)
-        contentStack.setCustomSpacing(20, after: toneStack)
+        contentStack.addArrangedSubview(toneScrollView)
+        contentStack.setCustomSpacing(20, after: toneScrollView)
 
         // Input area
         setupInputArea()
@@ -91,14 +125,20 @@ class AIWriterViewController: UIViewController {
     }
 
     private func setupTonePills() {
-        toneStack.axis = .horizontal
-        toneStack.spacing = 8
+        toneScrollView.addSubview(toneStack)
+        NSLayoutConstraint.activate([
+            toneStack.leadingAnchor.constraint(equalTo: toneScrollView.contentLayoutGuide.leadingAnchor),
+            toneStack.trailingAnchor.constraint(equalTo: toneScrollView.contentLayoutGuide.trailingAnchor),
+            toneStack.topAnchor.constraint(equalTo: toneScrollView.contentLayoutGuide.topAnchor),
+            toneStack.bottomAnchor.constraint(equalTo: toneScrollView.contentLayoutGuide.bottomAnchor),
+            toneStack.heightAnchor.constraint(equalTo: toneScrollView.frameLayoutGuide.heightAnchor),
+        ])
 
         let tones: [(String, String, String)] = [
-            ("casual", "💬", L("tone.casual")),
-            ("formal", "🎩", L("tone.formal")),
-            ("polished", "✨", L("tone.polished")),
-            ("friendly", "😊", L("tone.friendly")),
+            ("casual", "\u{1F4AC}", L("tone.casual")),
+            ("formal", "\u{1F3A9}", L("tone.formal")),
+            ("polished", "\u{2728}", L("tone.polished")),
+            ("friendly", "\u{1F60A}", L("tone.friendly")),
         ]
 
         for (i, tone) in tones.enumerated() {
@@ -129,13 +169,23 @@ class AIWriterViewController: UIViewController {
         inputTextView.delegate = self
         inputTextView.translatesAutoresizingMaskIntoConstraints = false
 
-        generateButton.setTitle("✨ " + L("ai_writer.generate"), for: .normal)
+        generateButton.setTitle(L("ai_writer.generate"), for: .normal)
         generateButton.titleLabel?.font = .systemFont(ofSize: 14, weight: .semibold)
         generateButton.backgroundColor = AppColors.accent
         generateButton.setTitleColor(.white, for: .normal)
         generateButton.layer.cornerRadius = 10
         generateButton.translatesAutoresizingMaskIntoConstraints = false
         generateButton.addTarget(self, action: #selector(generateTapped), for: .touchUpInside)
+
+        // 남은 횟수 배지
+        generateButton.addSubview(remainingBadge)
+        NSLayoutConstraint.activate([
+            remainingBadge.trailingAnchor.constraint(equalTo: generateButton.trailingAnchor, constant: -12),
+            remainingBadge.centerYAnchor.constraint(equalTo: generateButton.centerYAnchor),
+            remainingBadge.widthAnchor.constraint(greaterThanOrEqualToConstant: 20),
+            remainingBadge.heightAnchor.constraint(equalToConstant: 20),
+        ])
+        remainingBadge.isHidden = true
 
         inputContainer.addSubview(inputTextView)
         inputContainer.addSubview(generateButton)
@@ -165,9 +215,31 @@ class AIWriterViewController: UIViewController {
         resultCard.isHidden = true
 
         let headerLabel = UILabel()
-        headerLabel.text = "✨ " + L("ai_writer.result")
+        headerLabel.text = L("ai_writer.result")
         headerLabel.font = .systemFont(ofSize: 13, weight: .semibold)
         headerLabel.textColor = AppColors.accent
+
+        let resultCloseButton = UIButton(type: .system)
+        let closeConfig = UIImage.SymbolConfiguration(pointSize: 14, weight: .medium)
+        resultCloseButton.setImage(UIImage(systemName: "xmark", withConfiguration: closeConfig), for: .normal)
+        resultCloseButton.tintColor = .secondaryLabel
+        resultCloseButton.addTarget(self, action: #selector(closeResultTapped), for: .touchUpInside)
+        resultCloseButton.translatesAutoresizingMaskIntoConstraints = false
+
+        let headerRow = UIView()
+        headerRow.translatesAutoresizingMaskIntoConstraints = false
+        headerLabel.translatesAutoresizingMaskIntoConstraints = false
+        headerRow.addSubview(headerLabel)
+        headerRow.addSubview(resultCloseButton)
+        NSLayoutConstraint.activate([
+            headerLabel.leadingAnchor.constraint(equalTo: headerRow.leadingAnchor),
+            headerLabel.centerYAnchor.constraint(equalTo: headerRow.centerYAnchor),
+            resultCloseButton.trailingAnchor.constraint(equalTo: headerRow.trailingAnchor),
+            resultCloseButton.centerYAnchor.constraint(equalTo: headerRow.centerYAnchor),
+            resultCloseButton.widthAnchor.constraint(equalToConstant: 44),
+            resultCloseButton.heightAnchor.constraint(equalToConstant: 44),
+            headerRow.heightAnchor.constraint(equalToConstant: 44),
+        ])
 
         resultLabel.font = .systemFont(ofSize: 16, weight: .semibold)
         resultLabel.textColor = AppColors.text
@@ -176,7 +248,7 @@ class AIWriterViewController: UIViewController {
         loadingIndicator.color = AppColors.accent
         loadingIndicator.hidesWhenStopped = true
 
-        copyButton.setTitle("📋 " + L("ai_writer.copy"), for: .normal)
+        copyButton.setTitle(L("ai_writer.copy"), for: .normal)
         copyButton.titleLabel?.font = .systemFont(ofSize: 13, weight: .medium)
         copyButton.setTitleColor(AppColors.text, for: .normal)
         copyButton.backgroundColor = AppColors.cardHover
@@ -184,7 +256,7 @@ class AIWriterViewController: UIViewController {
         copyButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 14, bottom: 8, right: 14)
         copyButton.addTarget(self, action: #selector(copyTapped), for: .touchUpInside)
 
-        regenerateButton.setTitle("✨ " + L("ai_writer.regenerate"), for: .normal)
+        regenerateButton.setTitle(L("ai_writer.regenerate"), for: .normal)
         regenerateButton.titleLabel?.font = .systemFont(ofSize: 13, weight: .medium)
         regenerateButton.setTitleColor(AppColors.text, for: .normal)
         regenerateButton.backgroundColor = AppColors.cardHover
@@ -196,7 +268,7 @@ class AIWriterViewController: UIViewController {
         btnStack.axis = .horizontal
         btnStack.spacing = 10
 
-        let stack = UIStackView(arrangedSubviews: [headerLabel, loadingIndicator, resultLabel, btnStack])
+        let stack = UIStackView(arrangedSubviews: [headerRow, loadingIndicator, resultLabel, btnStack])
         stack.axis = .vertical
         stack.spacing = 12
         stack.alignment = .leading
@@ -204,10 +276,12 @@ class AIWriterViewController: UIViewController {
         resultCard.addSubview(stack)
 
         NSLayoutConstraint.activate([
-            stack.topAnchor.constraint(equalTo: resultCard.topAnchor, constant: 16),
+            stack.topAnchor.constraint(equalTo: resultCard.topAnchor, constant: 4),
             stack.leadingAnchor.constraint(equalTo: resultCard.leadingAnchor, constant: 16),
             stack.trailingAnchor.constraint(equalTo: resultCard.trailingAnchor, constant: -16),
             stack.bottomAnchor.constraint(equalTo: resultCard.bottomAnchor, constant: -16),
+            headerRow.leadingAnchor.constraint(equalTo: stack.leadingAnchor),
+            headerRow.trailingAnchor.constraint(equalTo: stack.trailingAnchor),
         ])
 
         contentStack.addArrangedSubview(resultCard)
@@ -244,6 +318,45 @@ class AIWriterViewController: UIViewController {
         generateButton.isEnabled = hasText
     }
 
+    private func updateGenerateButton() {
+        let tier = SubscriptionStatus.shared.currentTier
+
+        if tier == .free {
+            let remaining = DailyUsageManager.shared.remainingComposes
+            if remaining > 0 {
+                showGenerateState(remaining: remaining)
+            } else {
+                showWatchAdState()
+            }
+        } else {
+            showGenerateState(remaining: nil)
+        }
+    }
+
+    private func showGenerateState(remaining: Int?) {
+        generateButton.removeTarget(self, action: #selector(watchAdTapped), for: .touchUpInside)
+        generateButton.addTarget(self, action: #selector(generateTapped), for: .touchUpInside)
+        generateButton.setTitle(L("ai_writer.generate"), for: .normal)
+        generateButton.backgroundColor = AppColors.accent
+
+        if let remaining = remaining {
+            remainingBadge.isHidden = false
+            remainingBadge.text = "\(remaining)"
+        } else {
+            remainingBadge.isHidden = true
+        }
+        updateGenerateButtonState()
+    }
+
+    private func showWatchAdState() {
+        generateButton.removeTarget(self, action: #selector(generateTapped), for: .touchUpInside)
+        generateButton.addTarget(self, action: #selector(watchAdTapped), for: .touchUpInside)
+        generateButton.setTitle(L("ai_writer.watch_ad_to_write"), for: .normal)
+        generateButton.backgroundColor = UIColor.systemOrange
+        remainingBadge.isHidden = true
+        updateGenerateButtonState()
+    }
+
     @objc private func generateTapped() {
         guard let prompt = inputTextView.text?.trimmingCharacters(in: .whitespacesAndNewlines),
               !prompt.isEmpty else { return }
@@ -251,11 +364,30 @@ class AIWriterViewController: UIViewController {
         requestCompose(prompt: prompt)
     }
 
+    @objc private func watchAdTapped() {
+        let rewardVC = RewardedAdsViewController(mode: .compose)
+        rewardVC.modalPresentationStyle = .pageSheet
+        if let sheet = rewardVC.sheetPresentationController {
+            sheet.detents = [.medium()]
+        }
+        present(rewardVC, animated: true)
+    }
+
+    @objc private func closeResultTapped() {
+        UIView.animate(withDuration: 0.2) {
+            self.resultCard.alpha = 0
+        } completion: { _ in
+            self.resultCard.isHidden = true
+            self.resultCard.alpha = 1
+            self.resultLabel.text = nil
+        }
+    }
+
     @objc private func copyTapped() {
         UIPasteboard.general.string = resultLabel.text
-        copyButton.setTitle("✅ " + L("ai_writer.copied"), for: .normal)
+        copyButton.setTitle(L("ai_writer.copied"), for: .normal)
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
-            self?.copyButton.setTitle("📋 " + L("ai_writer.copy"), for: .normal)
+            self?.copyButton.setTitle(L("ai_writer.copy"), for: .normal)
         }
     }
 
@@ -307,6 +439,7 @@ class AIWriterViewController: UIViewController {
                 }
                 self?.resultLabel.text = message
                 DailyUsageManager.shared.recordCompose()
+                self?.updateGenerateButton()
             }
         }.resume()
     }

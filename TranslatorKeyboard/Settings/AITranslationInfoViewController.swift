@@ -64,7 +64,7 @@ class AITranslationInfoViewController: UIViewController {
 
         // Info cards
         let items: [(String, String)] = [
-            (L("ai_translation.engine"), "Gemini 2.5 Flash"),
+            (L("ai_translation.engine"), "AI"),
             (L("ai_translation.languages"), L("ai_translation.languages_detail")),
             (L("ai_translation.privacy"), L("ai_translation.privacy_detail")),
         ]
