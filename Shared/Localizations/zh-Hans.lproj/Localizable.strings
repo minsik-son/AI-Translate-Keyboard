@@ -388,3 +388,20 @@
 // === Paste Guide Banner ===
 "home.paste_guide_banner.title" = "关闭粘贴通知";
 "home.paste_guide_banner.desc" = "了解如何关闭剪贴板访问提示";
+
+// === Quick Notes ===
+"quicknote.title" = "快速笔记";
+"quicknote.new" = "新建笔记";
+"quicknote.edit" = "编辑笔记";
+"quicknote.empty_title" = "暂无笔记";
+"quicknote.empty_subtitle" = "点击 + 创建一个";
+"quicknote.placeholder" = "输入笔记...";
+"quicknote.paste" = "粘贴";
+"quicknote.copy" = "复制";
+"quicknote.copied" = "已复制！";
+"quicknote.done" = "完成";
+"quicknote.delete" = "删除";
+"quicknote.char_count" = "%d/500";
+"quicknote.auto_saved" = "已自动保存";
+"quicknote.just_now" = "刚刚";
+"settings.quick_notes" = "快速笔记";

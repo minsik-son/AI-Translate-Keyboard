@@ -30,6 +30,7 @@ enum AppConstants {
         static let compositionSessionHistory = "composition_session_history"
         static let keyboardFullAccessEnabled = "keyboard_full_access_enabled"
         static let appDarkMode = "app_dark_mode"
+        static let quickNotes = "quick_notes"
     }
 
     enum API {
@@ -44,5 +45,7 @@ enum AppConstants {
         static let warningCharacters = 150
         static let cacheMaxItems = 100
         static let sessionIdleTimeout: TimeInterval = 30
+        static let quickNoteMaxCount = 50
+        static let quickNoteMaxLength = 500
     }
 }

@@ -388,3 +388,20 @@
 // === Paste Guide Banner ===
 "home.paste_guide_banner.title" = "Einfüge-Hinweis deaktivieren";
 "home.paste_guide_banner.desc" = "Deaktivieren Sie die Zwischenablage-Benachrichtigung";
+
+// === Quick Notes ===
+"quicknote.title" = "Schnellnotizen";
+"quicknote.new" = "Neue Notiz";
+"quicknote.edit" = "Notiz bearbeiten";
+"quicknote.empty_title" = "Noch keine Notizen";
+"quicknote.empty_subtitle" = "Tippe auf + zum Erstellen";
+"quicknote.placeholder" = "Notiz eingeben...";
+"quicknote.paste" = "Einfügen";
+"quicknote.copy" = "Kopieren";
+"quicknote.copied" = "Kopiert!";
+"quicknote.done" = "Fertig";
+"quicknote.delete" = "Löschen";
+"quicknote.char_count" = "%d/500";
+"quicknote.auto_saved" = "Automatisch gespeichert";
+"quicknote.just_now" = "Gerade eben";
+"settings.quick_notes" = "Schnellnotizen";

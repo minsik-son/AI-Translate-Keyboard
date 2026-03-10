@@ -388,3 +388,20 @@
 // === Paste Guide Banner ===
 "home.paste_guide_banner.title" = "Disattiva notifica incolla";
 "home.paste_guide_banner.desc" = "Disattiva l'avviso di accesso agli appunti";
+
+// === Quick Notes ===
+"quicknote.title" = "Note Rapide";
+"quicknote.new" = "Nuova Nota";
+"quicknote.edit" = "Modifica Nota";
+"quicknote.empty_title" = "Nessuna nota";
+"quicknote.empty_subtitle" = "Tocca + per crearne una";
+"quicknote.placeholder" = "Scrivi una nota...";
+"quicknote.paste" = "Incolla";
+"quicknote.copy" = "Copia";
+"quicknote.copied" = "Copiato!";
+"quicknote.done" = "Fatto";
+"quicknote.delete" = "Elimina";
+"quicknote.char_count" = "%d/500";
+"quicknote.auto_saved" = "Salvato automaticamente";
+"quicknote.just_now" = "Adesso";
+"settings.quick_notes" = "Note Rapide";

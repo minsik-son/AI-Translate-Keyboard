@@ -6,6 +6,8 @@ class TranslationInputView: UIView {
     var onClearText: (() -> Void)?
     var onHeightChanged: ((CGFloat) -> Void)?
 
+    var maxCharacters: Int = AppConstants.Limits.maxCharacters
+
     private var textBuffer: String = ""
 
     private static let minHeight: CGFloat = 44
@@ -183,7 +185,7 @@ class TranslationInputView: UIView {
     // MARK: - Public Methods
 
     func insertText(_ text: String) {
-        guard textBuffer.count + text.count <= AppConstants.Limits.maxCharacters else { return }
+        guard textBuffer.count + text.count <= maxCharacters else { return }
         textBuffer += text
         updateDisplay()
         onTextChanged?(textBuffer)
@@ -271,7 +273,7 @@ class TranslationInputView: UIView {
     }
 
     private func updateCounter(count: Int) {
-        let max = AppConstants.Limits.maxCharacters
+        let max = maxCharacters
         counterLabel.text = "\(count)/\(max)"
         if count >= max {
             counterLabel.textColor = .systemRed

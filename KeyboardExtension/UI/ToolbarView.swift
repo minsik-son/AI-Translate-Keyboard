@@ -9,6 +9,7 @@ class ToolbarView: UIView {
     var onEmojiKeyboardToggle: (() -> Void)?
     var onSavedPhrasesTap: (() -> Void)?
     var onClipboardTap: (() -> Void)?
+    var onQuickNoteTap: (() -> Void)?
     var onSuggestionTap: ((String) -> Void)?
     var onSuggestionDismiss: (() -> Void)?
     var onLogoTap: (() -> Void)?
@@ -204,7 +205,12 @@ class ToolbarView: UIView {
             ("face.smiling", #selector(emojiButtonTapped), 1),
             ("doc.on.clipboard", #selector(clipboardHistoryTapped), 2),
             ("bookmark", #selector(savedPhrasesTapped), 3),
+            ("note.text", #selector(noteTapped), 4),
         ]
+
+        // CC-6: 반응형 spacing (iPhone SE 등 좁은 화면 대응)
+        let screenWidth = UIScreen.main.bounds.width
+        leftGroup.spacing = screenWidth <= 375 ? -2 : 0
 
         for item in items {
             let btn = UIButton(type: .system)
@@ -477,6 +483,10 @@ class ToolbarView: UIView {
 
     @objc private func savedPhrasesTapped() {
         onSavedPhrasesTap?()
+    }
+
+    @objc private func noteTapped() {
+        onQuickNoteTap?()
     }
 
     @objc private func correctionPillTapped() {

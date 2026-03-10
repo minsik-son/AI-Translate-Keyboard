@@ -388,3 +388,20 @@
 // === Paste Guide Banner ===
 "home.paste_guide_banner.title" = "붙여넣기 알림 해제";
 "home.paste_guide_banner.desc" = "클립보드 접근 시 나타나는 알림을 해제하세요";
+
+// === Quick Notes ===
+"quicknote.title" = "빠른 메모";
+"quicknote.new" = "새 메모";
+"quicknote.edit" = "메모 편집";
+"quicknote.empty_title" = "메모가 없습니다";
+"quicknote.empty_subtitle" = "+를 눌러 메모를 작성하세요";
+"quicknote.placeholder" = "메모를 입력하세요...";
+"quicknote.paste" = "붙여넣기";
+"quicknote.copy" = "복사";
+"quicknote.copied" = "복사됨!";
+"quicknote.done" = "완료";
+"quicknote.delete" = "삭제";
+"quicknote.char_count" = "%d/500";
+"quicknote.auto_saved" = "자동 저장됨";
+"quicknote.just_now" = "방금";
+"settings.quick_notes" = "빠른 메모";

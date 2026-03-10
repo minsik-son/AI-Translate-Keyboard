@@ -42,6 +42,7 @@ class SettingsViewController: UITableViewController {
                     SettingsItem(title: L("settings.autocomplete"), iconName: "text.badge.checkmark", iconBackgroundColor: .systemGreen, accessory: .toggle(key: AppConstants.UserDefaultsKeys.autoComplete)),
                     SettingsItem(title: L("settings.auto_capitalize"), iconName: "textformat", iconBackgroundColor: AppColors.blue, accessory: .toggle(key: AppConstants.UserDefaultsKeys.autoCapitalize)),
                     SettingsItem(title: L("settings.haptic"), iconName: "iphone.radiowaves.left.and.right", iconBackgroundColor: AppColors.pink, accessory: .toggle(key: AppConstants.UserDefaultsKeys.hapticFeedback)),
+                    SettingsItem(title: L("settings.quick_notes"), iconName: "note.text", iconBackgroundColor: .systemYellow, accessory: .chevron),
                 ]
             ),
             // Section 3: AI
@@ -203,6 +204,7 @@ class SettingsViewController: UITableViewController {
         // Keyboard section
         case (2, 0): vc = LanguageSettingsViewController()
         case (2, 1): vc = LayoutSettingsViewController()
+        case (2, 5): vc = QuickNoteListViewController()
         // AI section
         case (3, 0): vc = AICorrectionInfoViewController()
         case (3, 1): vc = AITranslationInfoViewController()

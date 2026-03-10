@@ -388,3 +388,20 @@
 // === Paste Guide Banner ===
 "home.paste_guide_banner.title" = "ペースト通知を解除";
 "home.paste_guide_banner.desc" = "クリップボードアクセス時の通知を無効にしましょう";
+
+// === Quick Notes ===
+"quicknote.title" = "クイックメモ";
+"quicknote.new" = "新規メモ";
+"quicknote.edit" = "メモを編集";
+"quicknote.empty_title" = "メモがありません";
+"quicknote.empty_subtitle" = "+をタップして作成";
+"quicknote.placeholder" = "メモを入力...";
+"quicknote.paste" = "貼り付け";
+"quicknote.copy" = "コピー";
+"quicknote.copied" = "コピーしました！";
+"quicknote.done" = "完了";
+"quicknote.delete" = "削除";
+"quicknote.char_count" = "%d/500";
+"quicknote.auto_saved" = "自動保存しました";
+"quicknote.just_now" = "たった今";
+"settings.quick_notes" = "クイックメモ";

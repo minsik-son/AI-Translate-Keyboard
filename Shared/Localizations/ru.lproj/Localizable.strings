@@ -388,3 +388,20 @@
 // === Paste Guide Banner ===
 "home.paste_guide_banner.title" = "Отключить уведомление";
 "home.paste_guide_banner.desc" = "Отключите уведомление о доступе к буферу обмена";
+
+// === Quick Notes ===
+"quicknote.title" = "Быстрые заметки";
+"quicknote.new" = "Новая заметка";
+"quicknote.edit" = "Редактировать";
+"quicknote.empty_title" = "Заметок пока нет";
+"quicknote.empty_subtitle" = "Нажмите + чтобы создать";
+"quicknote.placeholder" = "Введите заметку...";
+"quicknote.paste" = "Вставить";
+"quicknote.copy" = "Копировать";
+"quicknote.copied" = "Скопировано!";
+"quicknote.done" = "Готово";
+"quicknote.delete" = "Удалить";
+"quicknote.char_count" = "%d/500";
+"quicknote.auto_saved" = "Автосохранение";
+"quicknote.just_now" = "Только что";
+"settings.quick_notes" = "Быстрые заметки";

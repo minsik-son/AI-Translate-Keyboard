@@ -1212,7 +1212,7 @@ class KeyboardLayoutView: UIView {
 
         let config: (label: String, color: UIColor)
         switch mode {
-        case .defaultMode, .phraseInputMode:
+        case .defaultMode, .phraseInputMode, .quickNoteMode:
             // Don't override — use the standard returnKeyDisplayName/returnKeyIsBlue logic
             returnButton.alpha = 1.0
             returnButton.isUserInteractionEnabled = false // touch handled at view level

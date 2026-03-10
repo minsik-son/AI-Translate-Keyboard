@@ -388,3 +388,20 @@
 // === Paste Guide Banner ===
 "home.paste_guide_banner.title" = "Disable Paste Notification";
 "home.paste_guide_banner.desc" = "Learn how to turn off clipboard access alerts";
+
+// === Quick Notes ===
+"quicknote.title" = "Quick Notes";
+"quicknote.new" = "New Note";
+"quicknote.edit" = "Edit Note";
+"quicknote.empty_title" = "No notes yet";
+"quicknote.empty_subtitle" = "Tap + to create one";
+"quicknote.placeholder" = "Type a note...";
+"quicknote.paste" = "Paste";
+"quicknote.copy" = "Copy";
+"quicknote.copied" = "Copied!";
+"quicknote.done" = "Done";
+"quicknote.delete" = "Delete";
+"quicknote.char_count" = "%d/500";
+"quicknote.auto_saved" = "Auto-saved";
+"quicknote.just_now" = "Just now";
+"settings.quick_notes" = "Quick Notes";

@@ -388,3 +388,20 @@
 // === Paste Guide Banner ===
 "home.paste_guide_banner.title" = "Désactiver la notification";
 "home.paste_guide_banner.desc" = "Désactivez l'alerte de collage du presse-papiers";
+
+// === Quick Notes ===
+"quicknote.title" = "Notes Rapides";
+"quicknote.new" = "Nouvelle Note";
+"quicknote.edit" = "Modifier la Note";
+"quicknote.empty_title" = "Aucune note";
+"quicknote.empty_subtitle" = "Appuyez sur + pour en créer";
+"quicknote.placeholder" = "Saisir une note...";
+"quicknote.paste" = "Coller";
+"quicknote.copy" = "Copier";
+"quicknote.copied" = "Copié !";
+"quicknote.done" = "Terminé";
+"quicknote.delete" = "Supprimer";
+"quicknote.char_count" = "%d/500";
+"quicknote.auto_saved" = "Sauvegardé";
+"quicknote.just_now" = "À l'instant";
+"settings.quick_notes" = "Notes Rapides";
