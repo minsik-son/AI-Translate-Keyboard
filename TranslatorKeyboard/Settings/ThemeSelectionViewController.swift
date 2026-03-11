@@ -4,8 +4,6 @@ class ThemeSelectionViewController: UIViewController {
 
     private let freeThemes = KeyboardTheme.allThemes
     private let premiumThemes = KeyboardTheme.allPremiumThemes
-    private var isPaywallPresenting = false
-
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.minimumInteritemSpacing = 14
@@ -46,7 +44,6 @@ class ThemeSelectionViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        isPaywallPresenting = false
         collectionView.reloadData()
     }
 
@@ -141,8 +138,7 @@ extension ThemeSelectionViewController: UICollectionViewDataSource, UICollection
 
         let isPro = SubscriptionStatus.shared.isPro
         if theme.isPremium && !isPro {
-            guard !isPaywallPresenting else { return }
-            isPaywallPresenting = true
+            guard self.presentedViewController == nil else { return }
 
             let paywallVC = PaywallViewController()
             paywallVC.modalPresentationStyle = .pageSheet
