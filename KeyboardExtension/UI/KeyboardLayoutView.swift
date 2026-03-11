@@ -233,6 +233,8 @@ class KeyboardLayoutView: UIView {
 
     private var allKeyButtons: [UIButton] = []
     private var isRebuilding = false
+    private var gradientLayer: CAGradientLayer?
+    private var patternImageView: UIImageView?
 
     // MARK: - Init
 
@@ -610,13 +612,28 @@ class KeyboardLayoutView: UIView {
         // Colors
         if let theme = customTheme {
             if key == Self.returnKey {
-                button.backgroundColor = returnKeyIsBlue ? UIColor.systemBlue : theme.specialKeyBackground
+                button.backgroundColor = returnKeyIsBlue ? UIColor.systemBlue : {
+                    switch theme.specialKeyVisualStyle {
+                    case .solid: return theme.specialKeyBackground
+                    case .translucent(let alpha, let tint): return tint.withAlphaComponent(alpha)
+                    }
+                }()
                 button.setTitleColor(returnKeyIsBlue ? .white : theme.keyTextColor, for: .normal)
             } else if isSpecial {
-                button.backgroundColor = theme.specialKeyBackground
+                switch theme.specialKeyVisualStyle {
+                case .solid:
+                    button.backgroundColor = theme.specialKeyBackground
+                case .translucent(let alpha, let tint):
+                    button.backgroundColor = tint.withAlphaComponent(alpha)
+                }
                 button.setTitleColor(theme.keyTextColor, for: .normal)
             } else {
-                button.backgroundColor = theme.keyBackground
+                switch theme.keyVisualStyle {
+                case .solid:
+                    button.backgroundColor = theme.keyBackground
+                case .translucent(let alpha, let tint):
+                    button.backgroundColor = tint.withAlphaComponent(alpha)
+                }
                 button.setTitleColor(theme.keyTextColor, for: .normal)
             }
         } else if key == Self.returnKey {
@@ -638,8 +655,13 @@ class KeyboardLayoutView: UIView {
             button.setImage(UIImage(systemName: imgName, withConfiguration: config), for: .normal)
             button.tintColor = customTheme?.keyTextColor ?? (isDark ? .white : .black)
             if isShifted {
-                if customTheme != nil {
-                    button.backgroundColor = customTheme!.keyBackground
+                if let theme = customTheme {
+                    switch theme.keyVisualStyle {
+                    case .solid:
+                        button.backgroundColor = theme.keyBackground
+                    case .translucent(let alpha, let tint):
+                        button.backgroundColor = tint.withAlphaComponent(alpha)
+                    }
                 } else {
                     button.backgroundColor = isDark ? UIColor(white: 0.55, alpha: 1) : UIColor(white: 0.95, alpha: 1)
                 }
@@ -1182,12 +1204,69 @@ class KeyboardLayoutView: UIView {
 
     func updateAppearance(isDark: Bool) {
         self.isDark = isDark
+
         if let theme = customTheme {
-            backgroundColor = theme.keyboardBackground
+            // 그라데이션 배경 처리
+            if theme.hasGradient, let colors = theme.gradientColors {
+                backgroundColor = .clear
+
+                if gradientLayer == nil {
+                    let gl = CAGradientLayer()
+                    layer.insertSublayer(gl, at: 0)
+                    gradientLayer = gl
+                }
+                gradientLayer?.colors = colors.map { $0.cgColor }
+                gradientLayer?.locations = theme.gradientLocations
+                gradientLayer?.startPoint = theme.gradientDirection.startPoint
+                gradientLayer?.endPoint = theme.gradientDirection.endPoint
+                gradientLayer?.frame = bounds
+            } else {
+                gradientLayer?.removeFromSuperlayer()
+                gradientLayer = nil
+                backgroundColor = theme.keyboardBackground
+            }
+
+            // 패턴 오버레이 처리
+            if theme.hasPattern {
+                if patternImageView == nil {
+                    let iv = UIImageView()
+                    iv.contentMode = .scaleToFill
+                    iv.isUserInteractionEnabled = false
+                    iv.translatesAutoresizingMaskIntoConstraints = false
+                    insertSubview(iv, belowSubview: keyboardContainer)
+                    NSLayoutConstraint.activate([
+                        iv.topAnchor.constraint(equalTo: topAnchor),
+                        iv.leadingAnchor.constraint(equalTo: leadingAnchor),
+                        iv.trailingAnchor.constraint(equalTo: trailingAnchor),
+                        iv.bottomAnchor.constraint(equalTo: bottomAnchor),
+                    ])
+                    patternImageView = iv
+                }
+                if let patternImg = ThemePatternRenderer.patternImage(
+                    style: theme.patternStyle,
+                    tint: theme.patternTint,
+                    opacity: theme.patternOpacity,
+                    size: CGSize(width: 128, height: 128)
+                ) {
+                    patternImageView?.backgroundColor = UIColor(patternImage: patternImg)
+                    patternImageView?.isHidden = false
+                }
+            } else {
+                patternImageView?.isHidden = true
+            }
         } else {
+            gradientLayer?.removeFromSuperlayer()
+            gradientLayer = nil
+            patternImageView?.isHidden = true
             backgroundColor = isDark ? UIColor(white: 0.08, alpha: 1) : UIColor(red: 0.82, green: 0.84, blue: 0.86, alpha: 1)
         }
+
         buildKeyboard()
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        gradientLayer?.frame = bounds
     }
 
     func getCurrentLanguage() -> KeyboardLanguage {

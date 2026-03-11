@@ -432,6 +432,12 @@
 "theme.premium_ocean_abyss" = "Abismo Oceánico";
 "theme.premium_sunset_ember" = "Brasa del Atardecer";
 "theme.premium_frost_crystal" = "Cristal de Escarcha";
+"theme.premium_starlit_night" = "Noche Estrellada";
+"theme.premium_volcanic_ember" = "Brasa Volcánica";
+"theme.premium_northern_lights" = "Aurora Boreal";
+"theme.premium_brushed_steel" = "Acero Cepillado";
+"theme.premium_sakura_breeze" = "Brisa de Sakura";
+"theme.premium_deep_ocean" = "Océano Profundo";
 "theme.section_free" = "Temas Gratuitos";
 "theme.section_premium" = "Temas Premium";
 

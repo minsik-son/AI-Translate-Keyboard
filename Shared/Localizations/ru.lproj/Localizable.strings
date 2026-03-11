@@ -432,6 +432,12 @@
 "theme.premium_ocean_abyss" = "Океанская бездна";
 "theme.premium_sunset_ember" = "Закатные угли";
 "theme.premium_frost_crystal" = "Ледяной кристалл";
+"theme.premium_starlit_night" = "Звёздная ночь";
+"theme.premium_volcanic_ember" = "Вулканический уголёк";
+"theme.premium_northern_lights" = "Северное сияние";
+"theme.premium_brushed_steel" = "Матовая сталь";
+"theme.premium_sakura_breeze" = "Сакура бриз";
+"theme.premium_deep_ocean" = "Глубокий океан";
 "theme.section_free" = "Бесплатные темы";
 "theme.section_premium" = "Премиум темы";
 

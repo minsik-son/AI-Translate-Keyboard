@@ -16,6 +16,7 @@
 		20242EBCBB1F370E0C1A4B16 /* KeyboardExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 15F02063B8037FB8B731BEE2 /* KeyboardExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		27D971F516C982E3990C0160 /* LocalizationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF1D1F3F9CA9F69A67054C25 /* LocalizationManager.swift */; };
 		35ABC70391C60A9068DF38AD /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2CDFC8B502F230107E052E7 /* Constants.swift */; };
+		3BC9E52A2F614A5B008D9B8A /* UIColor+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF00AA11BB22CC33DD440001 /* UIColor+Hex.swift */; };
 		3D92E2F82B576104B68B86D2 /* QuickNoteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EB1A6F9708C27789DA90C42 /* QuickNoteManager.swift */; };
 		3E5922FE0A6B41D79E37A4CD /* DailyUsageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA63F578073C4EA0A059B928 /* DailyUsageManager.swift */; };
 		3E8A52D5434351B396EA5525 /* RewardedAdsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2F7E0ADFB1B186D6E02D410 /* RewardedAdsViewController.swift */; };
@@ -93,6 +94,9 @@
 		CM01AA11BB22CC33DD440002 /* ContextMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CM01AA11BB22CC33DD440001 /* ContextMenuView.swift */; };
 		D1ADB3638D89BF7604EBFA1C /* StoreKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F99A6C778738429BC6EC5C3 /* StoreKitManager.swift */; };
 		DA2889598A127D99684A11D4 /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A131D0CE3D8515F4D942D37F /* ThemeManager.swift */; };
+		TP01AA11BB22CC33DD550002 /* ThemePatternRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = TP01AA11BB22CC33DD550001 /* ThemePatternRenderer.swift */; };
+		TP01AA11BB22CC33DD550003 /* ThemePatternRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = TP01AA11BB22CC33DD550001 /* ThemePatternRenderer.swift */; };
+		3BC9E52A2F614A5B008D9B8B /* UIColor+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF00AA11BB22CC33DD440001 /* UIColor+Hex.swift */; };
 		DCD3592930A0D79C8DE0C43C /* TranslationCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11AE8D80E15CF01D67DFD7C3 /* TranslationCache.swift */; };
 		DD11EE22FF33001100220002 /* ToneStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD11EE22FF33001100220001 /* ToneStyle.swift */; };
 		DD11EE22FF33001100220004 /* TonePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD11EE22FF33001100220003 /* TonePickerView.swift */; };
@@ -171,6 +175,7 @@
 		9E3ACADD739C681C0B3B1E42 /* SuggestionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionManager.swift; sourceTree = "<group>"; };
 		9F2D41AC8FC84858A4EF2A49 /* AdminMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminMode.swift; sourceTree = "<group>"; };
 		A131D0CE3D8515F4D942D37F /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
+		TP01AA11BB22CC33DD550001 /* ThemePatternRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemePatternRenderer.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F607081920ABCE /* CorrectionLanguageBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CorrectionLanguageBar.swift; sourceTree = "<group>"; };
 		A2C36F5FE7C33CE377D041C1 /* LanguagePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguagePickerView.swift; sourceTree = "<group>"; };
 		A6000F0BD0B2A3FE078D0A60 /* ToolbarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarView.swift; sourceTree = "<group>"; };
@@ -230,6 +235,7 @@
 		EE11FF22003344550066AA02 /* LayoutSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutSettingsViewController.swift; sourceTree = "<group>"; };
 		F2F7E0ADFB1B186D6E02D410 /* RewardedAdsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewardedAdsViewController.swift; sourceTree = "<group>"; };
 		FA63F578073C4EA0A059B928 /* DailyUsageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyUsageManager.swift; sourceTree = "<group>"; };
+		FF00AA11BB22CC33DD440001 /* UIColor+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+Hex.swift"; sourceTree = "<group>"; };
 		FF11AA22BB33CC44DD550002 /* AccentMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccentMap.swift; sourceTree = "<group>"; };
 		FF11AA22BB33CC44DD550004 /* AccentPopupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccentPopupView.swift; sourceTree = "<group>"; };
 		FFFE634A94A64A2F8F243186 /* FeatureGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureGate.swift; sourceTree = "<group>"; };
@@ -298,6 +304,7 @@
 			children = (
 				BB22CC33DD44EE5500070002 /* KeyboardTheme.swift */,
 				A131D0CE3D8515F4D942D37F /* ThemeManager.swift */,
+				TP01AA11BB22CC33DD550001 /* ThemePatternRenderer.swift */,
 			);
 			path = Theme;
 			sourceTree = "<group>";
@@ -377,6 +384,7 @@
 			children = (
 				AA00BB11CC22DD33EE11000A /* AppColors.swift */,
 				6FE78200C931753ED4B82721 /* AppGroupManager.swift */,
+				FF00AA11BB22CC33DD440001 /* UIColor+Hex.swift */,
 				AA00BB11CC22DD33EE11000E /* CompositionSessionManager.swift */,
 				CB01AA11BB22CC33DD440010 /* ClipboardItem.swift */,
 				C2CDFC8B502F230107E052E7 /* Constants.swift */,
@@ -607,6 +615,7 @@
 				48785B31AB3E464020A5AB01 /* TextInputHandler.swift in Sources */,
 				570CC66D851D856F9A768EB0 /* TextProxyManager.swift in Sources */,
 				DA2889598A127D99684A11D4 /* ThemeManager.swift in Sources */,
+				TP01AA11BB22CC33DD550002 /* ThemePatternRenderer.swift in Sources */,
 				SP01AA11BB22CC33DD440002 /* StatusPopupView.swift in Sources */,
 				CM01AA11BB22CC33DD440002 /* ContextMenuView.swift in Sources */,
 				DS01AA11BB22CC33DD440002 /* DiffSuggestionView.swift in Sources */,
@@ -626,6 +635,7 @@
 				7237963120014F2EB5E42F8B /* DailyUsageManager.swift in Sources */,
 				DU01AA11BB22CC33DD440002 /* DailyUsageData.swift in Sources */,
 				KH01AA11BB22CC33DD440002 /* KeychainHelper.swift in Sources */,
+				3BC9E52A2F614A5B008D9B8A /* UIColor+Hex.swift in Sources */,
 				AD15949F86CE40BDADBB12E1 /* AdminMode.swift in Sources */,
 				C19EBCC6BDA4CA5CE1A739A8 /* QuickNote.swift in Sources */,
 				52160BF718EFB08AA19013B4 /* QuickNoteManager.swift in Sources */,
@@ -657,6 +667,8 @@
 				93A28AD89882938CABFFC72D /* ThemeStoreViewController.swift in Sources */,
 				CC33DD44EE5500080001 /* ThemeSelectionViewController.swift in Sources */,
 				CC33DD44EE5500080003 /* KeyboardTheme.swift in Sources */,
+				TP01AA11BB22CC33DD550003 /* ThemePatternRenderer.swift in Sources */,
+				3BC9E52A2F614A5B008D9B8B /* UIColor+Hex.swift in Sources */,
 				EE11FF22003344550066AA03 /* LanguageSettingsViewController.swift in Sources */,
 				EE11FF22003344550066AA04 /* LayoutSettingsViewController.swift in Sources */,
 				DCD3592930A0D79C8DE0C43C /* TranslationCache.swift in Sources */,

@@ -143,6 +143,11 @@ class KeyboardViewController: UIInputViewController {
         restoreState()
     }
 
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        ThemePatternRenderer.clearCache()
+    }
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
