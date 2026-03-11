@@ -2196,10 +2196,10 @@ extension KeyboardViewController {
             quickNoteTextInputHandler?.setInitialText(existingText)
         }
 
-        // 편집 뷰 생성
+        // 편집 뷰 생성 — 키보드 아래에 삽입하여 터치 이벤트 간섭 방지
         let editView = QuickNoteEditView()
         editView.translatesAutoresizingMaskIntoConstraints = false
-        inputView.addSubview(editView)
+        inputView.insertSubview(editView, belowSubview: keyboardLayoutView)
         quickNoteEditView = editView
 
         // 키보드 표시
@@ -2229,6 +2229,9 @@ extension KeyboardViewController {
 
     private func setupQuickNoteEditCallbacks() {
         // CC-3: [weak self] — onSave 제거 (autoSaveIfNeeded에서 일원화)
+        quickNoteEditView?.onClearText = { [weak self] in
+            self?.quickNoteTextInputHandler?.clear()
+        }
         quickNoteEditView?.onPaste = { [weak self] content in
             self?.textDocumentProxy.insertText(content)
         }

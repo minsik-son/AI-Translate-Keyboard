@@ -221,6 +221,10 @@ class TranslationInputView: UIView {
         placeholderLabel.text = text
     }
 
+    func hideCounter() {
+        counterLabel.isHidden = true
+    }
+
     private var customTheme: KeyboardTheme?
 
     func applyTheme(_ theme: KeyboardTheme?) {

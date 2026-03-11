@@ -8,6 +8,7 @@ class QuickNoteEditView: UIView {
     var onPaste: ((String) -> Void)?
     var onCopy: ((String) -> Void)?
     var onClose: (() -> Void)?
+    var onClearText: (() -> Void)?
 
     // MARK: - UI
 
@@ -37,6 +38,7 @@ class QuickNoteEditView: UIView {
         v.translatesAutoresizingMaskIntoConstraints = false
         v.setPlaceholder(L("quicknote.placeholder"))
         v.maxCharacters = AppConstants.Limits.quickNoteMaxLength
+        v.hideCounter()
         return v
     }()
 
@@ -147,6 +149,10 @@ class QuickNoteEditView: UIView {
         noteInputView.onHeightChanged = { [weak self] newHeight in
             self?.inputHeightConstraint?.constant = newHeight
             self?.onHeightChanged?(self?.idealHeight() ?? 130)
+        }
+
+        noteInputView.onClearText = { [weak self] in
+            self?.onClearText?()
         }
 
         updateCharCount()
