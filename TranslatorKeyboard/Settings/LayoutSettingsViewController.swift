@@ -16,7 +16,7 @@ class LayoutSettingsViewController: UITableViewController {
     }
 
     private let languageOptions: [LanguageOption] = [
-        LanguageOption(code: "ko", displayName: "한국어"),
+        LanguageOption(code: "ko", displayName: L("language.korean")),
         LanguageOption(code: "es", displayName: "Español"),
         LanguageOption(code: "fr", displayName: "Français"),
         LanguageOption(code: "de", displayName: "Deutsch"),

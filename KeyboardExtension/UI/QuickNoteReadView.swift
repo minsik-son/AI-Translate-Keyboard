@@ -170,10 +170,12 @@ class QuickNoteReadView: UIView {
 
         if let theme = customTheme {
             backgroundColor = theme.keyboardBackground
+            scrollView.backgroundColor = theme.keyBackground
             textColor = theme.keyTextColor
             accentColor = theme.keyTextColor
         } else {
             backgroundColor = isDark ? UIColor(white: 0.12, alpha: 1) : UIColor(white: 0.95, alpha: 1)
+            scrollView.backgroundColor = isDark ? UIColor(white: 0.18, alpha: 1) : .white
             textColor = isDark ? .white : .label
             accentColor = .systemBlue
         }

@@ -96,7 +96,7 @@ class KeyboardViewController: UIInputViewController {
         if let obj = defaults?.object(forKey: AppConstants.UserDefaultsKeys.autoComplete) {
             return (obj as? Bool) ?? false
         }
-        return true
+        return false
     }
 
     // Suggestion dismiss state
@@ -1143,7 +1143,7 @@ class KeyboardViewController: UIInputViewController {
         }
         ensureLanguagePickerView()
         isLanguagePickerVisible = true
-        languagePickerView?.configureSingleLanguage(code: correctionLanguageCode, title: "교정 언어")
+        languagePickerView?.configureSingleLanguage(code: correctionLanguageCode, title: L("keyboard.correction_language"))
         languagePickerView?.isHidden = false
         languagePickerView?.alpha = 0
         UIView.animate(withDuration: 0.2) {
@@ -1730,23 +1730,40 @@ class KeyboardViewController: UIInputViewController {
 
     private func checkAutoCapitalize() {
         guard AppGroupManager.shared.bool(forKey: AppConstants.UserDefaultsKeys.autoCapitalize) else { return }
-        guard currentMode == .defaultMode else { return }
-        guard keyboardLayoutView.getCurrentLanguage() == .english else { return }
+        guard currentMode == .defaultMode || currentMode == .quickNoteMode else { return }
+
+        let lang = keyboardLayoutView.getCurrentLanguage()
+        guard lang == .english || lang == .spanish || lang == .french || lang == .german || lang == .italian else { return }
 
         let shouldCapitalize: Bool
-        let context = textDocumentProxy.documentContextBeforeInput
 
-        if context == nil || context?.isEmpty == true {
-            shouldCapitalize = true
-        } else if let text = context,
-                  text.hasSuffix(". ") || text.hasSuffix("? ") || text.hasSuffix("! ") || text.hasSuffix("\n") {
-            shouldCapitalize = true
+        if currentMode == .quickNoteMode {
+            guard let handler = quickNoteTextInputHandler else { return }
+            let text = handler.fullText
+
+            if text.isEmpty {
+                shouldCapitalize = true
+            } else if text.hasSuffix(". ") || text.hasSuffix("? ") || text.hasSuffix("! ") || text.hasSuffix("\n") {
+                shouldCapitalize = true
+            } else {
+                shouldCapitalize = false
+            }
         } else {
-            shouldCapitalize = false
+            let context = textDocumentProxy.documentContextBeforeInput
+            if context == nil || context?.isEmpty == true {
+                shouldCapitalize = true
+            } else if let text = context,
+                      text.hasSuffix(". ") || text.hasSuffix("? ") || text.hasSuffix("! ") || text.hasSuffix("\n") {
+                shouldCapitalize = true
+            } else {
+                shouldCapitalize = false
+            }
         }
 
         if shouldCapitalize {
             keyboardLayoutView.setShifted(true)
+        } else {
+            keyboardLayoutView.setShifted(false)
         }
     }
 
@@ -2225,6 +2242,7 @@ extension KeyboardViewController {
 
         updateHeight(for: .quickNoteMode, animated: true)
         inputView.bringSubviewToFront(toastLabel)
+        checkAutoCapitalize()
     }
 
     private func setupQuickNoteEditCallbacks() {
@@ -2315,5 +2333,7 @@ extension KeyboardViewController {
                 handler.handleKey(char, isKorean: isKorean)
             }
         }
+
+        checkAutoCapitalize()
     }
 }

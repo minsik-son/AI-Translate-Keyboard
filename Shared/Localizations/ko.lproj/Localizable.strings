@@ -163,10 +163,7 @@
 "theme.pastel_blue" = "파스텔 블루";
 "theme.pastel_indigo" = "파스텔 인디고";
 "theme.pastel_violet" = "파스텔 바이올렛";
-"theme.dark_navy" = "네이비";
-"theme.dark_charcoal" = "차콜";
-"theme.dark_forest" = "다크 그린";
-"theme.dark_burgundy" = "버건디";
+
 
 // === Home ===
 "home.greeting.morning" = "Good morning";
@@ -406,3 +403,21 @@
 "quicknote.auto_saved" = "자동 저장됨";
 "quicknote.just_now" = "방금";
 "settings.quick_notes" = "빠른 메모";
+
+// MARK: - Saved Phrases
+"savedphrases.title" = "저장 문구";
+"savedphrases.empty" = "저장된 문구가 없습니다";
+"savedphrases.add" = "문구 추가";
+"savedphrases.delete" = "삭제";
+
+// MARK: - Themes
+"theme.navy" = "네이비";
+"theme.charcoal" = "차콜";
+"theme.dark_green" = "다크 그린";
+"theme.burgundy" = "버건디";
+
+// MARK: - Keyboard
+"keyboard.correction_language" = "교정 언어";
+
+// MARK: - Language
+"language.korean" = "한국어";

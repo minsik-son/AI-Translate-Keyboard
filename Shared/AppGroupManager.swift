@@ -9,7 +9,8 @@ final class AppGroupManager {
         userDefaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier)
         userDefaults?.register(defaults: [
             AppConstants.UserDefaultsKeys.autoCapitalize: true,
-            AppConstants.UserDefaultsKeys.hapticFeedback: true
+            AppConstants.UserDefaultsKeys.hapticFeedback: true,
+            AppConstants.UserDefaultsKeys.autoComplete: false
         ])
     }
 

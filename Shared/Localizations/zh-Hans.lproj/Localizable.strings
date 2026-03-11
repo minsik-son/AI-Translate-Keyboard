@@ -163,10 +163,7 @@
 "theme.pastel_blue" = "柔蓝色";
 "theme.pastel_indigo" = "柔靛蓝";
 "theme.pastel_violet" = "柔紫色";
-"theme.dark_navy" = "海军蓝";
-"theme.dark_charcoal" = "炭灰";
-"theme.dark_forest" = "暗绿";
-"theme.dark_burgundy" = "酒红";
+
 
 // === Home ===
 "home.greeting.morning" = "早上好";
@@ -406,3 +403,21 @@
 "quicknote.auto_saved" = "已自动保存";
 "quicknote.just_now" = "刚刚";
 "settings.quick_notes" = "快速笔记";
+
+// MARK: - Saved Phrases
+"savedphrases.title" = "保存的短语";
+"savedphrases.empty" = "没有保存的短语";
+"savedphrases.add" = "添加短语";
+"savedphrases.delete" = "删除";
+
+// MARK: - Themes
+"theme.navy" = "海军蓝";
+"theme.charcoal" = "炭灰";
+"theme.dark_green" = "深绿";
+"theme.burgundy" = "酒红";
+
+// MARK: - Keyboard
+"keyboard.correction_language" = "校对语言";
+
+// MARK: - Language
+"language.korean" = "韩语";

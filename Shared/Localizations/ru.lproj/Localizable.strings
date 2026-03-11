@@ -163,10 +163,7 @@
 "theme.pastel_blue" = "Пастельный голубой";
 "theme.pastel_indigo" = "Пастельный индиго";
 "theme.pastel_violet" = "Пастельный фиолетовый";
-"theme.dark_navy" = "Тёмно-синий";
-"theme.dark_charcoal" = "Угольный";
-"theme.dark_forest" = "Тёмно-зелёный";
-"theme.dark_burgundy" = "Бордовый";
+
 
 // === Home ===
 "home.greeting.morning" = "Доброе утро";
@@ -406,3 +403,21 @@
 "quicknote.auto_saved" = "Автосохранение";
 "quicknote.just_now" = "Только что";
 "settings.quick_notes" = "Быстрые заметки";
+
+// MARK: - Saved Phrases
+"savedphrases.title" = "Сохранённые фразы";
+"savedphrases.empty" = "Нет сохранённых фраз";
+"savedphrases.add" = "Добавить фразу";
+"savedphrases.delete" = "Удалить";
+
+// MARK: - Themes
+"theme.navy" = "Тёмно-синий";
+"theme.charcoal" = "Угольный";
+"theme.dark_green" = "Тёмно-зелёный";
+"theme.burgundy" = "Бордовый";
+
+// MARK: - Keyboard
+"keyboard.correction_language" = "Язык коррекции";
+
+// MARK: - Language
+"language.korean" = "Корейский";

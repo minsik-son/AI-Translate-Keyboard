@@ -163,10 +163,7 @@
 "theme.pastel_blue" = "パステルブルー";
 "theme.pastel_indigo" = "パステルインディゴ";
 "theme.pastel_violet" = "パステルバイオレット";
-"theme.dark_navy" = "ネイビー";
-"theme.dark_charcoal" = "チャコール";
-"theme.dark_forest" = "ダークグリーン";
-"theme.dark_burgundy" = "バーガンディ";
+
 
 // === Home ===
 "home.greeting.morning" = "おはようございます";
@@ -406,3 +403,21 @@
 "quicknote.auto_saved" = "自動保存しました";
 "quicknote.just_now" = "たった今";
 "settings.quick_notes" = "クイックメモ";
+
+// MARK: - Saved Phrases
+"savedphrases.title" = "保存フレーズ";
+"savedphrases.empty" = "保存されたフレーズはありません";
+"savedphrases.add" = "フレーズを追加";
+"savedphrases.delete" = "削除";
+
+// MARK: - Themes
+"theme.navy" = "ネイビー";
+"theme.charcoal" = "チャコール";
+"theme.dark_green" = "ダークグリーン";
+"theme.burgundy" = "バーガンディ";
+
+// MARK: - Keyboard
+"keyboard.correction_language" = "校正言語";
+
+// MARK: - Language
+"language.korean" = "韓国語";

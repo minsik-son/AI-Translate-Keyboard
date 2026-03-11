@@ -36,7 +36,7 @@ class SavedPhrasesView: UIView {
 
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "저장 문구"
+        label.text = L("savedphrases.title")
         label.font = .systemFont(ofSize: 16, weight: .medium)
         label.textColor = .label
         label.textAlignment = .center
@@ -55,7 +55,7 @@ class SavedPhrasesView: UIView {
 
     private let emptyLabel: UILabel = {
         let label = UILabel()
-        label.text = "저장된 문구가 없습니다"
+        label.text = L("savedphrases.empty")
         label.font = .systemFont(ofSize: 15)
         label.textColor = .secondaryLabel
         label.textAlignment = .center
@@ -66,7 +66,7 @@ class SavedPhrasesView: UIView {
 
     private let emptyAddButton: UIButton = {
         let btn = UIButton(type: .system)
-        btn.setTitle("문구 추가", for: .normal)
+        btn.setTitle(L("savedphrases.add"), for: .normal)
         btn.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         btn.translatesAutoresizingMaskIntoConstraints = false
         btn.isHidden = true
@@ -216,7 +216,7 @@ extension SavedPhrasesView: UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let deleteAction = UIContextualAction(style: .destructive, title: "삭제") { [weak self] _, _, completionHandler in
+        let deleteAction = UIContextualAction(style: .destructive, title: L("savedphrases.delete")) { [weak self] _, _, completionHandler in
             SavedPhrasesManager.shared.deletePhrase(at: indexPath.row)
             self?.phrases.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .automatic)

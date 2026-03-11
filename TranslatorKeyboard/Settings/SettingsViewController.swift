@@ -174,7 +174,14 @@ class SettingsViewController: UITableViewController {
         case .toggle(let key):
             let toggle = UISwitch()
             let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier)
-            let defaultValue = key != AppConstants.UserDefaultsKeys.appDarkMode
+            let defaultValue: Bool
+            if key == AppConstants.UserDefaultsKeys.appDarkMode {
+                defaultValue = false
+            } else if key == AppConstants.UserDefaultsKeys.autoComplete {
+                defaultValue = false
+            } else {
+                defaultValue = true
+            }
             toggle.isOn = defaults?.object(forKey: key) == nil ? defaultValue : AppGroupManager.shared.bool(forKey: key)
             toggle.tag = indexPath.section * 100 + indexPath.row
             toggle.addTarget(self, action: #selector(toggleChanged(_:)), for: .valueChanged)

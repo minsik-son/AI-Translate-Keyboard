@@ -163,10 +163,7 @@
 "theme.pastel_blue" = "Pastellblau";
 "theme.pastel_indigo" = "Pastellindigo";
 "theme.pastel_violet" = "Pastellviolett";
-"theme.dark_navy" = "Marineblau";
-"theme.dark_charcoal" = "Anthrazit";
-"theme.dark_forest" = "Dunkelgrün";
-"theme.dark_burgundy" = "Burgunder";
+
 
 // === Home ===
 "home.greeting.morning" = "Guten Morgen";
@@ -406,3 +403,21 @@
 "quicknote.auto_saved" = "Automatisch gespeichert";
 "quicknote.just_now" = "Gerade eben";
 "settings.quick_notes" = "Schnellnotizen";
+
+// MARK: - Saved Phrases
+"savedphrases.title" = "Gespeicherte Sätze";
+"savedphrases.empty" = "Keine gespeicherten Sätze";
+"savedphrases.add" = "Satz hinzufügen";
+"savedphrases.delete" = "Löschen";
+
+// MARK: - Themes
+"theme.navy" = "Marineblau";
+"theme.charcoal" = "Anthrazit";
+"theme.dark_green" = "Dunkelgrün";
+"theme.burgundy" = "Burgunderrot";
+
+// MARK: - Keyboard
+"keyboard.correction_language" = "Korrektursprache";
+
+// MARK: - Language
+"language.korean" = "Koreanisch";
