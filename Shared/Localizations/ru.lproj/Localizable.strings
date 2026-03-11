@@ -415,6 +415,29 @@
 "theme.charcoal" = "Угольный";
 "theme.dark_green" = "Тёмно-зелёный";
 "theme.burgundy" = "Бордовый";
+"theme.dark_navy" = "Тёмно-синий";
+"theme.dark_charcoal" = "Тёмно-угольный";
+"theme.dark_forest" = "Тёмно-зелёный";
+"theme.dark_burgundy" = "Тёмно-бордовый";
+"theme.premium_midnight_aurora" = "Полночное сияние";
+"theme.premium_rose_gold" = "Розовое золото";
+"theme.premium_ocean_abyss" = "Океанская бездна";
+"theme.premium_sunset_ember" = "Закатные угли";
+"theme.premium_frost_crystal" = "Ледяной кристалл";
+"theme.premium_starlit_night" = "Звёздная ночь";
+"theme.premium_volcanic_ember" = "Вулканический уголёк";
+"theme.premium_northern_lights" = "Северное сияние";
+"theme.premium_brushed_steel" = "Матовая сталь";
+"theme.premium_sakura_breeze" = "Сакура бриз";
+"theme.premium_deep_ocean" = "Глубокий океан";
+"theme.premium_dark_walnut" = "Тёмный орех";
+"theme.premium_natural_oak" = "Натуральный дуб";
+"theme.section_free" = "Бесплатные темы";
+"theme.section_premium" = "Премиум темы";
+"accessibility.locked" = "Заблокировано";
+"accessibility.selected" = "Выбрано";
+"accessibility.theme_locked_hint" = "Дважды нажмите, чтобы посмотреть варианты подписки";
+"accessibility.theme_select_hint" = "Дважды нажмите, чтобы применить эту тему";
 
 // MARK: - Keyboard
 "keyboard.correction_language" = "Язык коррекции";

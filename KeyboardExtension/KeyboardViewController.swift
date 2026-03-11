@@ -143,6 +143,11 @@ class KeyboardViewController: UIInputViewController {
         restoreState()
     }
 
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        ThemePatternRenderer.clearCache()
+    }
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
@@ -1769,9 +1774,18 @@ class KeyboardViewController: UIInputViewController {
 
     // MARK: - Appearance
 
+    private func loadTheme() -> KeyboardTheme? {
+        guard let theme = KeyboardTheme.currentTheme() else { return nil }
+        if theme.isPremium && !SubscriptionStatus.shared.isPro {
+            AppGroupManager.shared.set("default", forKey: AppConstants.UserDefaultsKeys.keyboardTheme)
+            return nil
+        }
+        return theme
+    }
+
     private func updateKeyboardAppearance() {
         let isDark = textDocumentProxy.keyboardAppearance == .dark
-        let theme = KeyboardTheme.currentTheme()
+        let theme = loadTheme()
 
         // 시스템 둥근 배경을 덮기 위해 inputView 배경색 설정
         if let theme = theme {
@@ -2306,7 +2320,7 @@ extension KeyboardViewController {
 
     private func applyQuickNoteTheme() {
         let isDark = traitCollection.userInterfaceStyle == .dark
-        let theme = KeyboardTheme.currentTheme()
+        let theme = loadTheme()
 
         quickNoteListView?.applyTheme(theme)
         quickNoteListView?.updateAppearance(isDark: isDark)

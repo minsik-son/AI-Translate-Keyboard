@@ -78,6 +78,9 @@ class KeyboardLayoutView: UIView {
     private var isShifted = false
     private var isDark = false
     private var customTheme: KeyboardTheme?
+    private var gradientLayer: CAGradientLayer?
+    private var patternImageView: UIImageView?
+    private var woodTileImageView: UIImageView?
 
     // Backspace long-press repeat
     private var backspaceTimer: Timer?
@@ -598,7 +601,13 @@ class KeyboardLayoutView: UIView {
         configureButtonAppearance(button, key: key)
 
         button.layer.cornerRadius = Layout.cornerRadius
-        button.clipsToBounds = true
+
+        if let theme = customTheme, theme.hasWoodTexture {
+            button.clipsToBounds = false
+            button.layer.masksToBounds = false
+        } else {
+            button.clipsToBounds = true
+        }
 
         allKeyButtons.append(button)
         return button
@@ -609,15 +618,77 @@ class KeyboardLayoutView: UIView {
 
         // Colors
         if let theme = customTheme {
+
+            // ========================================
+            // Return 키 처리
+            // ========================================
             if key == Self.returnKey {
-                button.backgroundColor = returnKeyIsBlue ? UIColor.systemBlue : theme.specialKeyBackground
-                button.setTitleColor(returnKeyIsBlue ? .white : theme.keyTextColor, for: .normal)
-            } else if isSpecial {
-                button.backgroundColor = theme.specialKeyBackground
+                if theme.hasWoodTexture {
+                    if case .woodBlock(let borderColor, let shadowColor, let highlightAlpha) = theme.specialKeyVisualStyle {
+                        button.backgroundColor = theme.specialKeyBackground
+                        applyWoodTextureTile(to: button, theme: theme)
+                        button.layer.borderWidth = 1
+                        button.layer.borderColor = borderColor.cgColor
+                        button.layer.shadowColor = shadowColor.cgColor
+                        button.layer.shadowOffset = CGSize(width: 0, height: 3)
+                        button.layer.shadowRadius = 1.5
+                        button.layer.shadowOpacity = 1.0
+                        applyWoodHighlightGradient(to: button, highlightAlpha: highlightAlpha)
+                    }
+                    button.setTitleColor(theme.keyTextColor, for: .normal)
+                } else {
+                    button.backgroundColor = returnKeyIsBlue ? .systemBlue : theme.specialKeyBackground
+                    button.setTitleColor(returnKeyIsBlue ? .white : theme.keyTextColor, for: .normal)
+                }
+
+            // ========================================
+            // 일반 키 처리
+            // ========================================
+            } else if !isSpecial {
+                switch theme.keyVisualStyle {
+                case .solid:
+                    button.backgroundColor = theme.keyBackground
+                case .translucent(let alpha, let tint):
+                    button.backgroundColor = tint.withAlphaComponent(alpha)
+                case .woodBlock(let borderColor, let shadowColor, let highlightAlpha):
+                    button.backgroundColor = theme.keyBackground
+                    applyWoodTextureTile(to: button, theme: theme)
+                    button.layer.borderWidth = 1
+                    button.layer.borderColor = borderColor.cgColor
+                    button.layer.shadowColor = shadowColor.cgColor
+                    button.layer.shadowOffset = CGSize(width: 0, height: 3)
+                    button.layer.shadowRadius = 1.5
+                    button.layer.shadowOpacity = 1.0
+                    applyWoodHighlightGradient(to: button, highlightAlpha: highlightAlpha)
+                }
                 button.setTitleColor(theme.keyTextColor, for: .normal)
+
+            // ========================================
+            // 특수 키 처리
+            // ========================================
             } else {
-                button.backgroundColor = theme.keyBackground
+                switch theme.specialKeyVisualStyle {
+                case .solid:
+                    button.backgroundColor = theme.specialKeyBackground
+                case .translucent(let alpha, let tint):
+                    button.backgroundColor = tint.withAlphaComponent(alpha)
+                case .woodBlock(let borderColor, let shadowColor, let highlightAlpha):
+                    button.backgroundColor = theme.specialKeyBackground
+                    applyWoodTextureTile(to: button, theme: theme)
+                    button.layer.borderWidth = 1
+                    button.layer.borderColor = borderColor.cgColor
+                    button.layer.shadowColor = shadowColor.cgColor
+                    button.layer.shadowOffset = CGSize(width: 0, height: 3)
+                    button.layer.shadowRadius = 1.5
+                    button.layer.shadowOpacity = 1.0
+                    applyWoodHighlightGradient(to: button, highlightAlpha: highlightAlpha)
+                }
                 button.setTitleColor(theme.keyTextColor, for: .normal)
+            }
+
+            // === 음각(Intaglio) 텍스트 이펙트 ===
+            if theme.textShadowColor != .clear {
+                applyEngravedTextEffect(to: button, theme: theme, key: key)
             }
         } else if key == Self.returnKey {
             button.backgroundColor = returnKeyIsBlue ? UIColor.systemBlue : (isDark ? UIColor(white: 0.37, alpha: 1) : UIColor(red: 0.76, green: 0.78, blue: 0.81, alpha: 1))
@@ -1048,22 +1119,141 @@ class KeyboardLayoutView: UIView {
     private func flashButton(_ button: UIButton) {
         let original = button.backgroundColor ?? .clear
         let flashColor: UIColor
+
         if let theme = customTheme {
-            flashColor = theme.keyBackground.withAlphaComponent(0.4)
+            if theme.hasWoodTexture {
+                flashColor = UIColor(white: 1.0, alpha: 0.15)
+            } else {
+                flashColor = theme.keyBackground.withAlphaComponent(0.4)
+            }
         } else {
             flashColor = isDark ? UIColor(white: 0.5, alpha: 1) : UIColor(white: 0.65, alpha: 1)
         }
 
-        CATransaction.begin()
-        CATransaction.setDisableActions(true)
-        button.backgroundColor = flashColor
-        CATransaction.commit()
+        if let theme = customTheme, theme.hasWoodTexture {
+            let flashView = UIView(frame: button.bounds)
+            flashView.backgroundColor = flashColor
+            flashView.layer.cornerRadius = Layout.cornerRadius
+            flashView.tag = 9999
+            button.addSubview(flashView)
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                flashView.removeFromSuperview()
+            }
+        } else {
             CATransaction.begin()
             CATransaction.setDisableActions(true)
-            button.backgroundColor = original
+            button.backgroundColor = flashColor
             CATransaction.commit()
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                CATransaction.begin()
+                CATransaction.setDisableActions(true)
+                button.backgroundColor = original
+                CATransaction.commit()
+            }
+        }
+    }
+
+    // MARK: - Wood Block Helpers
+
+    /// 키 버튼에 나무 텍스처 타일 패턴 적용
+    private func applyWoodTextureTile(to button: UIButton, theme: KeyboardTheme) {
+        guard let tileName = theme.woodTileImageName,
+              let tileImg = UIImage(named: tileName) else { return }
+
+        let tag = 9901
+        if button.viewWithTag(tag) == nil {
+            let tv = UIView()
+            tv.tag = tag
+            tv.isUserInteractionEnabled = false
+            tv.backgroundColor = UIColor(patternImage: tileImg)
+            tv.alpha = 0.5
+            tv.layer.cornerRadius = Layout.cornerRadius
+            tv.clipsToBounds = true
+            tv.translatesAutoresizingMaskIntoConstraints = false
+            button.insertSubview(tv, at: 0)
+            NSLayoutConstraint.activate([
+                tv.topAnchor.constraint(equalTo: button.topAnchor),
+                tv.bottomAnchor.constraint(equalTo: button.bottomAnchor),
+                tv.leadingAnchor.constraint(equalTo: button.leadingAnchor),
+                tv.trailingAnchor.constraint(equalTo: button.trailingAnchor),
+            ])
+        }
+        if let tv = button.viewWithTag(tag) {
+            let randomOffset = CGAffineTransform(
+                translationX: CGFloat.random(in: -64...64),
+                y: CGFloat.random(in: -64...64)
+            )
+            tv.transform = randomOffset
+        }
+    }
+
+    /// 키 상단 하이라이트 그라디언트 (CAGradientLayer)
+    private func applyWoodHighlightGradient(to button: UIButton, highlightAlpha: CGFloat) {
+        let highlightTag = 9902
+        guard button.viewWithTag(highlightTag) == nil, highlightAlpha > 0 else { return }
+
+        let hv = UIView()
+        hv.tag = highlightTag
+        hv.isUserInteractionEnabled = false
+        hv.translatesAutoresizingMaskIntoConstraints = false
+        hv.layer.cornerRadius = Layout.cornerRadius
+        hv.clipsToBounds = true
+
+        let gl = CAGradientLayer()
+        gl.colors = [
+            UIColor(white: 1, alpha: highlightAlpha).cgColor,
+            UIColor.clear.cgColor,
+            UIColor(white: 0, alpha: highlightAlpha * 1.5).cgColor,
+        ]
+        gl.locations = [0, 0.4, 1.0]
+        hv.layer.addSublayer(gl)
+
+        button.addSubview(hv)
+        NSLayoutConstraint.activate([
+            hv.topAnchor.constraint(equalTo: button.topAnchor),
+            hv.bottomAnchor.constraint(equalTo: button.bottomAnchor),
+            hv.leadingAnchor.constraint(equalTo: button.leadingAnchor),
+            hv.trailingAnchor.constraint(equalTo: button.trailingAnchor),
+        ])
+    }
+
+    /// 음각(Intaglio) 텍스트 이펙트 — 나무에 파낸 듯한 글자
+    private func applyEngravedTextEffect(to button: UIButton, theme: KeyboardTheme, key: String) {
+        guard !Self.specialKeys.contains(key) || key == Self.returnKey else {
+            button.tintColor = theme.keyTextColor
+            return
+        }
+
+        if let title = button.title(for: .normal), !title.isEmpty {
+            let fontSize: CGFloat
+            switch key {
+            case Self.returnKey: fontSize = Layout.returnFontSize
+            case " ": fontSize = Layout.spaceFontSize
+            default: fontSize = Layout.letterFontSize
+            }
+
+            let shadow = NSShadow()
+            shadow.shadowColor = theme.textShadowColor
+            shadow.shadowOffset = theme.textShadowOffset
+            shadow.shadowBlurRadius = 1.0
+
+            let attrs: [NSAttributedString.Key: Any] = [
+                .font: UIFont.systemFont(ofSize: fontSize, weight: .medium),
+                .foregroundColor: theme.keyTextColor,
+                .shadow: shadow,
+            ]
+
+            button.setAttributedTitle(NSAttributedString(string: title, attributes: attrs), for: .normal)
+        }
+
+        if button.image(for: .normal) != nil {
+            button.tintColor = theme.keyTextColor
+            button.imageView?.layer.shadowColor = theme.textShadowColor.cgColor
+            button.imageView?.layer.shadowOffset = theme.textShadowOffset
+            button.imageView?.layer.shadowRadius = 1.0
+            button.imageView?.layer.shadowOpacity = 1.0
         }
     }
 
@@ -1182,12 +1372,106 @@ class KeyboardLayoutView: UIView {
 
     func updateAppearance(isDark: Bool) {
         self.isDark = isDark
+
         if let theme = customTheme {
-            backgroundColor = theme.keyboardBackground
+            // 그라데이션 배경 처리
+            if theme.hasGradient, let colors = theme.gradientColors {
+                backgroundColor = .clear
+
+                if gradientLayer == nil {
+                    let gl = CAGradientLayer()
+                    layer.insertSublayer(gl, at: 0)
+                    gradientLayer = gl
+                }
+                gradientLayer?.colors = colors.map { $0.cgColor }
+                gradientLayer?.locations = theme.gradientLocations
+                gradientLayer?.startPoint = theme.gradientDirection.startPoint
+                gradientLayer?.endPoint = theme.gradientDirection.endPoint
+                gradientLayer?.frame = bounds
+            } else {
+                gradientLayer?.removeFromSuperlayer()
+                gradientLayer = nil
+                backgroundColor = theme.keyboardBackground
+            }
+
+            // 패턴 오버레이 처리
+            if theme.hasPattern {
+                if patternImageView == nil {
+                    let iv = UIImageView()
+                    iv.contentMode = .scaleToFill
+                    iv.isUserInteractionEnabled = false
+                    iv.translatesAutoresizingMaskIntoConstraints = false
+                    insertSubview(iv, belowSubview: keyboardContainer)
+                    NSLayoutConstraint.activate([
+                        iv.topAnchor.constraint(equalTo: topAnchor),
+                        iv.leadingAnchor.constraint(equalTo: leadingAnchor),
+                        iv.trailingAnchor.constraint(equalTo: trailingAnchor),
+                        iv.bottomAnchor.constraint(equalTo: bottomAnchor),
+                    ])
+                    patternImageView = iv
+                }
+                if let patternImg = ThemePatternRenderer.patternImage(
+                    style: theme.patternStyle,
+                    tint: theme.patternTint,
+                    opacity: theme.patternOpacity,
+                    size: CGSize(width: 128, height: 128)
+                ) {
+                    patternImageView?.backgroundColor = UIColor(patternImage: patternImg)
+                    patternImageView?.isHidden = false
+                }
+            } else {
+                patternImageView?.isHidden = true
+            }
         } else {
+            gradientLayer?.removeFromSuperlayer()
+            gradientLayer = nil
+            patternImageView?.isHidden = true
             backgroundColor = isDark ? UIColor(white: 0.08, alpha: 1) : UIColor(red: 0.82, green: 0.84, blue: 0.86, alpha: 1)
         }
+
+        // Wood texture tile rendering
+        if let theme = customTheme, theme.hasWoodTexture,
+           let tileName = theme.woodTileImageName,
+           let tileImg = UIImage(named: tileName) {
+
+            if woodTileImageView == nil {
+                let iv = UIImageView()
+                iv.contentMode = .scaleToFill
+                iv.isUserInteractionEnabled = false
+                iv.translatesAutoresizingMaskIntoConstraints = false
+                insertSubview(iv, belowSubview: keyboardContainer)
+                NSLayoutConstraint.activate([
+                    iv.topAnchor.constraint(equalTo: topAnchor),
+                    iv.bottomAnchor.constraint(equalTo: bottomAnchor),
+                    iv.leadingAnchor.constraint(equalTo: leadingAnchor),
+                    iv.trailingAnchor.constraint(equalTo: trailingAnchor),
+                ])
+                woodTileImageView = iv
+            }
+            woodTileImageView?.backgroundColor = UIColor(patternImage: tileImg)
+            woodTileImageView?.alpha = 0.6
+            woodTileImageView?.isHidden = false
+        } else {
+            woodTileImageView?.isHidden = true
+        }
+
         buildKeyboard()
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        gradientLayer?.frame = bounds
+
+        // Wood block key highlight gradient frame update
+        for button in allKeyButtons {
+            if let hv = button.viewWithTag(9902) {
+                hv.layer.sublayers?.forEach { sublayer in
+                    if let gl = sublayer as? CAGradientLayer {
+                        gl.frame = hv.bounds
+                    }
+                }
+            }
+        }
     }
 
     func getCurrentLanguage() -> KeyboardLanguage {

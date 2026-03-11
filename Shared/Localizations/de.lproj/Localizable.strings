@@ -415,6 +415,29 @@
 "theme.charcoal" = "Anthrazit";
 "theme.dark_green" = "Dunkelgrün";
 "theme.burgundy" = "Burgunderrot";
+"theme.dark_navy" = "Dunkel Marineblau";
+"theme.dark_charcoal" = "Dunkel Anthrazit";
+"theme.dark_forest" = "Dunkelgrün Wald";
+"theme.dark_burgundy" = "Dunkel Burgunderrot";
+"theme.premium_midnight_aurora" = "Mitternacht-Aurora";
+"theme.premium_rose_gold" = "Roségold";
+"theme.premium_ocean_abyss" = "Ozean-Abgrund";
+"theme.premium_sunset_ember" = "Abendglut";
+"theme.premium_frost_crystal" = "Frostkristall";
+"theme.premium_starlit_night" = "Sternennacht";
+"theme.premium_volcanic_ember" = "Vulkanglut";
+"theme.premium_northern_lights" = "Nordlicht";
+"theme.premium_brushed_steel" = "Gebürsteter Stahl";
+"theme.premium_sakura_breeze" = "Sakura Brise";
+"theme.premium_deep_ocean" = "Tiefsee";
+"theme.premium_dark_walnut" = "Dunkle Walnuss";
+"theme.premium_natural_oak" = "Natürliche Eiche";
+"theme.section_free" = "Kostenlose Themen";
+"theme.section_premium" = "Premium-Themen";
+"accessibility.locked" = "Gesperrt";
+"accessibility.selected" = "Ausgewählt";
+"accessibility.theme_locked_hint" = "Doppeltippen, um Abo-Optionen anzuzeigen";
+"accessibility.theme_select_hint" = "Doppeltippen, um dieses Thema anzuwenden";
 
 // MARK: - Keyboard
 "keyboard.correction_language" = "Korrektursprache";

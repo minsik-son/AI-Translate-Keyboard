@@ -415,6 +415,29 @@
 "theme.charcoal" = "Carbón";
 "theme.dark_green" = "Verde Oscuro";
 "theme.burgundy" = "Burdeos";
+"theme.dark_navy" = "Azul Marino Oscuro";
+"theme.dark_charcoal" = "Carbón Oscuro";
+"theme.dark_forest" = "Verde Bosque";
+"theme.dark_burgundy" = "Burdeos Oscuro";
+"theme.premium_midnight_aurora" = "Aurora Nocturna";
+"theme.premium_rose_gold" = "Oro Rosa";
+"theme.premium_ocean_abyss" = "Abismo Oceánico";
+"theme.premium_sunset_ember" = "Brasa del Atardecer";
+"theme.premium_frost_crystal" = "Cristal de Escarcha";
+"theme.premium_starlit_night" = "Noche Estrellada";
+"theme.premium_volcanic_ember" = "Brasa Volcánica";
+"theme.premium_northern_lights" = "Aurora Boreal";
+"theme.premium_brushed_steel" = "Acero Cepillado";
+"theme.premium_sakura_breeze" = "Brisa de Sakura";
+"theme.premium_deep_ocean" = "Océano Profundo";
+"theme.premium_dark_walnut" = "Nogal oscuro";
+"theme.premium_natural_oak" = "Roble natural";
+"theme.section_free" = "Temas Gratuitos";
+"theme.section_premium" = "Temas Premium";
+"accessibility.locked" = "Bloqueado";
+"accessibility.selected" = "Seleccionado";
+"accessibility.theme_locked_hint" = "Toca dos veces para ver opciones de suscripción";
+"accessibility.theme_select_hint" = "Toca dos veces para aplicar este tema";
 
 // MARK: - Keyboard
 "keyboard.correction_language" = "Idioma de corrección";

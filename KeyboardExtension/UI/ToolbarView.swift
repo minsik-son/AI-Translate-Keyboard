@@ -336,6 +336,105 @@ class ToolbarView: UIView {
 
         // Update chip colors
         updateChipAppearance()
+
+        // Wood toolbar styling
+        if let theme = customTheme, theme.hasWoodTexture {
+            applyWoodToolbarStyle(theme)
+        } else {
+            cleanupWoodToolbarStyle()
+        }
+    }
+
+    private func applyWoodToolbarStyle(_ theme: KeyboardTheme) {
+        guard let tileName = theme.woodTileImageName,
+              let tileImg = UIImage(named: tileName) else { return }
+
+        for case let btn as UIButton in leftGroup.arrangedSubviews {
+            btn.backgroundColor = theme.specialKeyBackground
+
+            let patternTag = 9903
+            btn.viewWithTag(patternTag)?.removeFromSuperview()
+
+            let patternView = UIView()
+            patternView.tag = patternTag
+            patternView.backgroundColor = UIColor(patternImage: tileImg)
+            patternView.alpha = 0.4
+            patternView.isUserInteractionEnabled = false
+            patternView.layer.cornerRadius = 5
+            patternView.clipsToBounds = true
+            patternView.translatesAutoresizingMaskIntoConstraints = false
+            btn.insertSubview(patternView, at: 0)
+            NSLayoutConstraint.activate([
+                patternView.topAnchor.constraint(equalTo: btn.topAnchor),
+                patternView.bottomAnchor.constraint(equalTo: btn.bottomAnchor),
+                patternView.leadingAnchor.constraint(equalTo: btn.leadingAnchor),
+                patternView.trailingAnchor.constraint(equalTo: btn.trailingAnchor),
+            ])
+
+            btn.layer.cornerRadius = 5
+            btn.layer.borderWidth = 1
+            btn.layer.borderColor = UIColor(white: 0, alpha: 0.2).cgColor
+            btn.layer.shadowColor = UIColor(white: 0, alpha: 0.3).cgColor
+            btn.layer.shadowOffset = CGSize(width: 0, height: 2)
+            btn.layer.shadowRadius = 1
+            btn.layer.shadowOpacity = 1.0
+            btn.clipsToBounds = false
+
+            btn.tintColor = theme.keyTextColor
+        }
+
+        for pill in [correctionPill, translationPill] {
+            pill.backgroundColor = theme.specialKeyBackground
+            pill.layer.cornerRadius = 5
+            pill.layer.borderWidth = 1
+            pill.layer.borderColor = UIColor(white: 0, alpha: 0.2).cgColor
+            pill.layer.shadowColor = UIColor(white: 0, alpha: 0.25).cgColor
+            pill.layer.shadowOffset = CGSize(width: 0, height: 2)
+            pill.layer.shadowRadius = 1
+            pill.layer.shadowOpacity = 1.0
+            pill.clipsToBounds = false
+
+            let patternTag = 9903
+            pill.viewWithTag(patternTag)?.removeFromSuperview()
+
+            let pv = UIView()
+            pv.tag = patternTag
+            pv.backgroundColor = UIColor(patternImage: tileImg)
+            pv.alpha = 0.4
+            pv.isUserInteractionEnabled = false
+            pv.layer.cornerRadius = 5
+            pv.clipsToBounds = true
+            pv.translatesAutoresizingMaskIntoConstraints = false
+            pill.insertSubview(pv, at: 0)
+            NSLayoutConstraint.activate([
+                pv.topAnchor.constraint(equalTo: pill.topAnchor),
+                pv.bottomAnchor.constraint(equalTo: pill.bottomAnchor),
+                pv.leadingAnchor.constraint(equalTo: pill.leadingAnchor),
+                pv.trailingAnchor.constraint(equalTo: pill.trailingAnchor),
+            ])
+        }
+    }
+
+    private func cleanupWoodToolbarStyle() {
+        let patternTag = 9903
+
+        for case let btn as UIButton in leftGroup.arrangedSubviews {
+            btn.viewWithTag(patternTag)?.removeFromSuperview()
+            btn.layer.shadowOpacity = 0
+            btn.layer.borderWidth = 0
+            btn.clipsToBounds = true
+            btn.backgroundColor = .clear
+            btn.layer.cornerRadius = 0
+        }
+
+        for pill in [correctionPill, translationPill] {
+            pill.viewWithTag(patternTag)?.removeFromSuperview()
+            pill.layer.shadowOpacity = 0
+            pill.layer.borderWidth = 0
+            pill.clipsToBounds = true
+            pill.backgroundColor = .clear
+            pill.layer.cornerRadius = pill.bounds.height / 2
+        }
     }
 
     func updatePillLabels() {

@@ -415,6 +415,29 @@
 "theme.charcoal" = "チャコール";
 "theme.dark_green" = "ダークグリーン";
 "theme.burgundy" = "バーガンディ";
+"theme.dark_navy" = "ダークネイビー";
+"theme.dark_charcoal" = "ダークチャコール";
+"theme.dark_forest" = "ダークフォレスト";
+"theme.dark_burgundy" = "ダークバーガンディ";
+"theme.premium_midnight_aurora" = "ミッドナイトオーロラ";
+"theme.premium_rose_gold" = "ローズゴールド";
+"theme.premium_ocean_abyss" = "オーシャンアビス";
+"theme.premium_sunset_ember" = "サンセットエンバー";
+"theme.premium_frost_crystal" = "フロストクリスタル";
+"theme.premium_starlit_night" = "星空の夜";
+"theme.premium_volcanic_ember" = "火山の残り火";
+"theme.premium_northern_lights" = "オーロラ";
+"theme.premium_brushed_steel" = "ブラッシュドスチール";
+"theme.premium_sakura_breeze" = "桜そよ風";
+"theme.premium_deep_ocean" = "深海";
+"theme.premium_dark_walnut" = "ダークウォールナット";
+"theme.premium_natural_oak" = "ナチュラルオーク";
+"theme.section_free" = "無料テーマ";
+"theme.section_premium" = "プレミアムテーマ";
+"accessibility.locked" = "ロック中";
+"accessibility.selected" = "選択中";
+"accessibility.theme_locked_hint" = "ダブルタップでサブスクリプションオプションを表示";
+"accessibility.theme_select_hint" = "ダブルタップでこのテーマを適用";
 
 // MARK: - Keyboard
 "keyboard.correction_language" = "校正言語";
