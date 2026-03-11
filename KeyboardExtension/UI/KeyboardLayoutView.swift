@@ -1049,14 +1049,21 @@ class KeyboardLayoutView: UIView {
         let original = button.backgroundColor ?? .clear
         let flashColor: UIColor
         if let theme = customTheme {
-            // Slightly darken the theme key color for flash
-            flashColor = theme.keyBackground.withAlphaComponent(0.6)
+            flashColor = theme.keyBackground.withAlphaComponent(0.4)
         } else {
-            flashColor = isDark ? UIColor(white: 0.6, alpha: 1) : UIColor(white: 0.75, alpha: 1)
+            flashColor = isDark ? UIColor(white: 0.5, alpha: 1) : UIColor(white: 0.65, alpha: 1)
         }
+
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
         button.backgroundColor = flashColor
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+        CATransaction.commit()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            CATransaction.begin()
+            CATransaction.setDisableActions(true)
             button.backgroundColor = original
+            CATransaction.commit()
         }
     }
 

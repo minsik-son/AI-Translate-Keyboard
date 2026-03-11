@@ -45,6 +45,8 @@ class TranslationInputView: UIView {
         return label
     }()
 
+    private var isCounterPermanentlyHidden = false
+
     private let counterLabel: UILabel = {
         let label = UILabel()
         label.font = .monospacedDigitSystemFont(ofSize: 10, weight: .regular)
@@ -209,7 +211,9 @@ class TranslationInputView: UIView {
     func setDisplayText(_ text: String) {
         inputLabel.text = text
         placeholderLabel.isHidden = !text.isEmpty
-        counterLabel.isHidden = text.isEmpty
+        if !isCounterPermanentlyHidden {
+            counterLabel.isHidden = text.isEmpty
+        }
         clearButton.isHidden = text.isEmpty
         updateCounter(count: text.count)
         notifyHeightChangeIfNeeded()
@@ -222,6 +226,7 @@ class TranslationInputView: UIView {
     }
 
     func hideCounter() {
+        isCounterPermanentlyHidden = true
         counterLabel.isHidden = true
     }
 
@@ -268,7 +273,9 @@ class TranslationInputView: UIView {
     private func updateDisplay() {
         inputLabel.text = textBuffer
         placeholderLabel.isHidden = !textBuffer.isEmpty
-        counterLabel.isHidden = textBuffer.isEmpty
+        if !isCounterPermanentlyHidden {
+            counterLabel.isHidden = textBuffer.isEmpty
+        }
         clearButton.isHidden = textBuffer.isEmpty
         updateCounter(count: textBuffer.count)
         notifyHeightChangeIfNeeded()

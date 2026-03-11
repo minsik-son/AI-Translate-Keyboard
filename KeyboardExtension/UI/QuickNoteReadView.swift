@@ -53,13 +53,6 @@ class QuickNoteReadView: UIView {
         return l
     }()
 
-    private let timeLabel: UILabel = {
-        let l = UILabel()
-        l.font = .systemFont(ofSize: 11)
-        l.translatesAutoresizingMaskIntoConstraints = false
-        return l
-    }()
-
     private let actionBar: UIView = {
         let v = UIView()
         v.translatesAutoresizingMaskIntoConstraints = false
@@ -110,7 +103,6 @@ class QuickNoteReadView: UIView {
         headerView.addSubview(editButton)
         addSubview(scrollView)
         scrollView.addSubview(contentLabel)
-        scrollView.addSubview(timeLabel)
         addSubview(actionBar)
         actionBar.addSubview(pasteButton)
         actionBar.addSubview(copyButton)
@@ -145,10 +137,7 @@ class QuickNoteReadView: UIView {
             contentLabel.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 8),
             contentLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             contentLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-
-            timeLabel.topAnchor.constraint(equalTo: contentLabel.bottomAnchor, constant: 8),
-            timeLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            timeLabel.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -8),
+            contentLabel.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -16),
 
             actionBar.leadingAnchor.constraint(equalTo: leadingAnchor),
             actionBar.trailingAnchor.constraint(equalTo: trailingAnchor),
@@ -168,7 +157,6 @@ class QuickNoteReadView: UIView {
     func configure(with note: QuickNote) {
         self.note = note
         contentLabel.text = note.content
-        timeLabel.text = relativeTimeString(from: note.updatedAt)
     }
 
     func applyTheme(_ theme: KeyboardTheme?) {
@@ -178,37 +166,23 @@ class QuickNoteReadView: UIView {
     func updateAppearance(isDark: Bool) {
         self.isDark = isDark
         let textColor: UIColor
-        let mutedColor: UIColor
         let accentColor: UIColor
 
         if let theme = customTheme {
             backgroundColor = theme.keyboardBackground
             textColor = theme.keyTextColor
-            mutedColor = theme.keyTextColor.withAlphaComponent(0.5)
             accentColor = theme.keyTextColor
         } else {
             backgroundColor = isDark ? UIColor(white: 0.12, alpha: 1) : UIColor(white: 0.95, alpha: 1)
             textColor = isDark ? .white : .label
-            mutedColor = isDark ? UIColor(white: 0.5, alpha: 1) : .secondaryLabel
             accentColor = .systemBlue
         }
 
         contentLabel.textColor = textColor
-        timeLabel.textColor = mutedColor
         backButton.tintColor = accentColor
         editButton.tintColor = accentColor
         pasteButton.tintColor = accentColor
         copyButton.tintColor = accentColor
-    }
-
-    // MARK: - Private
-
-    private func relativeTimeString(from date: Date) -> String {
-        let interval = Date().timeIntervalSince(date)
-        if interval < 60 { return L("quicknote.just_now") }
-        if interval < 3600 { return "\(Int(interval / 60))m" }
-        if interval < 86400 { return "\(Int(interval / 3600))h" }
-        return "\(Int(interval / 86400))d"
     }
 
     // MARK: - Actions
