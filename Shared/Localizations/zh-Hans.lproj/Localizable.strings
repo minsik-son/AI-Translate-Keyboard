@@ -415,9 +415,28 @@
 "theme.charcoal" = "炭灰";
 "theme.dark_green" = "深绿";
 "theme.burgundy" = "酒红";
+"theme.dark_navy" = "深海军蓝";
+"theme.dark_charcoal" = "深炭灰";
+"theme.dark_forest" = "深森林绿";
+"theme.dark_burgundy" = "深酒红";
 
 // MARK: - Keyboard
 "keyboard.correction_language" = "校对语言";
 
 // MARK: - Language
 "language.korean" = "韩语";
+
+// MARK: - Premium Themes
+"theme.premium_midnight_aurora" = "午夜极光";
+"theme.premium_rose_gold" = "玫瑰金";
+"theme.premium_ocean_abyss" = "深海之渊";
+"theme.premium_sunset_ember" = "夕阳余烬";
+"theme.premium_frost_crystal" = "霜晶";
+"theme.section_free" = "免费主题";
+"theme.section_premium" = "高级主题";
+
+// MARK: - Accessibility
+"accessibility.locked" = "已锁定";
+"accessibility.selected" = "已选择";
+"accessibility.theme_locked_hint" = "双击查看订阅选项";
+"accessibility.theme_select_hint" = "双击应用此主题";

@@ -415,9 +415,28 @@
 "theme.charcoal" = "Угольный";
 "theme.dark_green" = "Тёмно-зелёный";
 "theme.burgundy" = "Бордовый";
+"theme.dark_navy" = "Тёмно-синий";
+"theme.dark_charcoal" = "Тёмно-угольный";
+"theme.dark_forest" = "Тёмно-зелёный";
+"theme.dark_burgundy" = "Тёмно-бордовый";
 
 // MARK: - Keyboard
 "keyboard.correction_language" = "Язык коррекции";
 
 // MARK: - Language
 "language.korean" = "Корейский";
+
+// MARK: - Premium Themes
+"theme.premium_midnight_aurora" = "Полночное сияние";
+"theme.premium_rose_gold" = "Розовое золото";
+"theme.premium_ocean_abyss" = "Океанская бездна";
+"theme.premium_sunset_ember" = "Закатные угли";
+"theme.premium_frost_crystal" = "Ледяной кристалл";
+"theme.section_free" = "Бесплатные темы";
+"theme.section_premium" = "Премиум темы";
+
+// MARK: - Accessibility
+"accessibility.locked" = "Заблокировано";
+"accessibility.selected" = "Выбрано";
+"accessibility.theme_locked_hint" = "Дважды нажмите, чтобы посмотреть варианты подписки";
+"accessibility.theme_select_hint" = "Дважды нажмите, чтобы применить эту тему";

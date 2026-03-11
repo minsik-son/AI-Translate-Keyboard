@@ -2,7 +2,9 @@ import UIKit
 
 class ThemeSelectionViewController: UIViewController {
 
-    private let themes = KeyboardTheme.allThemes
+    private let freeThemes = KeyboardTheme.allThemes
+    private let premiumThemes = KeyboardTheme.allPremiumThemes
+    private var isPaywallPresenting = false
 
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -15,6 +17,9 @@ class ThemeSelectionViewController: UIViewController {
         cv.dataSource = self
         cv.delegate = self
         cv.register(ThemeCell.self, forCellWithReuseIdentifier: ThemeCell.reuseId)
+        cv.register(ThemeSectionHeader.self,
+                    forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+                    withReuseIdentifier: ThemeSectionHeader.reuseId)
         return cv
     }()
 
@@ -38,9 +43,25 @@ class ThemeSelectionViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(handleLanguageChange), name: .languageDidChange, object: nil)
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        isPaywallPresenting = false
+        collectionView.reloadData()
+    }
+
     @objc private func handleLanguageChange() {
         navigationItem.title = L("settings.keyboard_theme")
         collectionView.reloadData()
+    }
+
+    private func indexPath(forThemeId id: String) -> IndexPath? {
+        if let index = freeThemes.firstIndex(where: { $0.id == id }) {
+            return IndexPath(item: index, section: 0)
+        }
+        if let index = premiumThemes.firstIndex(where: { $0.id == id }) {
+            return IndexPath(item: index, section: 1)
+        }
+        return nil
     }
 }
 
@@ -48,15 +69,49 @@ class ThemeSelectionViewController: UIViewController {
 
 extension ThemeSelectionViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
 
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 2
+    }
+
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        themes.count
+        return section == 0 ? freeThemes.count : premiumThemes.count
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ThemeCell.reuseId, for: indexPath) as! ThemeCell
-        let theme = themes[indexPath.item]
-        cell.configure(theme: theme, isSelected: theme.id == selectedThemeId)
+
+        let theme: KeyboardTheme
+        if indexPath.section == 0 {
+            theme = freeThemes[indexPath.item]
+        } else {
+            theme = premiumThemes[indexPath.item]
+        }
+
+        let isPro = SubscriptionStatus.shared.isPro
+        let isLocked = theme.isPremium && !isPro
+        let isSelected = theme.id == selectedThemeId
+
+        cell.configure(theme: theme, isSelected: isSelected, isLocked: isLocked)
         return cell
+    }
+
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        let header = collectionView.dequeueReusableSupplementaryView(
+            ofKind: kind,
+            withReuseIdentifier: ThemeSectionHeader.reuseId,
+            for: indexPath
+        ) as! ThemeSectionHeader
+
+        if indexPath.section == 0 {
+            header.configure(title: L("theme.section_free"), showBadge: false)
+        } else {
+            header.configure(title: L("theme.section_premium"), showBadge: true)
+        }
+        return header
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        return CGSize(width: collectionView.bounds.width, height: 44)
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -66,15 +121,31 @@ extension ThemeSelectionViewController: UICollectionViewDataSource, UICollection
     }
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let theme: KeyboardTheme
+        if indexPath.section == 0 {
+            theme = freeThemes[indexPath.item]
+        } else {
+            theme = premiumThemes[indexPath.item]
+        }
+
+        let isPro = SubscriptionStatus.shared.isPro
+        if theme.isPremium && !isPro {
+            guard !isPaywallPresenting else { return }
+            isPaywallPresenting = true
+
+            let paywallVC = PaywallViewController()
+            paywallVC.modalPresentationStyle = .pageSheet
+            self.present(paywallVC, animated: true)
+            return
+        }
+
         let previousId = selectedThemeId
-        let theme = themes[indexPath.item]
         selectedThemeId = theme.id
         AppGroupManager.shared.set(theme.id, forKey: AppConstants.UserDefaultsKeys.keyboardTheme)
 
         var indexPaths = [indexPath]
-        if let prevIndex = themes.firstIndex(where: { $0.id == previousId }) {
-            let prevPath = IndexPath(item: prevIndex, section: 0)
-            if prevPath != indexPath { indexPaths.append(prevPath) }
+        if let prevPath = self.indexPath(forThemeId: previousId), prevPath != indexPath {
+            indexPaths.append(prevPath)
         }
         collectionView.reloadItems(at: indexPaths)
 
@@ -88,6 +159,60 @@ extension ThemeSelectionViewController: UICollectionViewDataSource, UICollection
                 }
             }
         }
+    }
+}
+
+// MARK: - ThemeSectionHeader
+
+private class ThemeSectionHeader: UICollectionReusableView {
+    static let reuseId = "ThemeSectionHeader"
+
+    private let titleLabel: UILabel = {
+        let l = UILabel()
+        l.font = .systemFont(ofSize: 16, weight: .bold)
+        l.textColor = AppColors.text
+        l.translatesAutoresizingMaskIntoConstraints = false
+        return l
+    }()
+
+    private let proBadge: UILabel = {
+        let l = UILabel()
+        l.text = "PRO"
+        l.font = .systemFont(ofSize: 10, weight: .heavy)
+        l.textColor = .white
+        l.backgroundColor = AppColors.accent
+        l.textAlignment = .center
+        l.layer.cornerRadius = 4
+        l.clipsToBounds = true
+        l.translatesAutoresizingMaskIntoConstraints = false
+        return l
+    }()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        addSubview(titleLabel)
+        addSubview(proBadge)
+
+        NSLayoutConstraint.activate([
+            titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
+            titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
+
+            proBadge.leadingAnchor.constraint(equalTo: titleLabel.trailingAnchor, constant: 8),
+            proBadge.centerYAnchor.constraint(equalTo: centerYAnchor),
+            proBadge.widthAnchor.constraint(equalToConstant: 34),
+            proBadge.heightAnchor.constraint(equalToConstant: 18),
+        ])
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    func configure(title: String, showBadge: Bool) {
+        titleLabel.text = title
+        proBadge.isHidden = !showBadge
+
+        isAccessibilityElement = true
+        accessibilityLabel = showBadge ? "\(title) PRO" : title
+        accessibilityTraits = .header
     }
 }
 
@@ -143,6 +268,26 @@ private class ThemeCell: UICollectionViewCell {
         return iv
     }()
 
+    private let lockOverlay: UIView = {
+        let v = UIView()
+        v.backgroundColor = UIColor(white: 0.5, alpha: 0.4)
+        v.layer.cornerRadius = 8
+        v.clipsToBounds = true
+        v.isHidden = true
+        v.isUserInteractionEnabled = false
+        v.translatesAutoresizingMaskIntoConstraints = false
+        return v
+    }()
+
+    private let lockIcon: UIImageView = {
+        let config = UIImage.SymbolConfiguration(pointSize: 22, weight: .medium)
+        let iv = UIImageView(image: UIImage(systemName: "lock.fill", withConfiguration: config))
+        iv.tintColor = .white
+        iv.isUserInteractionEnabled = false
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        return iv
+    }()
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupViews()
@@ -150,6 +295,18 @@ private class ThemeCell: UICollectionViewCell {
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        lockOverlay.isHidden = true
+        checkmark.isHidden = true
+        cardView.layer.borderColor = UIColor.clear.cgColor
+        cardView.layer.borderWidth = 1
+        nameLabel.textColor = AppColors.text
+        accessibilityLabel = nil
+        accessibilityHint = nil
+        accessibilityTraits = .button
     }
 
     private func setupViews() {
@@ -178,6 +335,10 @@ private class ThemeCell: UICollectionViewCell {
             keyRows.append(rowKeys)
             previewContainer.addSubview(row)
         }
+
+        // Lock overlay — added AFTER key rows to ensure Z-order on top
+        previewContainer.addSubview(lockOverlay)
+        lockOverlay.addSubview(lockIcon)
 
         // 4 color palette dots
         for _ in 0..<4 {
@@ -210,6 +371,14 @@ private class ThemeCell: UICollectionViewCell {
 
             checkmark.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -10),
             checkmark.centerYAnchor.constraint(equalTo: nameLabel.centerYAnchor),
+
+            lockOverlay.topAnchor.constraint(equalTo: previewContainer.topAnchor),
+            lockOverlay.leadingAnchor.constraint(equalTo: previewContainer.leadingAnchor),
+            lockOverlay.trailingAnchor.constraint(equalTo: previewContainer.trailingAnchor),
+            lockOverlay.bottomAnchor.constraint(equalTo: previewContainer.bottomAnchor),
+
+            lockIcon.centerXAnchor.constraint(equalTo: lockOverlay.centerXAnchor),
+            lockIcon.centerYAnchor.constraint(equalTo: lockOverlay.centerYAnchor),
         ])
 
         // Layout key rows
@@ -235,7 +404,7 @@ private class ThemeCell: UICollectionViewCell {
         cardView.layer.borderColor = UIColor.clear.cgColor
     }
 
-    func configure(theme: KeyboardTheme, isSelected: Bool) {
+    func configure(theme: KeyboardTheme, isSelected: Bool, isLocked: Bool) {
         cardView.backgroundColor = AppColors.card
         previewContainer.backgroundColor = theme.keyboardBackground
 
@@ -244,16 +413,13 @@ private class ThemeCell: UICollectionViewCell {
                 kv.backgroundColor = theme.keyBackground
             }
         }
-        // Last row: make first and last keys use special key color
         if let lastRow = keyRows.last, lastRow.count >= 2 {
             lastRow.first?.backgroundColor = theme.specialKeyBackground
             lastRow.last?.backgroundColor = theme.specialKeyBackground
         }
 
         nameLabel.text = theme.localizedDisplayName
-        nameLabel.textColor = AppColors.text
 
-        // Color palette dots
         let colors = [theme.keyboardBackground, theme.keyBackground, theme.specialKeyBackground, theme.keyTextColor]
         for (i, dot) in dotViews.enumerated() where i < colors.count {
             dot.backgroundColor = colors[i]
@@ -261,8 +427,34 @@ private class ThemeCell: UICollectionViewCell {
             dot.layer.borderColor = AppColors.border.cgColor
         }
 
-        checkmark.isHidden = !isSelected
-        cardView.layer.borderColor = isSelected ? AppColors.accent.cgColor : AppColors.border.cgColor
-        cardView.layer.borderWidth = isSelected ? 2 : 1
+        lockOverlay.isHidden = !isLocked
+        checkmark.isHidden = isLocked || !isSelected
+
+        if isLocked {
+            nameLabel.textColor = AppColors.textMuted
+            cardView.layer.borderColor = AppColors.border.cgColor
+            cardView.layer.borderWidth = 1
+        } else {
+            nameLabel.textColor = AppColors.text
+            checkmark.isHidden = !isSelected
+            cardView.layer.borderColor = isSelected ? AppColors.accent.cgColor : AppColors.border.cgColor
+            cardView.layer.borderWidth = isSelected ? 2 : 1
+        }
+
+        // VoiceOver
+        isAccessibilityElement = true
+        if isLocked {
+            accessibilityLabel = "\(theme.localizedDisplayName), \(L("theme.section_premium")), \(L("accessibility.locked"))"
+            accessibilityHint = L("accessibility.theme_locked_hint")
+            accessibilityTraits = .button
+        } else if isSelected {
+            accessibilityLabel = "\(theme.localizedDisplayName), \(L("accessibility.selected"))"
+            accessibilityTraits = [.button, .selected]
+            accessibilityHint = nil
+        } else {
+            accessibilityLabel = theme.localizedDisplayName
+            accessibilityTraits = .button
+            accessibilityHint = L("accessibility.theme_select_hint")
+        }
     }
 }

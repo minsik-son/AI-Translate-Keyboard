@@ -153,6 +153,71 @@ extension KeyboardTheme {
 
     static let allThemes: [KeyboardTheme] = [defaultLight] + allPastelThemes + allDarkThemes
 
+    // MARK: - Premium Presets
+
+    static let premiumMidnightAurora = KeyboardTheme(
+        id: "premium_midnight_aurora",
+        displayName: L("theme.premium_midnight_aurora"),
+        keyboardBackground: UIColor(red: 0.06, green: 0.08, blue: 0.18, alpha: 1),
+        keyBackground: UIColor(red: 0.10, green: 0.16, blue: 0.30, alpha: 1),
+        specialKeyBackground: UIColor(red: 0.00, green: 0.55, blue: 0.55, alpha: 1),
+        keyTextColor: UIColor(red: 0.70, green: 0.92, blue: 0.90, alpha: 1),
+        toolbarBackground: .clear
+    )
+
+    static let premiumRoseGold = KeyboardTheme(
+        id: "premium_rose_gold",
+        displayName: L("theme.premium_rose_gold"),
+        keyboardBackground: UIColor(red: 0.95, green: 0.85, blue: 0.82, alpha: 1),
+        keyBackground: UIColor(red: 1.0, green: 0.96, blue: 0.95, alpha: 1),
+        specialKeyBackground: UIColor(red: 0.76, green: 0.57, blue: 0.50, alpha: 1),
+        keyTextColor: UIColor(red: 0.35, green: 0.18, blue: 0.15, alpha: 1),
+        toolbarBackground: .clear
+    )
+
+    static let premiumOceanAbyss = KeyboardTheme(
+        id: "premium_ocean_abyss",
+        displayName: L("theme.premium_ocean_abyss"),
+        keyboardBackground: UIColor(red: 0.04, green: 0.15, blue: 0.25, alpha: 1),
+        keyBackground: UIColor(red: 0.08, green: 0.22, blue: 0.35, alpha: 1),
+        specialKeyBackground: UIColor(red: 0.10, green: 0.36, blue: 0.47, alpha: 1),
+        keyTextColor: UIColor(red: 0.80, green: 0.94, blue: 1.0, alpha: 1),
+        toolbarBackground: .clear
+    )
+
+    static let premiumSunsetEmber = KeyboardTheme(
+        id: "premium_sunset_ember",
+        displayName: L("theme.premium_sunset_ember"),
+        keyboardBackground: UIColor(red: 0.18, green: 0.06, blue: 0.04, alpha: 1),
+        keyBackground: UIColor(red: 0.30, green: 0.12, blue: 0.08, alpha: 1),
+        specialKeyBackground: UIColor(red: 0.55, green: 0.33, blue: 0.13, alpha: 1),
+        keyTextColor: UIColor(red: 1.0, green: 0.90, blue: 0.75, alpha: 1),
+        toolbarBackground: .clear
+    )
+
+    static let premiumFrostCrystal = KeyboardTheme(
+        id: "premium_frost_crystal",
+        displayName: L("theme.premium_frost_crystal"),
+        keyboardBackground: UIColor(red: 0.80, green: 0.85, blue: 0.89, alpha: 1),
+        keyBackground: UIColor(red: 0.94, green: 0.96, blue: 0.98, alpha: 1),
+        specialKeyBackground: UIColor(red: 0.62, green: 0.75, blue: 0.85, alpha: 1),
+        keyTextColor: UIColor(red: 0.15, green: 0.22, blue: 0.32, alpha: 1),
+        toolbarBackground: .clear
+    )
+
+    static let allPremiumThemes: [KeyboardTheme] = [
+        .premiumMidnightAurora, .premiumRoseGold, .premiumOceanAbyss,
+        .premiumSunsetEmber, .premiumFrostCrystal
+    ]
+
+    static let allThemesIncludingPremium: [KeyboardTheme] = allThemes + allPremiumThemes
+
+    // MARK: - Properties
+
+    var isPremium: Bool {
+        return id.hasPrefix("premium_")
+    }
+
     var localizedDisplayName: String {
         L("theme.\(id)")
     }
@@ -164,6 +229,6 @@ extension KeyboardTheme {
               themeId != "default" else {
             return nil
         }
-        return allThemes.first { $0.id == themeId }
+        return allThemesIncludingPremium.first { $0.id == themeId }
     }
 }

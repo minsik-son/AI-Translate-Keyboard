@@ -415,9 +415,28 @@
 "theme.charcoal" = "Antracite";
 "theme.dark_green" = "Verde Scuro";
 "theme.burgundy" = "Borgogna";
+"theme.dark_navy" = "Blu Navy Scuro";
+"theme.dark_charcoal" = "Antracite Scuro";
+"theme.dark_forest" = "Verde Foresta";
+"theme.dark_burgundy" = "Borgogna Scuro";
 
 // MARK: - Keyboard
 "keyboard.correction_language" = "Lingua di correzione";
 
 // MARK: - Language
 "language.korean" = "Coreano";
+
+// MARK: - Premium Themes
+"theme.premium_midnight_aurora" = "Aurora di Mezzanotte";
+"theme.premium_rose_gold" = "Oro Rosa";
+"theme.premium_ocean_abyss" = "Abisso Oceanico";
+"theme.premium_sunset_ember" = "Brace del Tramonto";
+"theme.premium_frost_crystal" = "Cristallo di Ghiaccio";
+"theme.section_free" = "Temi Gratuiti";
+"theme.section_premium" = "Temi Premium";
+
+// MARK: - Accessibility
+"accessibility.locked" = "Bloccato";
+"accessibility.selected" = "Selezionato";
+"accessibility.theme_locked_hint" = "Tocca due volte per visualizzare le opzioni di abbonamento";
+"accessibility.theme_select_hint" = "Tocca due volte per applicare questo tema";

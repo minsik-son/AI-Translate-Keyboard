@@ -415,9 +415,28 @@
 "theme.charcoal" = "차콜";
 "theme.dark_green" = "다크 그린";
 "theme.burgundy" = "버건디";
+"theme.dark_navy" = "다크 네이비";
+"theme.dark_charcoal" = "다크 차콜";
+"theme.dark_forest" = "다크 포레스트";
+"theme.dark_burgundy" = "다크 버건디";
 
 // MARK: - Keyboard
 "keyboard.correction_language" = "교정 언어";
 
 // MARK: - Language
 "language.korean" = "한국어";
+
+// MARK: - Premium Themes
+"theme.premium_midnight_aurora" = "미드나잇 오로라";
+"theme.premium_rose_gold" = "로즈 골드";
+"theme.premium_ocean_abyss" = "오션 어비스";
+"theme.premium_sunset_ember" = "선셋 엠버";
+"theme.premium_frost_crystal" = "프로스트 크리스탈";
+"theme.section_free" = "무료 테마";
+"theme.section_premium" = "프리미엄 테마";
+
+// MARK: - Accessibility
+"accessibility.locked" = "잠김";
+"accessibility.selected" = "선택됨";
+"accessibility.theme_locked_hint" = "이중 탭하여 구독 옵션 보기";
+"accessibility.theme_select_hint" = "이중 탭하여 이 테마 적용";

@@ -415,9 +415,28 @@
 "theme.charcoal" = "チャコール";
 "theme.dark_green" = "ダークグリーン";
 "theme.burgundy" = "バーガンディ";
+"theme.dark_navy" = "ダークネイビー";
+"theme.dark_charcoal" = "ダークチャコール";
+"theme.dark_forest" = "ダークフォレスト";
+"theme.dark_burgundy" = "ダークバーガンディ";
 
 // MARK: - Keyboard
 "keyboard.correction_language" = "校正言語";
 
 // MARK: - Language
 "language.korean" = "韓国語";
+
+// MARK: - Premium Themes
+"theme.premium_midnight_aurora" = "ミッドナイトオーロラ";
+"theme.premium_rose_gold" = "ローズゴールド";
+"theme.premium_ocean_abyss" = "オーシャンアビス";
+"theme.premium_sunset_ember" = "サンセットエンバー";
+"theme.premium_frost_crystal" = "フロストクリスタル";
+"theme.section_free" = "無料テーマ";
+"theme.section_premium" = "プレミアムテーマ";
+
+// MARK: - Accessibility
+"accessibility.locked" = "ロック中";
+"accessibility.selected" = "選択中";
+"accessibility.theme_locked_hint" = "ダブルタップでサブスクリプションオプションを表示";
+"accessibility.theme_select_hint" = "ダブルタップでこのテーマを適用";
