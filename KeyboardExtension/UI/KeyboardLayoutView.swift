@@ -633,6 +633,8 @@ class KeyboardLayoutView: UIView {
                         button.layer.shadowOffset = CGSize(width: 0, height: 3)
                         button.layer.shadowRadius = 1.5
                         button.layer.shadowOpacity = 1.0
+                        // 기존 tag 9902 UIView 정리 (v1 마이그레이션 안전 처리)
+                        if let oldHv = button.viewWithTag(9902) { oldHv.removeFromSuperview() }
                         applyWoodHighlightGradient(to: button, highlightAlpha: highlightAlpha)
                     }
                     button.setTitleColor(theme.keyTextColor, for: .normal)
@@ -659,6 +661,8 @@ class KeyboardLayoutView: UIView {
                     button.layer.shadowOffset = CGSize(width: 0, height: 3)
                     button.layer.shadowRadius = 1.5
                     button.layer.shadowOpacity = 1.0
+                    // 기존 tag 9902 UIView 정리 (v1 마이그레이션 안전 처리)
+                    if let oldHv = button.viewWithTag(9902) { oldHv.removeFromSuperview() }
                     applyWoodHighlightGradient(to: button, highlightAlpha: highlightAlpha)
                 }
                 button.setTitleColor(theme.keyTextColor, for: .normal)
@@ -681,6 +685,8 @@ class KeyboardLayoutView: UIView {
                     button.layer.shadowOffset = CGSize(width: 0, height: 3)
                     button.layer.shadowRadius = 1.5
                     button.layer.shadowOpacity = 1.0
+                    // 기존 tag 9902 UIView 정리 (v1 마이그레이션 안전 처리)
+                    if let oldHv = button.viewWithTag(9902) { oldHv.removeFromSuperview() }
                     applyWoodHighlightGradient(to: button, highlightAlpha: highlightAlpha)
                 }
                 button.setTitleColor(theme.keyTextColor, for: .normal)
@@ -1163,60 +1169,43 @@ class KeyboardLayoutView: UIView {
               let tileImg = UIImage(named: tileName) else { return }
 
         let tag = 9901
-        if button.viewWithTag(tag) == nil {
-            let tv = UIView()
-            tv.tag = tag
-            tv.isUserInteractionEnabled = false
-            tv.backgroundColor = UIColor(patternImage: tileImg)
-            tv.alpha = 0.5
-            tv.layer.cornerRadius = Layout.cornerRadius
-            tv.clipsToBounds = true
-            tv.translatesAutoresizingMaskIntoConstraints = false
-            button.insertSubview(tv, at: 0)
-            NSLayoutConstraint.activate([
-                tv.topAnchor.constraint(equalTo: button.topAnchor),
-                tv.bottomAnchor.constraint(equalTo: button.bottomAnchor),
-                tv.leadingAnchor.constraint(equalTo: button.leadingAnchor),
-                tv.trailingAnchor.constraint(equalTo: button.trailingAnchor),
-            ])
-        }
-        if let tv = button.viewWithTag(tag) {
-            let randomOffset = CGAffineTransform(
-                translationX: CGFloat.random(in: -64...64),
-                y: CGFloat.random(in: -64...64)
-            )
-            tv.transform = randomOffset
-        }
+        if button.viewWithTag(tag) != nil { return }  // 이미 있으면 스킵
+
+        let tv = UIView()
+        tv.tag = tag
+        tv.isUserInteractionEnabled = false
+        tv.backgroundColor = UIColor(patternImage: tileImg)
+        tv.alpha = 0.5
+        tv.layer.cornerRadius = Layout.cornerRadius
+        tv.clipsToBounds = true
+        // translatesAutoresizingMaskIntoConstraints = true (기본값 유지)
+        tv.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        tv.frame = button.bounds  // 초기 frame 설정
+        button.insertSubview(tv, at: 0)
     }
 
     /// 키 상단 하이라이트 그라디언트 (CAGradientLayer)
     private func applyWoodHighlightGradient(to button: UIButton, highlightAlpha: CGFloat) {
-        let highlightTag = 9902
-        guard button.viewWithTag(highlightTag) == nil, highlightAlpha > 0 else { return }
+        guard highlightAlpha > 0 else { return }
 
-        let hv = UIView()
-        hv.tag = highlightTag
-        hv.isUserInteractionEnabled = false
-        hv.translatesAutoresizingMaskIntoConstraints = false
-        hv.layer.cornerRadius = Layout.cornerRadius
-        hv.clipsToBounds = true
+        let layerName = "woodHighlightGradient"
+        if button.layer.sublayers?.contains(where: { $0.name == layerName }) == true { return }
 
         let gl = CAGradientLayer()
+        gl.name = layerName
         gl.colors = [
             UIColor(white: 1, alpha: highlightAlpha).cgColor,
             UIColor.clear.cgColor,
             UIColor(white: 0, alpha: highlightAlpha * 1.5).cgColor,
         ]
         gl.locations = [0, 0.4, 1.0]
-        hv.layer.addSublayer(gl)
+        gl.cornerRadius = Layout.cornerRadius
+        gl.masksToBounds = true
+        gl.frame = button.bounds  // 초기 frame 설정
 
-        button.addSubview(hv)
-        NSLayoutConstraint.activate([
-            hv.topAnchor.constraint(equalTo: button.topAnchor),
-            hv.bottomAnchor.constraint(equalTo: button.bottomAnchor),
-            hv.leadingAnchor.constraint(equalTo: button.leadingAnchor),
-            hv.trailingAnchor.constraint(equalTo: button.trailingAnchor),
-        ])
+        // UIView 래퍼 없이 CAGradientLayer를 직접 추가
+        // insertSublayer(at: 0)으로 최하위에 배치하여 텍스트 뒤에 렌더링
+        button.layer.insertSublayer(gl, at: 0)
     }
 
     /// 음각(Intaglio) 텍스트 이펙트 — 나무에 파낸 듯한 글자
@@ -1462,13 +1451,19 @@ class KeyboardLayoutView: UIView {
         super.layoutSubviews()
         gradientLayer?.frame = bounds
 
-        // Wood block key highlight gradient frame update
+        // Wood block key texture + gradient frame update
         for button in allKeyButtons {
-            if let hv = button.viewWithTag(9902) {
-                hv.layer.sublayers?.forEach { sublayer in
-                    if let gl = sublayer as? CAGradientLayer {
-                        gl.frame = hv.bounds
-                    }
+            let bounds = button.bounds
+
+            // 텍스처 타일 UIView frame 업데이트 (tag 9901)
+            if let tv = button.viewWithTag(9901) {
+                tv.frame = bounds
+            }
+
+            // 하이라이트 그래디언트 CALayer frame 업데이트
+            button.layer.sublayers?.forEach { sublayer in
+                if sublayer.name == "woodHighlightGradient" {
+                    sublayer.frame = bounds
                 }
             }
         }
