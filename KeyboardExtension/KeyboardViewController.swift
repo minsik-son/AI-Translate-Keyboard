@@ -440,6 +440,14 @@ class KeyboardViewController: UIInputViewController {
 
         setupTranslationCallbacks()
         updateLanguageLabels()
+
+        // 생성 직후 테마 적용
+        let theme = loadTheme()
+        let isDark = textDocumentProxy.keyboardAppearance == .dark
+        translationLanguageBar.applyTheme(theme)
+        translationLanguageBar.updateAppearance(isDark: isDark)
+        translationInputView.applyTheme(theme)
+        translationInputView.updateAppearance(isDark: isDark)
     }
 
     private func setupCorrectionViewsIfNeeded() {
@@ -473,6 +481,14 @@ class KeyboardViewController: UIInputViewController {
         keyboardTopToCorrectionConstraint?.priority = .defaultHigh
 
         setupCorrectionCallbacks()
+
+        // 생성 직후 테마 적용
+        let theme = loadTheme()
+        let isDark = textDocumentProxy.keyboardAppearance == .dark
+        correctionLanguageBar.applyTheme(theme)
+        correctionLanguageBar.updateAppearance(isDark: isDark)
+        correctionInputView.applyTheme(theme)
+        correctionInputView.updateAppearance(isDark: isDark)
     }
 
     private func setupPhraseViewsIfNeeded() {
@@ -740,6 +756,7 @@ class KeyboardViewController: UIInputViewController {
             translationInputView.clear()
             toolbarView.hideSuggestions()
             keyboardTopToTranslationConstraint?.isActive = true
+            updateKeyboardAppearance()
 
         case .correctionMode:
             toolbarView.isHidden = true
@@ -759,6 +776,7 @@ class KeyboardViewController: UIInputViewController {
             textProxyManager.reset()
             toolbarView.hideSuggestions()
             keyboardTopToCorrectionConstraint?.isActive = true
+            updateKeyboardAppearance()
 
         case .phraseInputMode:
             toolbarView.isHidden = true

@@ -85,6 +85,11 @@ class CorrectionLanguageBar: UIView {
         languagePill.addTarget(self, action: #selector(pillTapped), for: .touchUpInside)
         tonePill.addTarget(self, action: #selector(tonePillTapped), for: .touchUpInside)
         closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
+
+        // 누름 효과 등록
+        addWoodPressEffect(to: languagePill)
+        addWoodPressEffect(to: tonePill)
+        addWoodPressEffect(to: closeButton)
     }
 
     // MARK: - Actions
@@ -112,18 +117,70 @@ class CorrectionLanguageBar: UIView {
     func updateAppearance(isDark: Bool) {
         if let theme = customTheme {
             backgroundColor = theme.toolbarBackground
-            languagePill.backgroundColor = theme.keyBackground
-            languagePill.setTitleColor(theme.keyTextColor, for: .normal)
-            tonePill.backgroundColor = theme.keyBackground
-            tonePill.setTitleColor(theme.keyTextColor, for: .normal)
-            closeButton.tintColor = theme.keyTextColor.withAlphaComponent(0.6)
+
+            if theme.hasWoodTexture {
+                // 나무 블록 스타일
+                for pill in [languagePill, tonePill] {
+                    pill.layer.cornerRadius = 10
+                    pill.layer.borderWidth = 1
+                    pill.layer.borderColor = UIColor(white: 0, alpha: 0.15).cgColor
+                    pill.layer.shadowColor = UIColor.black.cgColor
+                    pill.layer.shadowOffset = CGSize(width: 0, height: 2)
+                    pill.layer.shadowRadius = 3
+                    pill.layer.shadowOpacity = 0.3
+                    pill.clipsToBounds = false
+                }
+                languagePill.backgroundColor = theme.keyBackground
+                tonePill.backgroundColor = theme.specialKeyBackground
+                languagePill.setTitleColor(theme.keyTextColor, for: .normal)
+                tonePill.setTitleColor(theme.keyTextColor, for: .normal)
+                closeButton.tintColor = theme.keyTextColor.withAlphaComponent(0.7)
+            } else {
+                // 다른 프리미엄 테마: 기존 스타일
+                for pill in [languagePill, tonePill] {
+                    pill.layer.cornerRadius = 18
+                    pill.layer.borderWidth = 0
+                    pill.layer.shadowOpacity = 0
+                    pill.clipsToBounds = true
+                }
+                languagePill.backgroundColor = theme.keyBackground
+                tonePill.backgroundColor = theme.keyBackground
+                languagePill.setTitleColor(theme.keyTextColor, for: .normal)
+                tonePill.setTitleColor(theme.keyTextColor, for: .normal)
+                closeButton.tintColor = theme.keyTextColor.withAlphaComponent(0.6)
+            }
         } else {
             backgroundColor = .clear
+            for pill in [languagePill, tonePill] {
+                pill.layer.cornerRadius = 18
+                pill.layer.borderWidth = 0
+                pill.layer.shadowOpacity = 0
+                pill.clipsToBounds = true
+            }
             languagePill.backgroundColor = isDark ? UIColor(white: 0.25, alpha: 1) : .white
             languagePill.setTitleColor(isDark ? .white : .label, for: .normal)
             tonePill.backgroundColor = isDark ? UIColor(white: 0.25, alpha: 1) : .white
             tonePill.setTitleColor(isDark ? .white : .label, for: .normal)
             closeButton.tintColor = isDark ? UIColor(white: 0.55, alpha: 1) : .secondaryLabel
+        }
+    }
+
+    // MARK: - Wood Press Effect
+
+    private func addWoodPressEffect(to button: UIButton) {
+        button.addTarget(self, action: #selector(woodButtonDown(_:)), for: .touchDown)
+        button.addTarget(self, action: #selector(woodButtonUp(_:)), for: [.touchUpInside, .touchUpOutside, .touchCancel])
+    }
+
+    @objc private func woodButtonDown(_ sender: UIButton) {
+        UIView.animate(withDuration: 0.08) {
+            sender.alpha = 0.6
+        }
+    }
+
+    @objc private func woodButtonUp(_ sender: UIButton) {
+        UIView.animate(withDuration: 0.15) {
+            sender.alpha = 1.0
         }
     }
 }

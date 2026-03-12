@@ -239,13 +239,43 @@ class TranslationInputView: UIView {
     func updateAppearance(isDark: Bool) {
         if let theme = customTheme {
             backgroundColor = theme.toolbarBackground
-            containerView.backgroundColor = theme.keyBackground
-            inputLabel.textColor = theme.keyTextColor
-            clearButton.tintColor = theme.keyTextColor.withAlphaComponent(0.4)
-            placeholderLabel.textColor = theme.keyTextColor.withAlphaComponent(0.4)
+
+            if theme.hasWoodTexture {
+                // 나무 테마: 밝은 갈색 입력창 + 나무 블록 느낌
+                containerView.backgroundColor = theme.keyBackground.withAlphaComponent(0.85)
+                containerView.layer.cornerRadius = 10
+                containerView.layer.borderWidth = 1
+                containerView.layer.borderColor = UIColor(white: 0, alpha: 0.1).cgColor
+                containerView.layer.shadowColor = UIColor.black.cgColor
+                containerView.layer.shadowOffset = CGSize(width: 0, height: 1)
+                containerView.layer.shadowRadius = 2
+                containerView.layer.shadowOpacity = 0.2
+                containerView.clipsToBounds = false
+
+                inputLabel.textColor = theme.keyTextColor
+                clearButton.tintColor = theme.keyTextColor.withAlphaComponent(0.5)
+                placeholderLabel.textColor = theme.keyTextColor.withAlphaComponent(0.4)
+                cursorView.backgroundColor = theme.keyTextColor.withAlphaComponent(0.6)
+                counterLabel.textColor = theme.keyTextColor.withAlphaComponent(0.35)
+            } else {
+                // 다른 프리미엄 테마: 기존 스타일
+                containerView.backgroundColor = theme.keyBackground
+                containerView.layer.cornerRadius = 8
+                containerView.layer.borderWidth = 0
+                containerView.layer.shadowOpacity = 0
+                containerView.clipsToBounds = true
+
+                inputLabel.textColor = theme.keyTextColor
+                clearButton.tintColor = theme.keyTextColor.withAlphaComponent(0.4)
+                placeholderLabel.textColor = theme.keyTextColor.withAlphaComponent(0.4)
+            }
         } else {
             backgroundColor = .clear
             containerView.backgroundColor = isDark ? UIColor(white: 0.18, alpha: 1) : UIColor(white: 0.95, alpha: 1)
+            containerView.layer.cornerRadius = 8
+            containerView.layer.borderWidth = 0
+            containerView.layer.shadowOpacity = 0
+            containerView.clipsToBounds = true
             clearButton.tintColor = isDark ? UIColor(white: 0.4, alpha: 1) : .tertiaryLabel
             inputLabel.textColor = isDark ? .white : .label
             placeholderLabel.textColor = isDark ? UIColor(white: 0.6, alpha: 1) : UIColor.placeholderText.withAlphaComponent(0.5)

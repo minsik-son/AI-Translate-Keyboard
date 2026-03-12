@@ -133,6 +133,12 @@ class TranslationLanguageBar: UIView {
         targetButton.addTarget(self, action: #selector(targetTapped), for: .touchUpInside)
         swapButton.addTarget(self, action: #selector(swapTapped), for: .touchUpInside)
         closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
+
+        // 누름 효과 등록
+        addWoodPressEffect(to: sourceButton)
+        addWoodPressEffect(to: targetButton)
+        addWoodPressEffect(to: swapButton)
+        addWoodPressEffect(to: closeButton)
     }
 
     // MARK: - Actions
@@ -164,19 +170,67 @@ class TranslationLanguageBar: UIView {
     func updateAppearance(isDark: Bool) {
         if let theme = customTheme {
             backgroundColor = theme.toolbarBackground
-            capsuleContainer.backgroundColor = theme.keyBackground
-            sourceButton.setTitleColor(theme.keyTextColor, for: .normal)
-            targetButton.setTitleColor(theme.keyTextColor, for: .normal)
-            swapButton.tintColor = theme.keyTextColor.withAlphaComponent(0.6)
-            closeButton.tintColor = theme.keyTextColor.withAlphaComponent(0.6)
+
+            if theme.hasWoodTexture {
+                // 나무 테마: 나무 블록 스타일 적용
+                capsuleContainer.backgroundColor = theme.keyBackground
+                capsuleContainer.layer.cornerRadius = 10
+                capsuleContainer.layer.borderWidth = 1
+                capsuleContainer.layer.borderColor = UIColor(white: 0, alpha: 0.15).cgColor
+                capsuleContainer.layer.shadowColor = UIColor.black.cgColor
+                capsuleContainer.layer.shadowOffset = CGSize(width: 0, height: 2)
+                capsuleContainer.layer.shadowRadius = 3
+                capsuleContainer.layer.shadowOpacity = 0.3
+                capsuleContainer.clipsToBounds = false
+
+                sourceButton.setTitleColor(theme.keyTextColor, for: .normal)
+                targetButton.setTitleColor(theme.keyTextColor, for: .normal)
+                swapButton.tintColor = theme.keyTextColor.withAlphaComponent(0.7)
+                closeButton.tintColor = theme.keyTextColor.withAlphaComponent(0.7)
+            } else {
+                // 다른 프리미엄 테마: 기존 스타일
+                capsuleContainer.backgroundColor = theme.keyBackground
+                capsuleContainer.layer.borderWidth = 0
+                capsuleContainer.layer.shadowOpacity = 0
+                capsuleContainer.clipsToBounds = true
+                capsuleContainer.layer.cornerRadius = 18
+
+                sourceButton.setTitleColor(theme.keyTextColor, for: .normal)
+                targetButton.setTitleColor(theme.keyTextColor, for: .normal)
+                swapButton.tintColor = theme.keyTextColor.withAlphaComponent(0.6)
+                closeButton.tintColor = theme.keyTextColor.withAlphaComponent(0.6)
+            }
         } else {
             backgroundColor = .clear
             capsuleContainer.backgroundColor = isDark ? UIColor(white: 0.25, alpha: 1) : .white
+            capsuleContainer.layer.borderWidth = 0
+            capsuleContainer.layer.shadowOpacity = 0
+            capsuleContainer.clipsToBounds = true
+            capsuleContainer.layer.cornerRadius = 18
             let textColor: UIColor = isDark ? .white : .label
             sourceButton.setTitleColor(textColor, for: .normal)
             targetButton.setTitleColor(textColor, for: .normal)
             swapButton.tintColor = isDark ? UIColor(white: 0.55, alpha: 1) : .secondaryLabel
             closeButton.tintColor = isDark ? UIColor(white: 0.55, alpha: 1) : .secondaryLabel
+        }
+    }
+
+    // MARK: - Wood Press Effect
+
+    private func addWoodPressEffect(to button: UIButton) {
+        button.addTarget(self, action: #selector(woodButtonDown(_:)), for: .touchDown)
+        button.addTarget(self, action: #selector(woodButtonUp(_:)), for: [.touchUpInside, .touchUpOutside, .touchCancel])
+    }
+
+    @objc private func woodButtonDown(_ sender: UIButton) {
+        UIView.animate(withDuration: 0.08) {
+            sender.alpha = 0.6
+        }
+    }
+
+    @objc private func woodButtonUp(_ sender: UIButton) {
+        UIView.animate(withDuration: 0.15) {
+            sender.alpha = 1.0
         }
     }
 }
