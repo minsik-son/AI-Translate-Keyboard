@@ -1123,36 +1123,48 @@ class KeyboardLayoutView: UIView {
 
     /// Brief background color flash — no transform, no animation delay, no coordinate disruption
     private func flashButton(_ button: UIButton) {
-        let original = button.backgroundColor ?? .clear
         let flashColor: UIColor
 
         if let theme = customTheme {
             if theme.hasWoodTexture {
                 flashColor = UIColor(white: 1.0, alpha: 0.15)
             } else {
-                flashColor = theme.keyBackground.withAlphaComponent(0.4)
+                // 키 배경 밝기 기준으로 자동 판단
+                var brightness: CGFloat = 0
+                theme.keyBackground.getHue(nil, saturation: nil, brightness: &brightness, alpha: nil)
+                if brightness > 0.5 {
+                    flashColor = UIColor(white: 0.0, alpha: 0.12)  // 밝은 키 → 어두운 플래시
+                } else {
+                    flashColor = UIColor(white: 1.0, alpha: 0.25)  // 어두운 키 → 밝은 플래시
+                }
             }
         } else {
             flashColor = isDark ? UIColor(white: 0.5, alpha: 1) : UIColor(white: 0.65, alpha: 1)
         }
 
-        if let theme = customTheme, theme.hasWoodTexture {
+        if customTheme != nil {
+            // 프리미엄/나무 테마: 오버레이 UIView 방식 통일
             let flashView = UIView(frame: button.bounds)
             flashView.backgroundColor = flashColor
             flashView.layer.cornerRadius = Layout.cornerRadius
+            flashView.clipsToBounds = true
+            flashView.isUserInteractionEnabled = false
             flashView.tag = 9999
+            flashView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
             button.addSubview(flashView)
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                 flashView.removeFromSuperview()
             }
         } else {
+            // 기본 테마 (customTheme == nil)
+            let original = button.backgroundColor ?? .clear
             CATransaction.begin()
             CATransaction.setDisableActions(true)
             button.backgroundColor = flashColor
             CATransaction.commit()
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                 CATransaction.begin()
                 CATransaction.setDisableActions(true)
                 button.backgroundColor = original
