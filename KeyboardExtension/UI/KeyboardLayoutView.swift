@@ -77,6 +77,7 @@ class KeyboardLayoutView: UIView {
     private var currentPage: KeyboardPage = .letters
     private var isShifted = false
     private var isDark = false
+    private var pendingBuildWork: DispatchWorkItem?
     private var customTheme: KeyboardTheme?
     private var gradientLayer: CAGradientLayer?
     private var patternImageView: UIImageView?
@@ -297,8 +298,21 @@ class KeyboardLayoutView: UIView {
 
     // MARK: - Build Keyboard
 
+    private func scheduleBuildKeyboard(delay: TimeInterval = 0.08) {
+        pendingBuildWork?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            self?.buildKeyboard()
+            self?.pendingBuildWork = nil
+        }
+        pendingBuildWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: work)
+    }
+
     private func buildKeyboard() {
         guard !isTrackpadMode else { return }  // 트랙패드 중 재빌드 방지
+        // 예약된 build가 있으면 취소 (직접 호출 시 중복 방지)
+        pendingBuildWork?.cancel()
+        pendingBuildWork = nil
         isRebuilding = true
         keyboardContainer.subviews.forEach { $0.removeFromSuperview() }
         allKeyButtons.removeAll()
@@ -1016,20 +1030,20 @@ class KeyboardLayoutView: UIView {
         switch key {
         case Self.shiftKey:
             isShifted.toggle()
-            buildKeyboard()
+            scheduleBuildKeyboard()
 
         case Self.langKR:
             currentLanguage = .korean
             isShifted = false
             currentPage = .letters
-            buildKeyboard()
+            scheduleBuildKeyboard()
             onLanguageChanged?(.korean)
 
         case Self.langEN:
             currentLanguage = .english
             isShifted = false
             currentPage = .letters
-            buildKeyboard()
+            scheduleBuildKeyboard()
             onLanguageChanged?(.english)
 
         case Self.globeLangKey:
@@ -1043,35 +1057,35 @@ class KeyboardLayoutView: UIView {
             }
             isShifted = false
             currentPage = .letters
-            buildKeyboard()
+            scheduleBuildKeyboard()
 
         case Self.symbolToggleKey:
             currentPage = .symbols1
-            buildKeyboard()
+            scheduleBuildKeyboard()
 
         case Self.symbolKey:
             currentPage = .symbols1
-            buildKeyboard()
+            scheduleBuildKeyboard()
 
         case Self.moreSymKey:
             currentPage = .symbols2
-            buildKeyboard()
+            scheduleBuildKeyboard()
 
         case Self.abcKey:
             currentPage = .letters
             isShifted = false
-            buildKeyboard()
+            scheduleBuildKeyboard()
 
         default:
             onKeyTap?(key)
             if isShifted && !Self.specialKeys.contains(key) && currentPage == .letters {
                 isShifted = false
-                buildKeyboard()
+                scheduleBuildKeyboard()
             }
             // ' 키 입력 후 자동으로 문자 키보드로 복귀
             if key == "'" && (currentPage == .symbols1 || currentPage == .symbols2) {
                 currentPage = .letters
-                buildKeyboard()
+                scheduleBuildKeyboard()
             }
         }
     }
@@ -1235,13 +1249,47 @@ class KeyboardLayoutView: UIView {
             default: fontSize = Layout.letterFontSize
             }
 
+            // === 음각 효과: 3레이어 구조 ===
+            // Layer 1 (최하단): 밝은 하이라이트 (파인 바닥의 빛 반사)
+            // Layer 2 (중간): 어두운 그림자 (파인 위쪽 엣지)
+            // Layer 3 (최상단): 실제 텍스트
+
+            // 기존 하이라이트 라벨 제거 (재적용 방지)
+            button.viewWithTag(9903)?.removeFromSuperview()
+
+            // --- Layer 1: 하이라이트 라벨 (UILabel로 직접 추가) ---
+            if theme.textHighlightColor != .clear {
+                let highlightLabel = UILabel()
+                highlightLabel.tag = 9903
+                highlightLabel.text = title
+                highlightLabel.font = UIFont.systemFont(ofSize: fontSize, weight: .semibold)
+                highlightLabel.textColor = theme.textHighlightColor
+                highlightLabel.textAlignment = .center
+                highlightLabel.isUserInteractionEnabled = false
+                highlightLabel.translatesAutoresizingMaskIntoConstraints = false
+
+                button.addSubview(highlightLabel)
+                NSLayoutConstraint.activate([
+                    highlightLabel.centerXAnchor.constraint(equalTo: button.centerXAnchor,
+                        constant: theme.textHighlightOffset.width),
+                    highlightLabel.centerYAnchor.constraint(equalTo: button.centerYAnchor,
+                        constant: theme.textHighlightOffset.height),
+                ])
+
+                // titleLabel 아래에 배치
+                if let titleLabel = button.titleLabel {
+                    button.bringSubviewToFront(titleLabel)
+                }
+            }
+
+            // --- Layer 2+3: 그림자 + 텍스트 (NSAttributedString) ---
             let shadow = NSShadow()
             shadow.shadowColor = theme.textShadowColor
             shadow.shadowOffset = theme.textShadowOffset
-            shadow.shadowBlurRadius = 1.0
+            shadow.shadowBlurRadius = 1.5
 
             let attrs: [NSAttributedString.Key: Any] = [
-                .font: UIFont.systemFont(ofSize: fontSize, weight: .medium),
+                .font: UIFont.systemFont(ofSize: fontSize, weight: .semibold),
                 .foregroundColor: theme.keyTextColor,
                 .shadow: shadow,
             ]
@@ -1249,11 +1297,12 @@ class KeyboardLayoutView: UIView {
             button.setAttributedTitle(NSAttributedString(string: title, attributes: attrs), for: .normal)
         }
 
+        // 아이콘(이미지)에도 음각 효과 강화
         if button.image(for: .normal) != nil {
             button.tintColor = theme.keyTextColor
             button.imageView?.layer.shadowColor = theme.textShadowColor.cgColor
             button.imageView?.layer.shadowOffset = theme.textShadowOffset
-            button.imageView?.layer.shadowRadius = 1.0
+            button.imageView?.layer.shadowRadius = 1.5
             button.imageView?.layer.shadowOpacity = 1.0
         }
     }

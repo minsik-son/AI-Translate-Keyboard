@@ -474,9 +474,9 @@ extension KeyboardTheme {
             shadowColor: UIColor(red: 0.12, green: 0.07, blue: 0.04, alpha: 0.65),
             highlightAlpha: 0.04
         ),
-        textShadowColor: UIColor(white: 0, alpha: 0.6),
+        textShadowColor: UIColor(white: 0, alpha: 0.7),
         textShadowOffset: CGSize(width: 0, height: -1),
-        textHighlightColor: UIColor(white: 1.0, alpha: 0.12),
+        textHighlightColor: UIColor(white: 1.0, alpha: 0.25),
         textHighlightOffset: CGSize(width: 0, height: 1),
         woodTileImageName: "wood_tile_dark"
     )
@@ -508,9 +508,9 @@ extension KeyboardTheme {
             shadowColor: UIColor(red: 0.47, green: 0.35, blue: 0.20, alpha: 0.35),
             highlightAlpha: 0.04
         ),
-        textShadowColor: UIColor(white: 0, alpha: 0.15),
+        textShadowColor: UIColor(white: 0, alpha: 0.25),
         textShadowOffset: CGSize(width: 0, height: -1),
-        textHighlightColor: UIColor(white: 1.0, alpha: 0.30),
+        textHighlightColor: UIColor(white: 1.0, alpha: 0.45),
         textHighlightOffset: CGSize(width: 0, height: 1),
         woodTileImageName: "wood_tile_light"
     )
