@@ -83,8 +83,12 @@ extension ThemeSelectionViewController: UICollectionViewDataSource, UICollection
             theme = premiumThemes[indexPath.item]
         }
 
+        #if DEBUG
+        let isLocked = false
+        #else
         let isPro = SubscriptionStatus.shared.isPro
         let isLocked = theme.isPremium && !isPro
+        #endif
         let isSelected = theme.id == selectedThemeId
 
         if indexPath.section == 1 {
@@ -135,15 +139,18 @@ extension ThemeSelectionViewController: UICollectionViewDataSource, UICollection
             theme = premiumThemes[indexPath.item]
         }
 
+        #if DEBUG
+        // 개발 모드: Paywall 건너뜀
+        #else
         let isPro = SubscriptionStatus.shared.isPro
         if theme.isPremium && !isPro {
             guard self.presentedViewController == nil else { return }
-
             let paywallVC = PaywallViewController()
             paywallVC.modalPresentationStyle = .pageSheet
             self.present(paywallVC, animated: true)
             return
         }
+        #endif
 
         let previousId = selectedThemeId
         selectedThemeId = theme.id
@@ -559,7 +566,7 @@ private class PremiumThemeCell: UICollectionViewCell {
     private var bottomKeyLabels: [UILabel] = []
 
     private var rowStacks: [UIStackView] = []
-    private var bottomStack: UIStackView!
+    private var bottomRow: UIView!
 
     private let nameLabel: UILabel = {
         let l = UILabel()
@@ -695,10 +702,8 @@ private class PremiumThemeCell: UICollectionViewCell {
         }
 
         // Bottom row
-        bottomStack = UIStackView()
-        bottomStack.axis = .horizontal
-        bottomStack.spacing = 2
-        bottomStack.translatesAutoresizingMaskIntoConstraints = false
+        bottomRow = UIView()
+        bottomRow.translatesAutoresizingMaskIntoConstraints = false
 
         let numLabel = makeKeyLabel(text: "123", isSpecial: true)
         let globeLabel = makeKeyLabel(text: "🌐", isSpecial: true)
@@ -708,12 +713,11 @@ private class PremiumThemeCell: UICollectionViewCell {
 
         bottomKeyLabels = [numLabel, globeLabel, spaceLabel, periodLabel, returnLabel]
 
-        bottomStack.addArrangedSubview(numLabel)
-        bottomStack.addArrangedSubview(globeLabel)
-        bottomStack.addArrangedSubview(spaceLabel)
-        bottomStack.addArrangedSubview(periodLabel)
-        bottomStack.addArrangedSubview(returnLabel)
-        previewContainer.addSubview(bottomStack)
+        for label in bottomKeyLabels {
+            bottomRow.addSubview(label)
+        }
+
+        previewContainer.addSubview(bottomRow)
 
         // Lock overlay
         previewContainer.addSubview(lockOverlay)
@@ -794,20 +798,46 @@ private class PremiumThemeCell: UICollectionViewCell {
             }
         }
 
-        // Bottom stack
+        // Bottom row container
         NSLayoutConstraint.activate([
-            bottomStack.leadingAnchor.constraint(equalTo: previewContainer.leadingAnchor, constant: 4),
-            bottomStack.trailingAnchor.constraint(equalTo: previewContainer.trailingAnchor, constant: -4),
-            bottomStack.topAnchor.constraint(equalTo: rowStacks.last!.bottomAnchor, constant: 3),
-            bottomStack.bottomAnchor.constraint(equalTo: previewContainer.bottomAnchor, constant: -6),
+            bottomRow.leadingAnchor.constraint(equalTo: previewContainer.leadingAnchor, constant: 4),
+            bottomRow.trailingAnchor.constraint(equalTo: previewContainer.trailingAnchor, constant: -4),
+            bottomRow.topAnchor.constraint(equalTo: rowStacks.last!.bottomAnchor, constant: 3),
+            bottomRow.bottomAnchor.constraint(equalTo: previewContainer.bottomAnchor, constant: -6),
         ])
 
-        // Space key width proportional
-        if bottomKeyLabels.count >= 5 {
-            let spaceLabel = bottomKeyLabels[2]
-            let numLabel = bottomKeyLabels[0]
-            spaceLabel.widthAnchor.constraint(equalTo: numLabel.widthAnchor, multiplier: 3.5).isActive = true
-        }
+        // Bottom row labels — pure Auto Layout chaining + ratio constraints
+        let spacing: CGFloat = 2
+        let numL = bottomKeyLabels[0]
+        let globeL = bottomKeyLabels[1]
+        let spaceL = bottomKeyLabels[2]
+        let periodL = bottomKeyLabels[3]
+        let returnL = bottomKeyLabels[4]
+
+        NSLayoutConstraint.activate([
+            numL.topAnchor.constraint(equalTo: bottomRow.topAnchor),
+            numL.bottomAnchor.constraint(equalTo: bottomRow.bottomAnchor),
+            globeL.topAnchor.constraint(equalTo: bottomRow.topAnchor),
+            globeL.bottomAnchor.constraint(equalTo: bottomRow.bottomAnchor),
+            spaceL.topAnchor.constraint(equalTo: bottomRow.topAnchor),
+            spaceL.bottomAnchor.constraint(equalTo: bottomRow.bottomAnchor),
+            periodL.topAnchor.constraint(equalTo: bottomRow.topAnchor),
+            periodL.bottomAnchor.constraint(equalTo: bottomRow.bottomAnchor),
+            returnL.topAnchor.constraint(equalTo: bottomRow.topAnchor),
+            returnL.bottomAnchor.constraint(equalTo: bottomRow.bottomAnchor),
+
+            numL.leadingAnchor.constraint(equalTo: bottomRow.leadingAnchor),
+            globeL.leadingAnchor.constraint(equalTo: numL.trailingAnchor, constant: spacing),
+            spaceL.leadingAnchor.constraint(equalTo: globeL.trailingAnchor, constant: spacing),
+            periodL.leadingAnchor.constraint(equalTo: spaceL.trailingAnchor, constant: spacing),
+            returnL.leadingAnchor.constraint(equalTo: periodL.trailingAnchor, constant: spacing),
+            returnL.trailingAnchor.constraint(equalTo: bottomRow.trailingAnchor),
+
+            globeL.widthAnchor.constraint(equalTo: numL.widthAnchor, multiplier: 0.8),
+            spaceL.widthAnchor.constraint(equalTo: numL.widthAnchor, multiplier: 4.0),
+            periodL.widthAnchor.constraint(equalTo: numL.widthAnchor, multiplier: 0.6),
+            returnL.widthAnchor.constraint(equalTo: numL.widthAnchor, multiplier: 1.2),
+        ])
 
         cardView.layer.borderWidth = 1
         cardView.layer.borderColor = UIColor.clear.cgColor

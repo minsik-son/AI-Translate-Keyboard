@@ -30,7 +30,11 @@ final class SubscriptionStatus {
     }
 
     var isPro: Bool {
+        #if DEBUG
+        return true
+        #else
         return currentTier == .pro || currentTier == .premium
+        #endif
     }
 
     func updateTier(_ tier: UserTier, expiryDate: Date? = nil) {
