@@ -32,6 +32,8 @@ final class ThemePatternRenderer {
                 drawBubbles(in: ctx.cgContext, rect: rect, tint: tint, opacity: opacity)
             case .woodGrain:
                 drawWoodGrain(in: ctx.cgContext, rect: rect, tint: tint, opacity: opacity)
+            case .matrixRain:
+                drawMatrixRain(in: ctx.cgContext, rect: rect, tint: tint, opacity: opacity)
             case .none:
                 break
             }
@@ -179,6 +181,30 @@ final class ThemePatternRenderer {
                 iy += 1
             }
             ix += 1
+        }
+    }
+
+    private static func drawMatrixRain(in ctx: CGContext, rect: CGRect, tint: UIColor, opacity: CGFloat) {
+        let cols = 16
+        let rows = 16
+        let cellW = rect.width / CGFloat(cols)
+        let cellH = rect.height / CGFloat(rows)
+
+        for col in 0..<cols {
+            for row in 0..<rows {
+                let hash = ((col &* 31) &+ (row &* 17) &+ 7) % 23
+                guard hash < 8 else { continue }
+
+                let intensity = CGFloat(hash + 1) / 8.0
+                let alpha = opacity * intensity * 0.6
+
+                let x = CGFloat(col) * cellW + cellW * 0.3
+                let y = CGFloat(row) * cellH + cellH * 0.3
+                let dotSize = cellW * 0.4 * intensity
+
+                ctx.setFillColor(tint.withAlphaComponent(alpha).cgColor)
+                ctx.fill(CGRect(x: x, y: y, width: dotSize, height: dotSize * 1.5))
+            }
         }
     }
 }

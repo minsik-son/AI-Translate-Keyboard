@@ -31,6 +31,7 @@ enum PatternStyle {
     case petals
     case bubbles
     case woodGrain
+    case matrixRain
 }
 
 enum KeyVisualStyle {
@@ -77,7 +78,11 @@ struct KeyboardTheme {
     // 나무 텍스처 타일
     let woodTileImageName: String?
 
+    // 웨이브 애니메이션 (Matrix Pulse)
+    let hasWaveAnimation: Bool
+
     var hasWoodTexture: Bool { woodTileImageName != nil }
+    var needsWaveAnimation: Bool { hasWaveAnimation }
 
     var hasGradient: Bool {
         guard let colors = gradientColors else { return false }
@@ -113,6 +118,7 @@ extension KeyboardTheme {
         self.textHighlightColor = .clear
         self.textHighlightOffset = .zero
         self.woodTileImageName = nil
+        self.hasWaveAnimation = false
     }
 }
 
@@ -327,7 +333,8 @@ extension KeyboardTheme {
         textShadowOffset: .zero,
         textHighlightColor: .clear,
         textHighlightOffset: .zero,
-        woodTileImageName: nil
+        woodTileImageName: nil,
+        hasWaveAnimation: false
     )
 
     static let premiumVolcanicEmber = KeyboardTheme(
@@ -350,7 +357,8 @@ extension KeyboardTheme {
         textShadowOffset: .zero,
         textHighlightColor: .clear,
         textHighlightOffset: .zero,
-        woodTileImageName: nil
+        woodTileImageName: nil,
+        hasWaveAnimation: false
     )
 
     static let premiumNorthernLights = KeyboardTheme(
@@ -373,7 +381,8 @@ extension KeyboardTheme {
         textShadowOffset: .zero,
         textHighlightColor: .clear,
         textHighlightOffset: .zero,
-        woodTileImageName: nil
+        woodTileImageName: nil,
+        hasWaveAnimation: false
     )
 
     static let premiumBrushedSteel = KeyboardTheme(
@@ -396,7 +405,8 @@ extension KeyboardTheme {
         textShadowOffset: .zero,
         textHighlightColor: .clear,
         textHighlightOffset: .zero,
-        woodTileImageName: nil
+        woodTileImageName: nil,
+        hasWaveAnimation: false
     )
 
     static let premiumSakuraBreeze = KeyboardTheme(
@@ -419,7 +429,8 @@ extension KeyboardTheme {
         textShadowOffset: .zero,
         textHighlightColor: .clear,
         textHighlightOffset: .zero,
-        woodTileImageName: nil
+        woodTileImageName: nil,
+        hasWaveAnimation: false
     )
 
     static let premiumDeepOcean = KeyboardTheme(
@@ -442,7 +453,34 @@ extension KeyboardTheme {
         textShadowOffset: .zero,
         textHighlightColor: .clear,
         textHighlightOffset: .zero,
-        woodTileImageName: nil
+        woodTileImageName: nil,
+        hasWaveAnimation: false
+    )
+
+    // MARK: - Animated Premium Themes
+
+    static let premiumMatrixPulse = KeyboardTheme(
+        id: "premium_matrix_pulse",
+        displayName: L("theme.premium_matrix_pulse"),
+        keyboardBackground: UIColor(hex: "#000000"),
+        keyBackground: UIColor(hex: "#00FF41").withAlphaComponent(0.08),
+        specialKeyBackground: UIColor(hex: "#00FF41").withAlphaComponent(0.15),
+        keyTextColor: UIColor(hex: "#00FF41"),
+        toolbarBackground: .clear,
+        gradientColors: [UIColor(hex: "#000000"), UIColor(hex: "#001A00"), UIColor(hex: "#000000")],
+        gradientLocations: [0, 0.5, 1.0],
+        gradientDirection: .topToBottom,
+        patternStyle: .matrixRain,
+        patternOpacity: 0.12,
+        patternTint: UIColor(hex: "#00FF41"),
+        keyVisualStyle: .translucent(alpha: 0.08, tint: UIColor(hex: "#00FF41")),
+        specialKeyVisualStyle: .translucent(alpha: 0.15, tint: UIColor(hex: "#00FF41")),
+        textShadowColor: .clear,
+        textShadowOffset: .zero,
+        textHighlightColor: .clear,
+        textHighlightOffset: .zero,
+        woodTileImageName: nil,
+        hasWaveAnimation: true
     )
 
     // MARK: - Wood Premium Themes
@@ -478,7 +516,8 @@ extension KeyboardTheme {
         textShadowOffset: CGSize(width: 0, height: -1),
         textHighlightColor: UIColor(white: 1.0, alpha: 0.25),
         textHighlightOffset: CGSize(width: 0, height: 1),
-        woodTileImageName: "wood_tile_dark"
+        woodTileImageName: "wood_tile_dark",
+        hasWaveAnimation: false
     )
 
     static let premiumNaturalOak = KeyboardTheme(
@@ -512,7 +551,8 @@ extension KeyboardTheme {
         textShadowOffset: CGSize(width: 0, height: -1),
         textHighlightColor: UIColor(white: 1.0, alpha: 0.45),
         textHighlightOffset: CGSize(width: 0, height: 1),
-        woodTileImageName: "wood_tile_light"
+        woodTileImageName: "wood_tile_light",
+        hasWaveAnimation: false
     )
 
     static let allPremiumThemes: [KeyboardTheme] = [
@@ -520,7 +560,8 @@ extension KeyboardTheme {
         .premiumSunsetEmber, .premiumFrostCrystal,
         .premiumStarlitNight, .premiumVolcanicEmber, .premiumNorthernLights,
         .premiumBrushedSteel, .premiumSakuraBreeze, .premiumDeepOcean,
-        .premiumDarkWalnut, .premiumNaturalOak
+        .premiumDarkWalnut, .premiumNaturalOak,
+        .premiumMatrixPulse
     ]
 
     static let allThemesIncludingPremium: [KeyboardTheme] = allThemes + allPremiumThemes

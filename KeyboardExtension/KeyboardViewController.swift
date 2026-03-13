@@ -141,11 +141,23 @@ class KeyboardViewController: UIInputViewController {
         setupCallbacks()
         switchMode(to: .defaultMode)
         restoreState()
+
+        // 저전력 모드 변경 감지
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(powerStateDidChange),
+            name: .NSProcessInfoPowerStateDidChange,
+            object: nil
+        )
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         ThemePatternRenderer.clearCache()
+    }
+
+    @objc private func powerStateDidChange() {
+        keyboardLayoutView.handlePowerStateChange()
     }
 
     override func viewWillAppear(_ animated: Bool) {

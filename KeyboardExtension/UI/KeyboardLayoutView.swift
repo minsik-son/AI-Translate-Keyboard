@@ -83,6 +83,12 @@ class KeyboardLayoutView: UIView {
     private var patternImageView: UIImageView?
     private var woodTileImageView: UIImageView?
 
+    // Matrix Pulse 웨이브 애니메이션
+    private var waveDisplayLink: CADisplayLink?
+    private var waveStartTime: CFTimeInterval = 0
+    private var cachedKeyProjections: [(button: UIButton, projection: CGFloat)] = []
+    private var isWaveAnimationActive = false
+
     // Backspace long-press repeat
     private var backspaceTimer: Timer?
     private var backspaceRepeatTimer: Timer?
@@ -314,6 +320,10 @@ class KeyboardLayoutView: UIView {
         pendingBuildWork?.cancel()
         pendingBuildWork = nil
         isRebuilding = true
+
+        // 웨이브 projection 캐시 즉시 정리 — 버튼 제거 전에 stale 참조 방지
+        cachedKeyProjections.removeAll()
+
         keyboardContainer.subviews.forEach { $0.removeFromSuperview() }
         allKeyButtons.removeAll()
 
@@ -358,6 +368,13 @@ class KeyboardLayoutView: UIView {
 
         keyboardContainer.layoutIfNeeded()
         isRebuilding = false
+
+        // Wave animation: 빌드 완료 후 웨이브 재시작/정지
+        if let theme = customTheme, theme.needsWaveAnimation {
+            restartWaveAnimationAfterBuild()
+        } else if isWaveAnimationActive {
+            stopWaveAnimation()
+        }
     }
 
     private func buildRow(keys: [String], rowIndex: Int, totalRows: Int) -> UIView {
@@ -1142,6 +1159,8 @@ class KeyboardLayoutView: UIView {
         if let theme = customTheme {
             if theme.hasWoodTexture {
                 flashColor = UIColor(white: 1.0, alpha: 0.15)
+            } else if theme.needsWaveAnimation {
+                flashColor = UIColor(hex: "#00FF41").withAlphaComponent(0.35)
             } else {
                 // 키 배경 밝기 기준으로 자동 판단
                 var brightness: CGFloat = 0
@@ -1326,6 +1345,10 @@ class KeyboardLayoutView: UIView {
 
     private func enterTrackpadMode() {
         guard !isTrackpadMode else { return }
+        // 트랙패드 중에는 웨이브 애니메이션 불필요 — CPU 절약
+        if isWaveAnimationActive {
+            stopWaveAnimation()
+        }
         isTrackpadMode = true
         selectionHaptic.prepare()
 
@@ -1528,6 +1551,172 @@ class KeyboardLayoutView: UIView {
                 }
             }
         }
+
+        // Wave animation projection 재계산
+        if isWaveAnimationActive {
+            rebuildKeyProjections()
+        }
+    }
+
+    // MARK: - Wave Animation (Matrix Pulse)
+
+    // 웨이브 색상 캐싱 — 매 프레임 UIColor 할당 방지
+    private static let waveBaseColor = UIColor(hex: "#00AA20")
+    private static let wavePeakColor = UIColor(hex: "#00FF41")
+    private static let waveGlowColor = UIColor(hex: "#66FF88")
+
+    /// buildKeyboard() 완료 후 호출 — 새 버튼 목록에 맞춰 웨이브 갱신
+    private func restartWaveAnimationAfterBuild() {
+        guard let theme = customTheme, theme.needsWaveAnimation else {
+            stopWaveAnimation()
+            return
+        }
+        guard !ProcessInfo.processInfo.isLowPowerModeEnabled else {
+            stopWaveAnimation()
+            return
+        }
+
+        if isWaveAnimationActive {
+            // 이미 실행 중이면 projection만 재계산 (DisplayLink 유지)
+            rebuildKeyProjections()
+        } else {
+            // 아직 시작 안 됐으면 새로 시작
+            startWaveAnimationIfNeeded()
+        }
+    }
+
+    private func startWaveAnimationIfNeeded() {
+        guard let theme = customTheme, theme.needsWaveAnimation else {
+            stopWaveAnimation()
+            return
+        }
+        guard !ProcessInfo.processInfo.isLowPowerModeEnabled else { return }
+        guard !isWaveAnimationActive else { return }
+
+        // 안전장치: 이전 displayLink가 남아있으면 정리
+        waveDisplayLink?.invalidate()
+        waveDisplayLink = nil
+
+        isWaveAnimationActive = true
+        waveStartTime = CACurrentMediaTime()
+        rebuildKeyProjections()
+
+        let dl = CADisplayLink(target: self, selector: #selector(waveAnimationTick))
+        if #available(iOS 15.0, *) {
+            dl.preferredFrameRateRange = CAFrameRateRange(minimum: 15, maximum: 30, preferred: 24)
+        } else {
+            dl.preferredFramesPerSecond = 24
+        }
+        dl.add(to: .main, forMode: .common)
+        waveDisplayLink = dl
+    }
+
+    private func stopWaveAnimation() {
+        guard isWaveAnimationActive else { return }
+        isWaveAnimationActive = false
+        waveDisplayLink?.invalidate()
+        waveDisplayLink = nil
+        cachedKeyProjections = []
+
+        if let theme = customTheme {
+            for button in allKeyButtons {
+                button.setTitleColor(theme.keyTextColor, for: .normal)
+            }
+        }
+    }
+
+    private func rebuildKeyProjections() {
+        cachedKeyProjections.removeAll(keepingCapacity: true)
+        guard !allKeyButtons.isEmpty else { return }
+
+        let dirX: CGFloat = 0.5
+        let dirY: CGFloat = 0.866
+
+        let kbBounds = bounds
+        guard kbBounds.width > 0, kbBounds.height > 0 else { return }
+
+        let maxDist = kbBounds.width * dirX + kbBounds.height * dirY
+
+        for button in allKeyButtons {
+            let center = button.superview?.convert(button.center, to: self) ?? button.center
+            let proj = (center.x * dirX + center.y * dirY) / maxDist
+            cachedKeyProjections.append((button: button, projection: proj))
+        }
+    }
+
+    @objc private func waveAnimationTick() {
+        guard isWaveAnimationActive, let _ = customTheme else { return }
+
+        if ProcessInfo.processInfo.isLowPowerModeEnabled {
+            stopWaveAnimation()
+            return
+        }
+
+        let elapsed = CACurrentMediaTime() - waveStartTime
+        let wavePeriod: Double = 3.5
+        let waveWidth: CGFloat = 0.25
+
+        let phase = CGFloat(elapsed.truncatingRemainder(dividingBy: wavePeriod) / wavePeriod)
+        let waveFront = phase * (1.0 + waveWidth * 2) - waveWidth
+
+        let baseColor = Self.waveBaseColor
+        let peakColor = Self.wavePeakColor
+        let glowColor = Self.waveGlowColor
+
+        for (button, proj) in cachedKeyProjections {
+            let dist = abs(proj - waveFront)
+
+            let intensity: CGFloat
+            if dist < waveWidth {
+                intensity = (cos(dist / waveWidth * .pi) + 1.0) / 2.0
+            } else {
+                intensity = 0
+            }
+
+            let titleColor: UIColor
+            if intensity > 0.8 {
+                let t = (intensity - 0.8) / 0.2
+                titleColor = interpolateColor(from: peakColor, to: glowColor, t: t)
+            } else if intensity > 0 {
+                let t = intensity / 0.8
+                titleColor = interpolateColor(from: baseColor, to: peakColor, t: t)
+            } else {
+                titleColor = baseColor
+            }
+
+            if button.titleColor(for: .normal) != titleColor {
+                button.setTitleColor(titleColor, for: .normal)
+            }
+        }
+    }
+
+    private func interpolateColor(from: UIColor, to: UIColor, t: CGFloat) -> UIColor {
+        var r1: CGFloat = 0, g1: CGFloat = 0, b1: CGFloat = 0, a1: CGFloat = 0
+        var r2: CGFloat = 0, g2: CGFloat = 0, b2: CGFloat = 0, a2: CGFloat = 0
+        from.getRed(&r1, green: &g1, blue: &b1, alpha: &a1)
+        to.getRed(&r2, green: &g2, blue: &b2, alpha: &a2)
+
+        let clampedT = min(max(t, 0), 1)
+        return UIColor(
+            red: r1 + (r2 - r1) * clampedT,
+            green: g1 + (g2 - g1) * clampedT,
+            blue: b1 + (b2 - b1) * clampedT,
+            alpha: a1 + (a2 - a1) * clampedT
+        )
+    }
+
+    func handlePowerStateChange() {
+        if ProcessInfo.processInfo.isLowPowerModeEnabled {
+            stopWaveAnimation()
+        } else if let theme = customTheme, theme.needsWaveAnimation {
+            startWaveAnimationIfNeeded()
+        }
+    }
+
+    deinit {
+        stopWaveAnimation()
+        waveDisplayLink?.invalidate()
+        waveDisplayLink = nil
     }
 
     func getCurrentLanguage() -> KeyboardLanguage {
