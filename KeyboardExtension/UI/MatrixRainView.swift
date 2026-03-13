@@ -67,22 +67,22 @@ final class MatrixRainView: UIView {
             let t = CGFloat(i) / 19.0
             let r: CGFloat, g: CGFloat, b: CGFloat, a: CGFloat
             if t < 0.05 {
-                // Head: 은은한 밝은 초록 (기존 대비 ~45% 밝기)
-                r = 0.15; g = 0.55; b = 0.20; a = 0.45
+                // Head: 은은한 밝은 초록 (소폭 밝기 증가)
+                r = 0.18; g = 0.65; b = 0.22; a = 0.55
             } else if t < 0.15 {
                 // Near head: 초록 전이 (은은하게)
                 let fade = (t - 0.05) / 0.10
-                r = 0.15 - fade * 0.15
-                g = 0.55 - fade * 0.15
-                b = 0.20 - fade * 0.12
-                a = 0.45 - fade * 0.10
+                r = 0.18 - fade * 0.18
+                g = 0.65 - fade * 0.17
+                b = 0.22 - fade * 0.14
+                a = 0.55 - fade * 0.12
             } else {
-                // Trail: 매우 어두운 초록으로 페이드
+                // Trail: 어두운 초록으로 페이드 (소폭 밝기 증가)
                 let fade = (t - 0.15) / 0.85
                 r = 0.0
-                g = 0.40 - fade * 0.30
-                b = 0.08 - fade * 0.05
-                a = max(0.35 - fade * 0.30, 0.03)
+                g = 0.48 - fade * 0.36
+                b = 0.10 - fade * 0.06
+                a = max(0.43 - fade * 0.36, 0.05)
             }
             colors.append((r, g, b, a))
         }
@@ -222,8 +222,8 @@ final class MatrixRainView: UIView {
         let chars = (0..<maxVisibleChars).map { _ in
             Int.random(in: 0..<Self.characters.count)
         }
-        let speed = CGFloat.random(in: 70...180)
-        let trailLength = CGFloat.random(in: 200...250)
+        let speed = CGFloat.random(in: 150...220)// 이전값 120...200
+        let trailLength = CGFloat.random(in: 250...300)
         let startY: CGFloat = staggered
             ? -CGFloat.random(in: 0...(viewHeight * 2.5))
             : -CGFloat.random(in: 20...120)
