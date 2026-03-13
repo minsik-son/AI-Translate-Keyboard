@@ -582,7 +582,7 @@ extension KeyboardTheme {
         woodTileImageName: nil,
         hasWaveAnimation: false,
         hasRainAnimation: true,
-        returnKeyAccentColor: UIColor(hex: "#00FF41").withAlphaComponent(0.25),
+        returnKeyAccentColor: UIColor(hex: "#00FF41").withAlphaComponent(0.08),
         returnKeyAccentTextColor: .white
     )
 
