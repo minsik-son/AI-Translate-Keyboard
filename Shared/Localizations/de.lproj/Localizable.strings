@@ -39,6 +39,8 @@
 "onboarding.cta.go_settings" = "Zu den Einstellungen";
 "onboarding.cta.done_settings" = "Einrichtung abgeschlossen";
 "onboarding.cta.next" = "Weiter";
+"onboarding.cta.reopen_settings" = "Einstellungen erneut öffnen";
+"onboarding.cta.back_to_settings" = "Zurück zu Einstellungen";
 "onboarding.verify.title" = "Überprüfen wir, ob die Tastatur eingerichtet ist!";
 "onboarding.verify.instruction" = "Tippen Sie auf das Feld unten und wechseln Sie mit 🌐 zu unserer Tastatur";
 "onboarding.verify.placeholder" = "Tippen Sie hier zum Schreiben";

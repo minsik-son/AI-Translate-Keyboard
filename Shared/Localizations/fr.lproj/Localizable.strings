@@ -39,6 +39,8 @@
 "onboarding.cta.go_settings" = "Aller aux réglages";
 "onboarding.cta.done_settings" = "J'ai terminé la configuration";
 "onboarding.cta.next" = "Suivant";
+"onboarding.cta.reopen_settings" = "Rouvrir les Réglages";
+"onboarding.cta.back_to_settings" = "Retour aux Réglages";
 "onboarding.verify.title" = "Vérifions si le clavier est bien configuré !";
 "onboarding.verify.instruction" = "Appuyez sur le champ ci-dessous et passez à notre clavier avec 🌐";
 "onboarding.verify.placeholder" = "Appuyez ici pour taper";

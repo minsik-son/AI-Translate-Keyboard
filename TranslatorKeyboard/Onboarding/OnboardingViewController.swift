@@ -34,6 +34,18 @@ class OnboardingViewController: UIViewController {
         return btn
     }()
 
+    private let secondaryButton: UIButton = {
+        let btn = UIButton(type: .system)
+        btn.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        btn.setTitleColor(.systemBlue, for: .normal)
+        btn.backgroundColor = .clear
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        btn.isHidden = true
+        return btn
+    }()
+
+    private var secondaryButtonHeightConstraint: NSLayoutConstraint!
+
     // Setup page state
     private var hasVisitedSettings = false
 
@@ -81,7 +93,10 @@ class OnboardingViewController: UIViewController {
 
     private func setupBottomControls() {
         view.addSubview(pageControl)
+        view.addSubview(secondaryButton)
         view.addSubview(ctaButton)
+
+        secondaryButtonHeightConstraint = secondaryButton.heightAnchor.constraint(equalToConstant: 0)
 
         NSLayoutConstraint.activate([
             pageViewController.view.topAnchor.constraint(equalTo: view.topAnchor),
@@ -90,7 +105,11 @@ class OnboardingViewController: UIViewController {
             pageViewController.view.bottomAnchor.constraint(equalTo: pageControl.topAnchor, constant: -12),
 
             pageControl.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            pageControl.bottomAnchor.constraint(equalTo: ctaButton.topAnchor, constant: -16),
+            pageControl.bottomAnchor.constraint(equalTo: secondaryButton.topAnchor, constant: -12),
+
+            secondaryButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            secondaryButton.bottomAnchor.constraint(equalTo: ctaButton.topAnchor, constant: -8),
+            secondaryButtonHeightConstraint,
 
             ctaButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
             ctaButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
@@ -99,6 +118,7 @@ class OnboardingViewController: UIViewController {
         ])
 
         ctaButton.addTarget(self, action: #selector(ctaTapped), for: .touchUpInside)
+        secondaryButton.addTarget(self, action: #selector(secondaryTapped), for: .touchUpInside)
     }
 
     private func disableSwipeGesture() {
@@ -153,6 +173,28 @@ class OnboardingViewController: UIViewController {
         }
     }
 
+    @objc private func secondaryTapped() {
+        switch currentIndex {
+        case 1:
+            // "다시 설정으로 이동" — 설정 앱 다시 열기
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(url)
+            }
+        case 2:
+            // "다시 설정해보기" — Page 1로 돌아가기
+            stopPolling()
+            // 검증 페이지의 동적 뷰 정리 (fullAccess 경고, 타임아웃 메시지 등)
+            if let page = pages[safe: 2] {
+                for subview in page.view.subviews where subview.tag == 901 || subview.tag == 902 {
+                    subview.removeFromSuperview()
+                }
+            }
+            goToPage(1)
+        default:
+            break
+        }
+    }
+
     private func goToPage(_ index: Int) {
         guard index >= 0, index < pages.count else { return }
         let direction: UIPageViewController.NavigationDirection = index > currentIndex ? .forward : .reverse
@@ -172,6 +214,10 @@ class OnboardingViewController: UIViewController {
         ctaButton.isHidden = false
         pageControl.isHidden = false
 
+        // 보조 버튼 기본 숨김 (height=0으로 공간 제거)
+        secondaryButton.isHidden = true
+        secondaryButtonHeightConstraint.constant = 0
+
         switch currentIndex {
         case 0:
             ctaButton.setTitle(L("onboarding.cta.start"), for: .normal)
@@ -181,10 +227,22 @@ class OnboardingViewController: UIViewController {
             ctaButton.setTitle(hasVisitedSettings ? L("onboarding.cta.done_settings") : L("onboarding.cta.go_settings"), for: .normal)
             ctaButton.isEnabled = true
             ctaButton.backgroundColor = .systemBlue
+            // 설정에서 돌아온 후: "다시 설정으로 이동" 보조 버튼 표시
+            if hasVisitedSettings {
+                secondaryButton.setTitle(L("onboarding.cta.reopen_settings"), for: .normal)
+                secondaryButton.isHidden = false
+                secondaryButtonHeightConstraint.constant = 36
+            }
         case 2:
             ctaButton.setTitle(L("onboarding.cta.next"), for: .normal)
             ctaButton.isEnabled = verificationPassed
             ctaButton.backgroundColor = verificationPassed ? .systemBlue : .systemGray4
+            // "다시 설정해보기" 보조 버튼 — 검증 미통과 시에만 표시
+            if !verificationPassed {
+                secondaryButton.setTitle(L("onboarding.cta.back_to_settings"), for: .normal)
+                secondaryButton.isHidden = false
+                secondaryButtonHeightConstraint.constant = 36
+            }
         case 3:
             ctaButton.setTitle(L("onboarding.cta.start"), for: .normal)
             ctaButton.isEnabled = true
@@ -287,6 +345,10 @@ class OnboardingViewController: UIViewController {
 
         guard let page = pages[safe: 2] else { return }
 
+        // secondaryButton 숨김 (settingsButton과 중복 방지)
+        secondaryButton.isHidden = true
+        secondaryButtonHeightConstraint.constant = 0
+
         // Remove existing extra views
         for subview in page.view.subviews where subview.tag == 901 || subview.tag == 902 {
             subview.removeFromSuperview()
@@ -328,6 +390,10 @@ class OnboardingViewController: UIViewController {
         stopPolling()
 
         guard let page = pages[safe: 2] else { return }
+
+        // secondaryButton 숨김 (retryButton과 중복 방지)
+        secondaryButton.isHidden = true
+        secondaryButtonHeightConstraint.constant = 0
 
         // Remove existing extra views
         for subview in page.view.subviews where subview.tag == 901 || subview.tag == 902 {

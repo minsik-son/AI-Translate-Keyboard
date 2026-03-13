@@ -39,6 +39,8 @@
 "onboarding.cta.go_settings" = "Ir a Ajustes";
 "onboarding.cta.done_settings" = "He completado la configuración";
 "onboarding.cta.next" = "Siguiente";
+"onboarding.cta.reopen_settings" = "Reabrir Ajustes";
+"onboarding.cta.back_to_settings" = "Volver a Ajustes";
 "onboarding.verify.title" = "¡Comprobemos si el teclado está configurado!";
 "onboarding.verify.instruction" = "Toca el campo de abajo y cambia a nuestro teclado usando 🌐";
 "onboarding.verify.placeholder" = "Toca aquí para escribir";

@@ -39,6 +39,8 @@
 "onboarding.cta.go_settings" = "Перейти в настройки";
 "onboarding.cta.done_settings" = "Настройка завершена";
 "onboarding.cta.next" = "Далее";
+"onboarding.cta.reopen_settings" = "Открыть настройки снова";
+"onboarding.cta.back_to_settings" = "Вернуться к настройкам";
 "onboarding.verify.title" = "Давайте проверим, настроена ли клавиатура!";
 "onboarding.verify.instruction" = "Нажмите на поле ниже и переключитесь на нашу клавиатуру с помощью 🌐";
 "onboarding.verify.placeholder" = "Нажмите здесь, чтобы печатать";

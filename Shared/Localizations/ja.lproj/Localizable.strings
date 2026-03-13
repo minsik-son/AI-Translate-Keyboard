@@ -39,6 +39,8 @@
 "onboarding.cta.go_settings" = "設定へ移動";
 "onboarding.cta.done_settings" = "設定を完了しました";
 "onboarding.cta.next" = "次へ";
+"onboarding.cta.reopen_settings" = "設定を再度開く";
+"onboarding.cta.back_to_settings" = "設定に戻る";
 "onboarding.verify.title" = "キーボードが正しく設定されたか確認しましょう！";
 "onboarding.verify.instruction" = "下の入力欄をタップして🌐ボタンでキーボードを切り替えてください";
 "onboarding.verify.placeholder" = "ここをタップして入力してみてください";

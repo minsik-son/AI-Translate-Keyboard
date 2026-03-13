@@ -39,6 +39,8 @@
 "onboarding.cta.go_settings" = "前往设置";
 "onboarding.cta.done_settings" = "我已完成设置";
 "onboarding.cta.next" = "下一步";
+"onboarding.cta.reopen_settings" = "重新打开设置";
+"onboarding.cta.back_to_settings" = "返回设置";
 "onboarding.verify.title" = "让我们检查键盘是否已设置好！";
 "onboarding.verify.instruction" = "点击下方输入框，使用🌐按钮切换到我们的键盘";
 "onboarding.verify.placeholder" = "点击这里输入";
