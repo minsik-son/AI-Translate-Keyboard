@@ -82,6 +82,8 @@ class KeyboardLayoutView: UIView {
     private var gradientLayer: CAGradientLayer?
     private var patternImageView: UIImageView?
     private var woodTileImageView: UIImageView?
+    private var matrixRainView: MatrixRainView?
+    private var isMemoryConstrained = false
 
     // Matrix Pulse 웨이브 애니메이션
     private var waveDisplayLink: CADisplayLink?
@@ -249,6 +251,12 @@ class KeyboardLayoutView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupContainer()
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleMemoryWarning),
+            name: UIApplication.didReceiveMemoryWarningNotification,
+            object: nil
+        )
     }
 
     required init?(coder: NSCoder) {
@@ -316,6 +324,13 @@ class KeyboardLayoutView: UIView {
 
     private func buildKeyboard() {
         guard !isTrackpadMode else { return }  // 트랙패드 중 재빌드 방지
+
+        // Rain 애니메이션 일시정지 — 뷰 계층 재구성 동안 draw() 방지
+        let wasRainAnimating = matrixRainView?.isActive ?? false
+        if wasRainAnimating {
+            matrixRainView?.pauseAnimation()
+        }
+
         // 예약된 build가 있으면 취소 (직접 호출 시 중복 방지)
         pendingBuildWork?.cancel()
         pendingBuildWork = nil
@@ -374,6 +389,16 @@ class KeyboardLayoutView: UIView {
             restartWaveAnimationAfterBuild()
         } else if isWaveAnimationActive {
             stopWaveAnimation()
+        }
+
+        // Rain animation: 빌드 완료 후 레인 재개
+        if wasRainAnimating {
+            matrixRainView?.resumeAnimation()
+        } else if let theme = customTheme, theme.needsRainAnimation,
+                  !isMemoryConstrained,
+                  let rv = matrixRainView, !rv.isActive,
+                  !ProcessInfo.processInfo.isLowPowerModeEnabled {
+            rv.startAnimation()
         }
     }
 
@@ -1349,6 +1374,7 @@ class KeyboardLayoutView: UIView {
         if isWaveAnimationActive {
             stopWaveAnimation()
         }
+        matrixRainView?.stopAnimation()
         isTrackpadMode = true
         selectionHaptic.prepare()
 
@@ -1385,6 +1411,8 @@ class KeyboardLayoutView: UIView {
         displayLink = nil
 
         buildKeyboard()  // Full rebuild to restore all key appearances
+        // Rain 재시작은 buildKeyboard() 내부 훅에서 자동 처리됨
+
         onTrackpadModeChanged?(false)
     }
 
@@ -1526,6 +1554,34 @@ class KeyboardLayoutView: UIView {
             woodTileImageView?.isHidden = false
         } else {
             woodTileImageView?.isHidden = true
+        }
+
+        // Digital Rain 애니메이션 배경
+        if let theme = customTheme, theme.needsRainAnimation {
+            if !isMemoryConstrained {
+                if matrixRainView == nil {
+                    let rv = MatrixRainView()
+                    rv.translatesAutoresizingMaskIntoConstraints = false
+                    rv.isUserInteractionEnabled = false
+                    insertSubview(rv, belowSubview: keyboardContainer)
+                    NSLayoutConstraint.activate([
+                        rv.topAnchor.constraint(equalTo: topAnchor),
+                        rv.bottomAnchor.constraint(equalTo: bottomAnchor),
+                        rv.leadingAnchor.constraint(equalTo: leadingAnchor),
+                        rv.trailingAnchor.constraint(equalTo: trailingAnchor),
+                    ])
+                    matrixRainView = rv
+                }
+                matrixRainView?.isHidden = false
+                // startAnimation() 여기서 호출하지 않음
+                // → buildKeyboard() 내부의 pause/resume 또는 시작 훅에서 처리
+            }
+        } else {
+            if let rv = matrixRainView {
+                rv.stopAnimation()
+                rv.removeFromSuperview()
+                matrixRainView = nil
+            }
         }
 
         buildKeyboard()
@@ -1708,8 +1764,33 @@ class KeyboardLayoutView: UIView {
     func handlePowerStateChange() {
         if ProcessInfo.processInfo.isLowPowerModeEnabled {
             stopWaveAnimation()
-        } else if let theme = customTheme, theme.needsWaveAnimation {
-            startWaveAnimationIfNeeded()
+            matrixRainView?.stopAnimation()
+        } else {
+            if let theme = customTheme, theme.needsWaveAnimation {
+                startWaveAnimationIfNeeded()
+            }
+            if let theme = customTheme, theme.needsRainAnimation,
+               !isMemoryConstrained {
+                matrixRainView?.startAnimation()
+            }
+        }
+    }
+
+    @objc private func handleMemoryWarning() {
+        isMemoryConstrained = true
+
+        if let rv = matrixRainView {
+            rv.stopAnimation()
+            rv.removeFromSuperview()
+            matrixRainView = nil
+        }
+
+        if isWaveAnimationActive {
+            stopWaveAnimation()
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) { [weak self] in
+            self?.isMemoryConstrained = false
         }
     }
 
@@ -1717,6 +1798,8 @@ class KeyboardLayoutView: UIView {
         stopWaveAnimation()
         waveDisplayLink?.invalidate()
         waveDisplayLink = nil
+        matrixRainView?.stopAnimation()
+        NotificationCenter.default.removeObserver(self, name: UIApplication.didReceiveMemoryWarningNotification, object: nil)
     }
 
     func getCurrentLanguage() -> KeyboardLanguage {
