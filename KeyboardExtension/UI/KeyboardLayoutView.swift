@@ -695,8 +695,8 @@ class KeyboardLayoutView: UIView {
                     }
                     button.setTitleColor(theme.keyTextColor, for: .normal)
                 } else {
-                    button.backgroundColor = returnKeyIsBlue ? .systemBlue : theme.specialKeyBackground
-                    button.setTitleColor(returnKeyIsBlue ? .white : theme.keyTextColor, for: .normal)
+                    button.backgroundColor = returnKeyIsBlue ? theme.returnKeyAccentColor : theme.specialKeyBackground
+                    button.setTitleColor(returnKeyIsBlue ? theme.returnKeyAccentTextColor : theme.keyTextColor, for: .normal)
                 }
 
             // ========================================

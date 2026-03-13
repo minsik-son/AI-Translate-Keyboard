@@ -84,6 +84,10 @@ struct KeyboardTheme {
     // 레인 애니메이션 (Digital Rain)
     let hasRainAnimation: Bool
 
+    // 엔터키 Accent (returnKeyIsBlue 시 사용)
+    let returnKeyAccentColor: UIColor
+    let returnKeyAccentTextColor: UIColor
+
     var hasWoodTexture: Bool { woodTileImageName != nil }
     var needsWaveAnimation: Bool { hasWaveAnimation }
     var needsRainAnimation: Bool {
@@ -128,6 +132,8 @@ extension KeyboardTheme {
         self.woodTileImageName = nil
         self.hasWaveAnimation = false
         self.hasRainAnimation = false
+        self.returnKeyAccentColor = .systemBlue
+        self.returnKeyAccentTextColor = .white
     }
 }
 
@@ -277,7 +283,15 @@ extension KeyboardTheme {
         keyBackground: UIColor(red: 0.10, green: 0.16, blue: 0.30, alpha: 1),
         specialKeyBackground: UIColor(red: 0.00, green: 0.55, blue: 0.55, alpha: 1),
         keyTextColor: UIColor(red: 0.70, green: 0.92, blue: 0.90, alpha: 1),
-        toolbarBackground: .clear
+        toolbarBackground: .clear,
+        gradientColors: nil, gradientLocations: nil, gradientDirection: .topToBottom,
+        patternStyle: .none, patternOpacity: 0, patternTint: .white,
+        keyVisualStyle: .solid, specialKeyVisualStyle: .solid,
+        textShadowColor: .clear, textShadowOffset: .zero,
+        textHighlightColor: .clear, textHighlightOffset: .zero,
+        woodTileImageName: nil, hasWaveAnimation: false, hasRainAnimation: false,
+        returnKeyAccentColor: UIColor(red: 0.00, green: 0.65, blue: 0.65, alpha: 1),
+        returnKeyAccentTextColor: .white
     )
 
     static let premiumRoseGold = KeyboardTheme(
@@ -287,7 +301,15 @@ extension KeyboardTheme {
         keyBackground: UIColor(red: 1.0, green: 0.96, blue: 0.95, alpha: 1),
         specialKeyBackground: UIColor(red: 0.76, green: 0.57, blue: 0.50, alpha: 1),
         keyTextColor: UIColor(red: 0.35, green: 0.18, blue: 0.15, alpha: 1),
-        toolbarBackground: .clear
+        toolbarBackground: .clear,
+        gradientColors: nil, gradientLocations: nil, gradientDirection: .topToBottom,
+        patternStyle: .none, patternOpacity: 0, patternTint: .white,
+        keyVisualStyle: .solid, specialKeyVisualStyle: .solid,
+        textShadowColor: .clear, textShadowOffset: .zero,
+        textHighlightColor: .clear, textHighlightOffset: .zero,
+        woodTileImageName: nil, hasWaveAnimation: false, hasRainAnimation: false,
+        returnKeyAccentColor: UIColor(red: 0.70, green: 0.45, blue: 0.38, alpha: 1),
+        returnKeyAccentTextColor: .white
     )
 
     static let premiumOceanAbyss = KeyboardTheme(
@@ -297,7 +319,15 @@ extension KeyboardTheme {
         keyBackground: UIColor(red: 0.08, green: 0.22, blue: 0.35, alpha: 1),
         specialKeyBackground: UIColor(red: 0.10, green: 0.36, blue: 0.47, alpha: 1),
         keyTextColor: UIColor(red: 0.80, green: 0.94, blue: 1.0, alpha: 1),
-        toolbarBackground: .clear
+        toolbarBackground: .clear,
+        gradientColors: nil, gradientLocations: nil, gradientDirection: .topToBottom,
+        patternStyle: .none, patternOpacity: 0, patternTint: .white,
+        keyVisualStyle: .solid, specialKeyVisualStyle: .solid,
+        textShadowColor: .clear, textShadowOffset: .zero,
+        textHighlightColor: .clear, textHighlightOffset: .zero,
+        woodTileImageName: nil, hasWaveAnimation: false, hasRainAnimation: false,
+        returnKeyAccentColor: UIColor(red: 0.10, green: 0.45, blue: 0.60, alpha: 1),
+        returnKeyAccentTextColor: .white
     )
 
     static let premiumSunsetEmber = KeyboardTheme(
@@ -307,7 +337,15 @@ extension KeyboardTheme {
         keyBackground: UIColor(red: 0.30, green: 0.12, blue: 0.08, alpha: 1),
         specialKeyBackground: UIColor(red: 0.55, green: 0.33, blue: 0.13, alpha: 1),
         keyTextColor: UIColor(red: 1.0, green: 0.90, blue: 0.75, alpha: 1),
-        toolbarBackground: .clear
+        toolbarBackground: .clear,
+        gradientColors: nil, gradientLocations: nil, gradientDirection: .topToBottom,
+        patternStyle: .none, patternOpacity: 0, patternTint: .white,
+        keyVisualStyle: .solid, specialKeyVisualStyle: .solid,
+        textShadowColor: .clear, textShadowOffset: .zero,
+        textHighlightColor: .clear, textHighlightOffset: .zero,
+        woodTileImageName: nil, hasWaveAnimation: false, hasRainAnimation: false,
+        returnKeyAccentColor: UIColor(red: 0.70, green: 0.42, blue: 0.15, alpha: 1),
+        returnKeyAccentTextColor: .white
     )
 
     static let premiumFrostCrystal = KeyboardTheme(
@@ -317,7 +355,15 @@ extension KeyboardTheme {
         keyBackground: UIColor(red: 0.94, green: 0.96, blue: 0.98, alpha: 1),
         specialKeyBackground: UIColor(red: 0.62, green: 0.75, blue: 0.85, alpha: 1),
         keyTextColor: UIColor(red: 0.15, green: 0.22, blue: 0.32, alpha: 1),
-        toolbarBackground: .clear
+        toolbarBackground: .clear,
+        gradientColors: nil, gradientLocations: nil, gradientDirection: .topToBottom,
+        patternStyle: .none, patternOpacity: 0, patternTint: .white,
+        keyVisualStyle: .solid, specialKeyVisualStyle: .solid,
+        textShadowColor: .clear, textShadowOffset: .zero,
+        textHighlightColor: .clear, textHighlightOffset: .zero,
+        woodTileImageName: nil, hasWaveAnimation: false, hasRainAnimation: false,
+        returnKeyAccentColor: UIColor(red: 0.45, green: 0.60, blue: 0.75, alpha: 1),
+        returnKeyAccentTextColor: .white
     )
 
     // MARK: - Visual Premium Presets
@@ -344,7 +390,9 @@ extension KeyboardTheme {
         textHighlightOffset: .zero,
         woodTileImageName: nil,
         hasWaveAnimation: false,
-        hasRainAnimation: false
+        hasRainAnimation: false,
+        returnKeyAccentColor: UIColor(hex: "#7B64D0"),
+        returnKeyAccentTextColor: .white
     )
 
     static let premiumVolcanicEmber = KeyboardTheme(
@@ -369,7 +417,9 @@ extension KeyboardTheme {
         textHighlightOffset: .zero,
         woodTileImageName: nil,
         hasWaveAnimation: false,
-        hasRainAnimation: false
+        hasRainAnimation: false,
+        returnKeyAccentColor: UIColor(hex: "#E07818"),
+        returnKeyAccentTextColor: .white
     )
 
     static let premiumNorthernLights = KeyboardTheme(
@@ -394,7 +444,9 @@ extension KeyboardTheme {
         textHighlightOffset: .zero,
         woodTileImageName: nil,
         hasWaveAnimation: false,
-        hasRainAnimation: false
+        hasRainAnimation: false,
+        returnKeyAccentColor: UIColor(hex: "#00C878"),
+        returnKeyAccentTextColor: .white
     )
 
     static let premiumBrushedSteel = KeyboardTheme(
@@ -419,7 +471,9 @@ extension KeyboardTheme {
         textHighlightOffset: .zero,
         woodTileImageName: nil,
         hasWaveAnimation: false,
-        hasRainAnimation: false
+        hasRainAnimation: false,
+        returnKeyAccentColor: UIColor(hex: "#6E7480"),
+        returnKeyAccentTextColor: .white
     )
 
     static let premiumSakuraBreeze = KeyboardTheme(
@@ -444,7 +498,9 @@ extension KeyboardTheme {
         textHighlightOffset: .zero,
         woodTileImageName: nil,
         hasWaveAnimation: false,
-        hasRainAnimation: false
+        hasRainAnimation: false,
+        returnKeyAccentColor: UIColor(hex: "#C8648A"),
+        returnKeyAccentTextColor: .white
     )
 
     static let premiumDeepOcean = KeyboardTheme(
@@ -469,7 +525,9 @@ extension KeyboardTheme {
         textHighlightOffset: .zero,
         woodTileImageName: nil,
         hasWaveAnimation: false,
-        hasRainAnimation: false
+        hasRainAnimation: false,
+        returnKeyAccentColor: UIColor(hex: "#0082B4"),
+        returnKeyAccentTextColor: .white
     )
 
     // MARK: - Animated Premium Themes
@@ -496,7 +554,9 @@ extension KeyboardTheme {
         textHighlightOffset: .zero,
         woodTileImageName: nil,
         hasWaveAnimation: true,
-        hasRainAnimation: false
+        hasRainAnimation: false,
+        returnKeyAccentColor: UIColor(hex: "#00FF41").withAlphaComponent(0.30),
+        returnKeyAccentTextColor: .white
     )
 
     static let premiumDigitalRain = KeyboardTheme(
@@ -521,7 +581,9 @@ extension KeyboardTheme {
         textHighlightOffset: .zero,
         woodTileImageName: nil,
         hasWaveAnimation: false,
-        hasRainAnimation: true
+        hasRainAnimation: true,
+        returnKeyAccentColor: UIColor(hex: "#00FF41").withAlphaComponent(0.25),
+        returnKeyAccentTextColor: .white
     )
 
     // MARK: - Wood Premium Themes
@@ -559,7 +621,9 @@ extension KeyboardTheme {
         textHighlightOffset: CGSize(width: 0, height: 1),
         woodTileImageName: "wood_tile_dark",
         hasWaveAnimation: false,
-        hasRainAnimation: false
+        hasRainAnimation: false,
+        returnKeyAccentColor: UIColor(red: 0.22, green: 0.15, blue: 0.10, alpha: 1),
+        returnKeyAccentTextColor: UIColor(white: 1.0, alpha: 0.75)
     )
 
     static let premiumNaturalOak = KeyboardTheme(
@@ -595,7 +659,9 @@ extension KeyboardTheme {
         textHighlightOffset: CGSize(width: 0, height: 1),
         woodTileImageName: "wood_tile_light",
         hasWaveAnimation: false,
-        hasRainAnimation: false
+        hasRainAnimation: false,
+        returnKeyAccentColor: UIColor(red: 0.68, green: 0.56, blue: 0.42, alpha: 1),
+        returnKeyAccentTextColor: UIColor(red: 0.16, green: 0.10, blue: 0.04, alpha: 0.70)
     )
 
     static let allPremiumThemes: [KeyboardTheme] = [
