@@ -7,7 +7,7 @@ final class MatrixRainView: UIView {
 
     private static let targetFPS: Int = 12
     private static let charSize: CGFloat = 14
-    private static let columnWidth: CGFloat = 20
+    private static let columnWidth: CGFloat = 16
 
     /// 반복 사용할 문자 목록 (카타카나 + 숫자 + 알파벳)
     private static let characters: [String] = {
@@ -222,8 +222,8 @@ final class MatrixRainView: UIView {
         let chars = (0..<maxVisibleChars).map { _ in
             Int.random(in: 0..<Self.characters.count)
         }
-        let speed = CGFloat.random(in: 40...130)
-        let trailLength = CGFloat.random(in: 60...160)
+        let speed = CGFloat.random(in: 70...180)
+        let trailLength = CGFloat.random(in: 200...250)
         let startY: CGFloat = staggered
             ? -CGFloat.random(in: 0...(viewHeight * 2.5))
             : -CGFloat.random(in: 20...120)
