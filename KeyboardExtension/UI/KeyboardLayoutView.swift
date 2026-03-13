@@ -83,6 +83,8 @@ class KeyboardLayoutView: UIView {
     private var patternImageView: UIImageView?
     private var woodTileImageView: UIImageView?
     private var matrixRainView: MatrixRainView?
+    private var mercuryRippleView: MercuryRippleView?
+    private var stardustView: StardustView?
     private var isMemoryConstrained = false
 
     // Matrix Pulse 웨이브 애니메이션
@@ -330,6 +332,12 @@ class KeyboardLayoutView: UIView {
         if wasRainAnimating {
             matrixRainView?.pauseAnimation()
         }
+        let wasRippleAnimating = mercuryRippleView?.isActive ?? false
+        if wasRippleAnimating {
+            mercuryRippleView?.pauseAnimation()
+        }
+        let wasStardustAnimating = stardustView?.isActive ?? false
+        if wasStardustAnimating { stardustView?.pauseAnimation() }
 
         // 예약된 build가 있으면 취소 (직접 호출 시 중복 방지)
         pendingBuildWork?.cancel()
@@ -399,6 +407,24 @@ class KeyboardLayoutView: UIView {
                   let rv = matrixRainView, !rv.isActive,
                   !ProcessInfo.processInfo.isLowPowerModeEnabled {
             rv.startAnimation()
+        }
+
+        // Resume ripple animation
+        if wasRippleAnimating {
+            mercuryRippleView?.resumeAnimation()
+        } else if let theme = customTheme, theme.needsRippleAnimation,
+                  !isMemoryConstrained, let rv = mercuryRippleView, !rv.isActive,
+                  !ProcessInfo.processInfo.isLowPowerModeEnabled {
+            rv.startAnimation()
+        }
+
+        // Resume stardust animation
+        if wasStardustAnimating {
+            stardustView?.resumeAnimation()
+        } else if let theme = customTheme, theme.needsStardustAnimation,
+                  !isMemoryConstrained, let sv = stardustView, !sv.isActive,
+                  !ProcessInfo.processInfo.isLowPowerModeEnabled {
+            sv.startAnimation()
         }
     }
 
@@ -906,6 +932,14 @@ class KeyboardLayoutView: UIView {
                     self.enterTrackpadMode()
                 }
                 flashButton(button)
+                if let rv = mercuryRippleView, rv.isActive {
+                    let rippleLoc = button.superview?.convert(button.center, to: rv) ?? loc
+                    rv.addRipple(at: rippleLoc, intensity: 1.0)
+                }
+                if let sv = stardustView, sv.isActive {
+                    let burstLoc = button.superview?.convert(button.center, to: sv) ?? loc
+                    sv.addBurst(at: burstLoc, isSupernova: true)
+                }
                 continue
             }
 
@@ -914,6 +948,14 @@ class KeyboardLayoutView: UIView {
                 backspaceTrackingTouch = touch
                 onKeyTap?(Self.backKey)
                 flashButton(button)
+                if let rv = mercuryRippleView, rv.isActive {
+                    let rippleLoc = button.superview?.convert(button.center, to: rv) ?? loc
+                    rv.addRipple(at: rippleLoc, intensity: 0.7)
+                }
+                if let sv = stardustView, sv.isActive {
+                    let burstLoc = button.superview?.convert(button.center, to: sv) ?? loc
+                    sv.addBurst(at: burstLoc, isSupernova: false)
+                }
 
                 backspaceTimer?.invalidate()
                 backspaceRepeatTimer?.invalidate()
@@ -932,6 +974,14 @@ class KeyboardLayoutView: UIView {
                 accentBaseKey = key
                 accentSourceButton = button
                 flashButton(button)
+                if let rv = mercuryRippleView, rv.isActive {
+                    let rippleLoc = button.superview?.convert(button.center, to: rv) ?? loc
+                    rv.addRipple(at: rippleLoc, intensity: 0.7)
+                }
+                if let sv = stardustView, sv.isActive {
+                    let burstLoc = button.superview?.convert(button.center, to: sv) ?? loc
+                    sv.addBurst(at: burstLoc, isSupernova: false)
+                }
                 handleKeyAction(key)  // Immediately type the base character
 
                 accentLongPressTimer = Timer.scheduledTimer(withTimeInterval: 0.4, repeats: false) { [weak self] _ in
@@ -942,6 +992,14 @@ class KeyboardLayoutView: UIView {
 
             // ── All other keys: handle immediately ──
             flashButton(button)
+            if let rv = mercuryRippleView, rv.isActive {
+                let rippleLoc = button.superview?.convert(button.center, to: rv) ?? loc
+                rv.addRipple(at: rippleLoc, intensity: 0.7)
+            }
+            if let sv = stardustView, sv.isActive {
+                let burstLoc = button.superview?.convert(button.center, to: sv) ?? loc
+                sv.addBurst(at: burstLoc, isSupernova: false)
+            }
             handleKeyAction(key)
         }
     }
@@ -1186,6 +1244,10 @@ class KeyboardLayoutView: UIView {
                 flashColor = UIColor(white: 1.0, alpha: 0.15)
             } else if theme.needsWaveAnimation {
                 flashColor = UIColor(hex: "#00FF41").withAlphaComponent(0.35)
+            } else if theme.needsRippleAnimation {
+                flashColor = UIColor(hex: "#6090C0").withAlphaComponent(0.25)
+            } else if theme.needsStardustAnimation {
+                flashColor = UIColor(hex: "#8060D0").withAlphaComponent(0.30)
             } else {
                 // 키 배경 밝기 기준으로 자동 판단
                 var brightness: CGFloat = 0
@@ -1375,6 +1437,8 @@ class KeyboardLayoutView: UIView {
             stopWaveAnimation()
         }
         matrixRainView?.stopAnimation()
+        mercuryRippleView?.stopAnimation()
+        stardustView?.stopAnimation()
         isTrackpadMode = true
         selectionHaptic.prepare()
 
@@ -1584,6 +1648,52 @@ class KeyboardLayoutView: UIView {
             }
         }
 
+        // ── Mercury Ripple ──
+        if let theme = customTheme, theme.needsRippleAnimation {
+            if !isMemoryConstrained {
+                if mercuryRippleView == nil {
+                    let rv = MercuryRippleView()
+                    rv.translatesAutoresizingMaskIntoConstraints = false
+                    rv.isUserInteractionEnabled = false
+                    insertSubview(rv, belowSubview: keyboardContainer)
+                    NSLayoutConstraint.activate([
+                        rv.topAnchor.constraint(equalTo: topAnchor),
+                        rv.bottomAnchor.constraint(equalTo: bottomAnchor),
+                        rv.leadingAnchor.constraint(equalTo: leadingAnchor),
+                        rv.trailingAnchor.constraint(equalTo: trailingAnchor),
+                    ])
+                    mercuryRippleView = rv
+                }
+                mercuryRippleView?.isHidden = false
+            }
+        } else {
+            mercuryRippleView?.stopAnimation()
+            mercuryRippleView?.isHidden = true
+        }
+
+        // ── Stardust Drift ──
+        if let theme = customTheme, theme.needsStardustAnimation {
+            if !isMemoryConstrained {
+                if stardustView == nil {
+                    let sv = StardustView()
+                    sv.translatesAutoresizingMaskIntoConstraints = false
+                    sv.isUserInteractionEnabled = false
+                    insertSubview(sv, belowSubview: keyboardContainer)
+                    NSLayoutConstraint.activate([
+                        sv.topAnchor.constraint(equalTo: topAnchor),
+                        sv.bottomAnchor.constraint(equalTo: bottomAnchor),
+                        sv.leadingAnchor.constraint(equalTo: leadingAnchor),
+                        sv.trailingAnchor.constraint(equalTo: trailingAnchor),
+                    ])
+                    stardustView = sv
+                }
+                stardustView?.isHidden = false
+            }
+        } else {
+            stardustView?.stopAnimation()
+            stardustView?.isHidden = true
+        }
+
         buildKeyboard()
     }
 
@@ -1765,6 +1875,8 @@ class KeyboardLayoutView: UIView {
         if ProcessInfo.processInfo.isLowPowerModeEnabled {
             stopWaveAnimation()
             matrixRainView?.stopAnimation()
+            mercuryRippleView?.stopAnimation()
+            stardustView?.stopAnimation()
         } else {
             if let theme = customTheme, theme.needsWaveAnimation {
                 startWaveAnimationIfNeeded()
@@ -1772,6 +1884,14 @@ class KeyboardLayoutView: UIView {
             if let theme = customTheme, theme.needsRainAnimation,
                !isMemoryConstrained {
                 matrixRainView?.startAnimation()
+            }
+            if let theme = customTheme, theme.needsRippleAnimation,
+               !isMemoryConstrained {
+                mercuryRippleView?.startAnimation()
+            }
+            if let theme = customTheme, theme.needsStardustAnimation,
+               !isMemoryConstrained {
+                stardustView?.startAnimation()
             }
         }
     }
@@ -1783,6 +1903,19 @@ class KeyboardLayoutView: UIView {
             rv.stopAnimation()
             rv.removeFromSuperview()
             matrixRainView = nil
+        }
+
+        // 리플 애니메이션 정리
+        if let rv = mercuryRippleView {
+            rv.stopAnimation()
+            rv.removeFromSuperview()
+            mercuryRippleView = nil
+        }
+
+        if let sv = stardustView {
+            sv.stopAnimation()
+            sv.removeFromSuperview()
+            stardustView = nil
         }
 
         if isWaveAnimationActive {
@@ -1799,6 +1932,8 @@ class KeyboardLayoutView: UIView {
         waveDisplayLink?.invalidate()
         waveDisplayLink = nil
         matrixRainView?.stopAnimation()
+        mercuryRippleView?.stopAnimation()
+        stardustView?.stopAnimation()
         NotificationCenter.default.removeObserver(self, name: UIApplication.didReceiveMemoryWarningNotification, object: nil)
     }
 

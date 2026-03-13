@@ -112,6 +112,8 @@
 		EE11FF22003344550066AA04 /* LayoutSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE11FF22003344550066AA02 /* LayoutSettingsViewController.swift */; };
 		F027BB91EC2EC981A6DD95A9 /* KeyboardLayoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2074DF00A0D06308149CC621 /* KeyboardLayoutView.swift */; };
 		3948B0F72D89CB1FFE6ADA48 /* MatrixRainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C21417E39394CA9BB9353695 /* MatrixRainView.swift */; };
+		MR01AA11BB22CC33DD440002 /* MercuryRippleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = MR01AA11BB22CC33DD440001 /* MercuryRippleView.swift */; };
+		SD01AA11BB22CC33DD440002 /* StardustView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SD01AA11BB22CC33DD440001 /* StardustView.swift */; };
 		F6B6FA0359011DC0F238876E /* SessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6F1F70EA3AC8A828B6400E /* SessionManager.swift */; };
 		F979FB1196C79873FEB4DA20 /* SubscriptionStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE58C410E1EB49722CC53E86 /* SubscriptionStatus.swift */; };
 		FF11AA22BB33CC44DD550001 /* AccentMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF11AA22BB33CC44DD550002 /* AccentMap.swift */; };
@@ -158,6 +160,8 @@
 		1FCBC8FB5D66C494D8A053A0 /* AutocorrectEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutocorrectEngine.swift; sourceTree = "<group>"; };
 		2074DF00A0D06308149CC621 /* KeyboardLayoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardLayoutView.swift; sourceTree = "<group>"; };
 		C21417E39394CA9BB9353695 /* MatrixRainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatrixRainView.swift; sourceTree = "<group>"; };
+		MR01AA11BB22CC33DD440001 /* MercuryRippleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MercuryRippleView.swift; sourceTree = "<group>"; };
+		SD01AA11BB22CC33DD440001 /* StardustView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StardustView.swift; sourceTree = "<group>"; };
 		210C063F672C0FE7A648C646 /* QuickNoteReadView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QuickNoteReadView.swift; sourceTree = "<group>"; };
 		2447A0D66729D36830A99707 /* QuickNoteEditView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QuickNoteEditView.swift; sourceTree = "<group>"; };
 		28A9A5F9D37A7DA5CBD32D56 /* QuickEmojiBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickEmojiBar.swift; sourceTree = "<group>"; };
@@ -353,6 +357,8 @@
 				03D7ABAFB25DE60E52119088 /* EmojiKeyboardView.swift */,
 				2074DF00A0D06308149CC621 /* KeyboardLayoutView.swift */,
 				C21417E39394CA9BB9353695 /* MatrixRainView.swift */,
+				MR01AA11BB22CC33DD440001 /* MercuryRippleView.swift */,
+				SD01AA11BB22CC33DD440001 /* StardustView.swift */,
 				A2C36F5FE7C33CE377D041C1 /* LanguagePickerView.swift */,
 				AA11BB22CC33DD44EE550006 /* PhraseInputHeaderView.swift */,
 				28A9A5F9D37A7DA5CBD32D56 /* QuickEmojiBar.swift */,
@@ -607,6 +613,8 @@
 				48EB6B73C377FAC506F6929F /* HangulComposer.swift in Sources */,
 				F027BB91EC2EC981A6DD95A9 /* KeyboardLayoutView.swift in Sources */,
 				3948B0F72D89CB1FFE6ADA48 /* MatrixRainView.swift in Sources */,
+				MR01AA11BB22CC33DD440002 /* MercuryRippleView.swift in Sources */,
+				SD01AA11BB22CC33DD440002 /* StardustView.swift in Sources */,
 				BB22CC33DD44EE5500070001 /* KeyboardTheme.swift in Sources */,
 				E4F87F8E343538A40FF3F37B /* KeyboardViewController.swift in Sources */,
 				63458A19F0CEE9C46528CDC9 /* LanguagePickerView.swift in Sources */,

@@ -34,6 +34,8 @@ final class ThemePatternRenderer {
                 drawWoodGrain(in: ctx.cgContext, rect: rect, tint: tint, opacity: opacity)
             case .matrixRain:
                 drawMatrixRain(in: ctx.cgContext, rect: rect, tint: tint, opacity: opacity)
+            case .ripple:
+                drawRipple(in: ctx.cgContext, rect: rect, tint: tint, opacity: opacity)
             case .none:
                 break
             }
@@ -181,6 +183,29 @@ final class ThemePatternRenderer {
                 iy += 1
             }
             ix += 1
+        }
+    }
+
+    private static func drawRipple(in ctx: CGContext, rect: CGRect, tint: UIColor, opacity: CGFloat) {
+        // 정적 프리뷰: 비대칭 동심원 3개 (물결 퍼지는 느낌)
+        let centerX = rect.width * 0.4
+        let centerY = rect.height * 0.45
+
+        for i in 1...3 {
+            let radius = CGFloat(i) * 12.0
+            let ringWidth: CGFloat = 2.5
+            let ringAlpha = opacity * CGFloat(4 - i) / 3.0
+
+            let ringRect = CGRect(
+                x: centerX - radius,
+                y: centerY - radius,
+                width: radius * 2,
+                height: radius * 2
+            )
+
+            ctx.setStrokeColor(tint.withAlphaComponent(ringAlpha).cgColor)
+            ctx.setLineWidth(ringWidth)
+            ctx.strokeEllipse(in: ringRect)
         }
     }
 

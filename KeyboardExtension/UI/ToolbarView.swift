@@ -329,6 +329,26 @@ class ToolbarView: UIView {
             btn.tintColor = textColor
         }
 
+        // Pill colors: apply theme colors for custom themes
+        if let theme = customTheme {
+            correctionPill.setTitleColor(theme.keyTextColor, for: .normal)
+            correctionPill.tintColor = theme.keyTextColor
+            correctionPill.backgroundColor = theme.specialKeyBackground
+
+            translationPill.setTitleColor(theme.keyTextColor, for: .normal)
+            translationPill.tintColor = theme.keyTextColor
+            translationPill.backgroundColor = theme.specialKeyBackground
+        } else {
+            // Restore default pill colors
+            correctionPill.setTitleColor(UIColor(red: 1, green: 0.624, blue: 0.263, alpha: 1), for: .normal)
+            correctionPill.tintColor = UIColor(red: 1, green: 0.624, blue: 0.263, alpha: 1)
+            correctionPill.backgroundColor = UIColor(red: 1, green: 0.624, blue: 0.263, alpha: 0.12)
+
+            translationPill.setTitleColor(UIColor(red: 0.192, green: 0.510, blue: 0.965, alpha: 1), for: .normal)
+            translationPill.tintColor = UIColor(red: 0.192, green: 0.510, blue: 0.965, alpha: 1)
+            translationPill.backgroundColor = UIColor(red: 0.192, green: 0.510, blue: 0.965, alpha: 0.12)
+        }
+
         // Dismiss button
         dismissButton.setTitleColor(textColor, for: .normal)
         suggestionScrollView.backgroundColor = suggestionBg
