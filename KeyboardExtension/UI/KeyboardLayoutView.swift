@@ -1899,10 +1899,7 @@ class KeyboardLayoutView: UIView {
         isLensAnimationActive = true
         rebuildLensButtonCache()
 
-        // 줄임표 방지: 스케일 확대 시 UILabel이 truncation하지 않도록 설정
-        for button in allKeyButtons {
-            button.titleLabel?.lineBreakMode = .byClipping
-        }
+        // button.transform 스케일 방식 → lineBreakMode, clipsToBounds 조작 불필요
 
         lensDisplayLink?.invalidate()
         lensDisplayLink = nil
@@ -1924,10 +1921,9 @@ class KeyboardLayoutView: UIView {
         lensDisplayLink = nil
         cachedButtonCentersInRippleView.removeAll()
 
-        // 모든 버튼 titleLabel 트랜스폼 리셋 + lineBreakMode 복원
+        // 모든 버튼 트랜스폼 리셋 (button.transform 방식이므로 별도 복원 불필요)
         for button in allKeyButtons {
-            button.titleLabel?.transform = .identity
-            button.titleLabel?.lineBreakMode = .byTruncatingTail
+            button.transform = .identity
         }
     }
 
@@ -1936,6 +1932,9 @@ class KeyboardLayoutView: UIView {
         isLensAnimationActive = false
         lensDisplayLink?.invalidate()
         lensDisplayLink = nil
+
+        // button.transform 방식이므로 별도 clipsToBounds 복원 불필요
+        // pause 후 resume 시 다시 캐시 재구축됨
     }
 
     private func resumeLensAnimation() {
@@ -1979,8 +1978,8 @@ class KeyboardLayoutView: UIView {
         // 리플이 없으면 모든 버튼 리셋 후 idle
         if snapshots.isEmpty {
             for (button, _) in cachedButtonCentersInRippleView {
-                if button.titleLabel?.transform != .identity {
-                    button.titleLabel?.transform = .identity
+                if button.transform != .identity {
+                    button.transform = .identity
                 }
             }
             return
@@ -2013,13 +2012,13 @@ class KeyboardLayoutView: UIView {
                 totalContribution += bell * fade * snap.intensity
             }
 
-            // scale = 1.0 + total * 0.20, max 1.25
-            let scale = min(1.0 + totalContribution * 0.20, 1.25)
+            // scale = 1.0 + total * 0.15, max 1.12 (인접 키 겹침 방지 + 효과 유지)
+            let scale = min(1.0 + totalContribution * 0.15, 1.12)
 
             if scale > 1.001 {
-                button.titleLabel?.transform = CGAffineTransform(scaleX: scale, y: scale)
-            } else if button.titleLabel?.transform != .identity {
-                button.titleLabel?.transform = .identity
+                button.transform = CGAffineTransform(scaleX: scale, y: scale)
+            } else if button.transform != .identity {
+                button.transform = .identity
             }
         }
     }

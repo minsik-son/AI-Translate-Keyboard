@@ -9,7 +9,7 @@ final class MercuryRippleView: UIView {
     private static let rippleMaxRadius: CGFloat = 200    // 최대 반경
     private static let rippleLifetime: CGFloat = 1.2     // 초
 
-    static let perspectiveY: CGFloat = 0.65               // Y축 압축 비율 (원근감)
+    static let perspectiveY: CGFloat = 1.0                // 완전한 원형 (원근감 없음)
 
     // MARK: - Ripple Snapshot (외부 노출용)
     struct RippleSnapshot {
@@ -148,7 +148,7 @@ final class MercuryRippleView: UIView {
             let radius = Self.rippleSpeed * age
             guard radius > 0 else { continue }
 
-            let ringWidth = radius * 0.3
+            let ringWidth = 5.0 + progress * radius * 0.18
 
             snapshots.append(RippleSnapshot(
                 centerX: ripple.centerX,
@@ -213,52 +213,57 @@ final class MercuryRippleView: UIView {
             let radius = Self.rippleSpeed * age
             guard radius > 0 else { continue }
 
-            // 물결 링 두께: 반경의 30%
-            let ringWidth = radius * 0.3
+            // 물결 링 두께: 초기엔 실처럼 얇고(2pt), 점차 넓어짐
+            let ringWidth = 2.0 + progress * radius * 0.12
 
             // 알파: 시작 시 밝고 점차 사라짐 (ease-out)
-            let baseAlpha = ripple.intensity * (1.0 - progress * progress) * 0.35
+            let baseAlpha = ripple.intensity * (1.0 - progress * progress) * 0.5
 
-            // 주 물결 (원형 도넛)
-            let innerRadius = max(radius - ringWidth * 0.5, 0)
-            let outerRadius = radius + ringWidth * 0.5
-            drawCircularRing(ctx: ctx, cx: ripple.centerX, cy: ripple.centerY,
-                             innerR: innerRadius, outerR: outerRadius,
-                             r: r, g: g, b: b, alpha: baseAlpha)
-
-            // 외곽 물결 (50% 크기, 40% 알파)
-            let outerWaveRadius = radius * 1.5
-            let outerRingWidth = ringWidth * 0.6
-            let outerInner = max(outerWaveRadius - outerRingWidth * 0.5, 0)
-            let outerOuter = outerWaveRadius + outerRingWidth * 0.5
-            drawCircularRing(ctx: ctx, cx: ripple.centerX, cy: ripple.centerY,
-                             innerR: outerInner, outerR: outerOuter,
-                             r: r, g: g, b: b, alpha: baseAlpha * 0.4)
+            // 그라데이션 경계 물결 (5겹 서브링)
+            drawSoftRing(ctx: ctx, cx: ripple.centerX, cy: ripple.centerY,
+                         radius: radius, ringWidth: ringWidth,
+                         r: r, g: g, b: b, peakAlpha: baseAlpha)
         }
     }
 
-    /// 원형 도넛 링 — 깔끔한 원형 수면파
-    private func drawCircularRing(ctx: CGContext,
-                                   cx: CGFloat, cy: CGFloat,
-                                   innerR: CGFloat, outerR: CGFloat,
-                                   r: CGFloat, g: CGFloat, b: CGFloat,
-                                   alpha: CGFloat) {
-        guard alpha > 0.005 else { return }
-        guard outerR > 0 else { return }
+    /// 그라데이션 경계 물결 — 5겹 서브링으로 부드러운 페이드
+    private func drawSoftRing(ctx: CGContext,
+                               cx: CGFloat, cy: CGFloat,
+                               radius: CGFloat, ringWidth: CGFloat,
+                               r: CGFloat, g: CGFloat, b: CGFloat,
+                               peakAlpha: CGFloat) {
+        guard peakAlpha > 0.005 else { return }
+        guard radius > 0 else { return }
+
+        let steps = 5
+        let stepWidth = ringWidth / CGFloat(steps)
 
         ctx.saveGState()
-
-        // Y축 압축 (수면 원근감): 중심점 기준으로 scaleBy
         ctx.translateBy(x: cx, y: cy)
         ctx.scaleBy(x: 1.0, y: Self.perspectiveY)
 
-        // 도넛 합성: 외곽 타원 + 내곽 타원 → even-odd fill
-        let outerRect = CGRect(x: -outerR, y: -outerR, width: outerR * 2, height: outerR * 2)
-        let innerRect = CGRect(x: -innerR, y: -innerR, width: innerR * 2, height: innerR * 2)
-        ctx.addEllipse(in: outerRect)
-        ctx.addEllipse(in: innerRect)
-        ctx.setFillColor(CGColor(red: r, green: g, blue: b, alpha: alpha))
-        ctx.fillPath(using: .evenOdd)
+        for i in 0..<steps {
+            // t: 0.1, 0.3, 0.5, 0.7, 0.9 (각 서브링의 중심 위치 비율)
+            let t = (CGFloat(i) + 0.5) / CGFloat(steps)
+
+            // cosine bell: 중앙(t=0.5)에서 최대, 양 끝(t=0, t=1)에서 0
+            let bell = (cos((t - 0.5) * 2.0 * .pi) + 1.0) * 0.5
+            let alpha = peakAlpha * bell
+            guard alpha > 0.005 else { continue }
+
+            // 서브링 위치: ring 중심(radius)에서 offset
+            let offset = (t - 0.5) * ringWidth
+            let subRadius = radius + offset
+            let innerR = max(subRadius - stepWidth * 0.55, 0)  // 약간 겹침(0.55)으로 간극 방지
+            let outerR = subRadius + stepWidth * 0.55
+
+            let outerRect = CGRect(x: -outerR, y: -outerR, width: outerR * 2, height: outerR * 2)
+            let innerRect = CGRect(x: -innerR, y: -innerR, width: innerR * 2, height: innerR * 2)
+            ctx.addEllipse(in: outerRect)
+            ctx.addEllipse(in: innerRect)
+            ctx.setFillColor(red: r, green: g, blue: b, alpha: alpha)
+            ctx.fillPath(using: .evenOdd)
+        }
 
         ctx.restoreGState()
     }
