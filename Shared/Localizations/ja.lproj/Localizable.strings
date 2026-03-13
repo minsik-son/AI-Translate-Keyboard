@@ -440,6 +440,13 @@
 "theme.premium_stardust_drift" = "スターダストドリフト";
 "theme.section_free" = "無料テーマ";
 "theme.section_premium" = "プレミアムテーマ";
+"theme.category_all" = "すべて";
+"theme.category_free" = "無料";
+"theme.category_neon" = "ネオン";
+"theme.category_nature" = "自然";
+"theme.category_animation" = "アニメーション";
+"theme.category_space" = "宇宙";
+"theme.category_minimal" = "ミニマル";
 "accessibility.locked" = "ロック中";
 "accessibility.selected" = "選択中";
 "accessibility.theme_locked_hint" = "ダブルタップでサブスクリプションオプションを表示";

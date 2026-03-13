@@ -440,6 +440,13 @@
 "theme.premium_stardust_drift" = "Звёздный дрейф";
 "theme.section_free" = "Бесплатные темы";
 "theme.section_premium" = "Премиум темы";
+"theme.category_all" = "Все";
+"theme.category_free" = "Бесплатные";
+"theme.category_neon" = "Неон";
+"theme.category_nature" = "Природа";
+"theme.category_animation" = "Анимации";
+"theme.category_space" = "Космос";
+"theme.category_minimal" = "Минимал";
 "accessibility.locked" = "Заблокировано";
 "accessibility.selected" = "Выбрано";
 "accessibility.theme_locked_hint" = "Дважды нажмите, чтобы посмотреть варианты подписки";

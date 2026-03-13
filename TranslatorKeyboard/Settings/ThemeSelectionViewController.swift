@@ -1,5 +1,19 @@
 import UIKit
 
+// MARK: - Theme Category
+
+enum ThemeCategory: String, CaseIterable {
+    case all         = "theme.category_all"
+    case free        = "theme.category_free"
+    case neon        = "theme.category_neon"
+    case nature      = "theme.category_nature"
+    case animation   = "theme.category_animation"
+    case space       = "theme.category_space"
+    case minimal     = "theme.category_minimal"
+
+    var localizedName: String { L(rawValue) }
+}
+
 class ThemeSelectionViewController: UIViewController {
 
     private let freeThemes = KeyboardTheme.allThemes
@@ -24,31 +38,96 @@ class ThemeSelectionViewController: UIViewController {
 
     private var selectedThemeId: String = "default"
 
+    // MARK: - Category Tag Map
+    // 태그가 없는 테마는 "전체"에만 표시됨
+    private static let themeTagMap: [String: Set<ThemeCategory>] = [
+        // 무료 테마 12개: .free 태그 일괄 부여 (allThemes에서 자동 처리)
+
+        // 프리미엄 - 네온
+        "premium_midnight_aurora":  [.neon, .space],
+        "premium_starlit_night":    [.neon, .space],
+        "premium_matrix_pulse":     [.neon, .animation],
+        "premium_digital_rain":     [.neon, .animation],
+
+        // 프리미엄 - 자연
+        "premium_ocean_abyss":      [.nature],
+        "premium_sunset_ember":     [.nature],
+        "premium_volcanic_ember":   [.nature],
+        "premium_northern_lights":  [.nature],
+        "premium_sakura_breeze":    [.nature],
+        "premium_deep_ocean":       [.nature],
+        "premium_dark_walnut":      [.nature],
+        "premium_natural_oak":      [.nature],
+        "premium_mercury_ripple":   [.nature, .animation],
+
+        // 프리미엄 - 우주
+        "premium_stardust_drift":   [.space, .animation],
+
+        // 프리미엄 - 미니멀
+        "premium_rose_gold":        [.minimal],
+        "premium_frost_crystal":    [.minimal],
+        "premium_brushed_steel":    [.minimal],
+    ]
+
+    private var selectedCategory: ThemeCategory = .all
+    private var filteredFreeThemes: [KeyboardTheme] = []
+    private var filteredPremiumThemes: [KeyboardTheme] = []
+
+    // MARK: - Category Tab Bar
+
+    private lazy var categoryScrollView: UIScrollView = {
+        let sv = UIScrollView()
+        sv.showsHorizontalScrollIndicator = false
+        sv.translatesAutoresizingMaskIntoConstraints = false
+        sv.backgroundColor = AppColors.bg
+        return sv
+    }()
+
+    private lazy var categoryStack: UIStackView = {
+        let sv = UIStackView()
+        sv.axis = .horizontal
+        sv.spacing = 8
+        sv.translatesAutoresizingMaskIntoConstraints = false
+        return sv
+    }()
+
+    private var categoryButtons: [UIButton] = []
+
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = L("settings.keyboard_theme")
         view.backgroundColor = AppColors.bg
         navigationController?.navigationBar.prefersLargeTitles = true
 
+        setupCategoryTabBar()
+
         view.addSubview(collectionView)
         NSLayoutConstraint.activate([
-            collectionView.topAnchor.constraint(equalTo: view.topAnchor),
+            collectionView.topAnchor.constraint(equalTo: categoryScrollView.bottomAnchor),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
 
         selectedThemeId = AppGroupManager.shared.string(forKey: AppConstants.UserDefaultsKeys.keyboardTheme) ?? "default"
+        applyFilter()   // 초기 필터 적용 (전체)
+
         NotificationCenter.default.addObserver(self, selector: #selector(handleLanguageChange), name: .languageDidChange, object: nil)
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        collectionView.reloadData()
+        selectedThemeId = AppGroupManager.shared.string(forKey: AppConstants.UserDefaultsKeys.keyboardTheme) ?? "default"
+        applyFilter()
     }
 
     @objc private func handleLanguageChange() {
         navigationItem.title = L("settings.keyboard_theme")
+        // 카테고리 버튼 텍스트 갱신
+        for (index, button) in categoryButtons.enumerated() {
+            let category = ThemeCategory.allCases[index]
+            button.setTitle(category.localizedName, for: .normal)
+        }
         collectionView.reloadData()
     }
 
@@ -61,6 +140,109 @@ class ThemeSelectionViewController: UIViewController {
         }
         return nil
     }
+
+    /// 필터된 배열에서 테마 ID로 IndexPath 찾기
+    private func findFilteredIndexPath(forThemeId id: String) -> IndexPath? {
+        if let index = filteredFreeThemes.firstIndex(where: { $0.id == id }) {
+            return IndexPath(item: index, section: 0)
+        }
+        if let index = filteredPremiumThemes.firstIndex(where: { $0.id == id }) {
+            let premiumSection = filteredFreeThemes.isEmpty ? 0 : 1
+            return IndexPath(item: index, section: premiumSection)
+        }
+        return nil
+    }
+
+    // MARK: - Filtering
+
+    private func applyFilter() {
+        switch selectedCategory {
+        case .all:
+            filteredFreeThemes = freeThemes
+            filteredPremiumThemes = premiumThemes
+        case .free:
+            filteredFreeThemes = freeThemes
+            filteredPremiumThemes = []
+        default:
+            filteredFreeThemes = freeThemes.filter { theme in
+                Self.themeTagMap[theme.id]?.contains(selectedCategory) == true
+            }
+            filteredPremiumThemes = premiumThemes.filter { theme in
+                Self.themeTagMap[theme.id]?.contains(selectedCategory) == true
+            }
+        }
+        collectionView.reloadData()
+    }
+
+    private func setupCategoryTabBar() {
+        view.addSubview(categoryScrollView)
+        categoryScrollView.addSubview(categoryStack)
+
+        NSLayoutConstraint.activate([
+            categoryScrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            categoryScrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            categoryScrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            categoryScrollView.heightAnchor.constraint(equalToConstant: 48),
+
+            categoryStack.topAnchor.constraint(equalTo: categoryScrollView.topAnchor, constant: 8),
+            categoryStack.leadingAnchor.constraint(equalTo: categoryScrollView.leadingAnchor, constant: 20),
+            categoryStack.trailingAnchor.constraint(equalTo: categoryScrollView.trailingAnchor, constant: -20),
+            categoryStack.bottomAnchor.constraint(equalTo: categoryScrollView.bottomAnchor, constant: -8),
+            categoryStack.heightAnchor.constraint(equalToConstant: 32),
+        ])
+
+        for (index, category) in ThemeCategory.allCases.enumerated() {
+            let button = UIButton(type: .system)
+            button.setTitle(category.localizedName, for: .normal)
+            button.titleLabel?.font = .systemFont(ofSize: 13, weight: .semibold)
+            button.layer.cornerRadius = 16
+            button.clipsToBounds = true
+            button.tag = index
+            button.contentEdgeInsets = UIEdgeInsets(top: 6, left: 16, bottom: 6, right: 16)
+            button.addTarget(self, action: #selector(categoryTapped(_:)), for: .touchUpInside)
+
+            categoryButtons.append(button)
+            categoryStack.addArrangedSubview(button)
+        }
+
+        updateCategoryButtonStyles()
+    }
+
+    @objc private func categoryTapped(_ sender: UIButton) {
+        let categories = ThemeCategory.allCases
+        guard sender.tag < categories.count else { return }
+
+        selectedCategory = categories[sender.tag]
+        updateCategoryButtonStyles()
+        applyFilter()
+
+        // 탭 변경 시 컬렉션뷰 맨 위로 스크롤
+        if collectionView.numberOfSections > 0,
+           collectionView.numberOfItems(inSection: 0) > 0 {
+            collectionView.scrollToItem(at: IndexPath(item: 0, section: 0),
+                                         at: .top, animated: false)
+        } else {
+            collectionView.setContentOffset(.zero, animated: false)
+        }
+    }
+
+    private func updateCategoryButtonStyles() {
+        for (index, button) in categoryButtons.enumerated() {
+            let category = ThemeCategory.allCases[index]
+            let isSelected = category == selectedCategory
+
+            if isSelected {
+                button.backgroundColor = AppColors.accent
+                button.setTitleColor(.white, for: .normal)
+                button.layer.borderWidth = 0
+            } else {
+                button.backgroundColor = AppColors.card
+                button.setTitleColor(AppColors.textSub, for: .normal)
+                button.layer.borderWidth = 1
+                button.layer.borderColor = AppColors.border.cgColor
+            }
+        }
+    }
 }
 
 // MARK: - UICollectionViewDataSource & Delegate
@@ -68,19 +250,37 @@ class ThemeSelectionViewController: UIViewController {
 extension ThemeSelectionViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
 
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        2
+        var count = 0
+        if !filteredFreeThemes.isEmpty { count += 1 }
+        if !filteredPremiumThemes.isEmpty { count += 1 }
+        return count
+    }
+
+    /// 실제 섹션 인덱스 → free/premium 판별
+    private enum SectionType {
+        case free, premium
+    }
+
+    private func sectionType(for section: Int) -> SectionType {
+        if !filteredFreeThemes.isEmpty {
+            return section == 0 ? .free : .premium
+        }
+        return .premium
     }
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        section == 0 ? freeThemes.count : premiumThemes.count
+        switch sectionType(for: section) {
+        case .free:    return filteredFreeThemes.count
+        case .premium: return filteredPremiumThemes.count
+        }
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let theme: KeyboardTheme
-        if indexPath.section == 0 {
-            theme = freeThemes[indexPath.item]
-        } else {
-            theme = premiumThemes[indexPath.item]
+        let type = sectionType(for: indexPath.section)
+        switch type {
+        case .free:    theme = filteredFreeThemes[indexPath.item]
+        case .premium: theme = filteredPremiumThemes[indexPath.item]
         }
 
         #if DEBUG
@@ -91,11 +291,12 @@ extension ThemeSelectionViewController: UICollectionViewDataSource, UICollection
         #endif
         let isSelected = theme.id == selectedThemeId
 
-        if indexPath.section == 1 {
+        switch type {
+        case .premium:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PremiumThemeCell.reuseId, for: indexPath) as! PremiumThemeCell
             cell.configure(theme: theme, isSelected: isSelected, isLocked: isLocked)
             return cell
-        } else {
+        case .free:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ThemeCell.reuseId, for: indexPath) as! ThemeCell
             cell.configure(theme: theme, isSelected: isSelected, isLocked: isLocked)
             return cell
@@ -109,34 +310,38 @@ extension ThemeSelectionViewController: UICollectionViewDataSource, UICollection
             for: indexPath
         ) as! ThemeSectionHeader
 
-        if indexPath.section == 0 {
+        switch sectionType(for: indexPath.section) {
+        case .free:
             header.configure(title: L("theme.section_free"), showBadge: false)
-        } else {
+        case .premium:
             header.configure(title: L("theme.section_premium"), showBadge: true)
         }
         return header
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        CGSize(width: collectionView.bounds.width, height: 44)
+        // 섹션에 아이템이 없으면 헤더도 숨김 (안전장치)
+        let itemCount = collectionView.numberOfItems(inSection: section)
+        guard itemCount > 0 else { return .zero }
+        return CGSize(width: collectionView.bounds.width, height: 44)
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let totalSpacing: CGFloat = 20 * 2 + 14
         let width = (collectionView.bounds.width - totalSpacing) / 2
-        if indexPath.section == 1 {
+        switch sectionType(for: indexPath.section) {
+        case .premium:
             return CGSize(width: floor(width), height: floor(width) * 1.45)
-        } else {
+        case .free:
             return CGSize(width: floor(width), height: floor(width) * 1.15)
         }
     }
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let theme: KeyboardTheme
-        if indexPath.section == 0 {
-            theme = freeThemes[indexPath.item]
-        } else {
-            theme = premiumThemes[indexPath.item]
+        switch sectionType(for: indexPath.section) {
+        case .free:    theme = filteredFreeThemes[indexPath.item]
+        case .premium: theme = filteredPremiumThemes[indexPath.item]
         }
 
         #if DEBUG
@@ -157,8 +362,12 @@ extension ThemeSelectionViewController: UICollectionViewDataSource, UICollection
         AppGroupManager.shared.set(theme.id, forKey: AppConstants.UserDefaultsKeys.keyboardTheme)
         ThemePatternRenderer.clearCache()
 
+        // 필터된 배열에서 이전 선택 찾기 (안전 검증 포함)
         var indexPaths = [indexPath]
-        if let prevPath = findIndexPath(forThemeId: previousId), prevPath != indexPath {
+        if let prevPath = findFilteredIndexPath(forThemeId: previousId),
+           prevPath != indexPath,
+           prevPath.section < collectionView.numberOfSections,
+           prevPath.item < collectionView.numberOfItems(inSection: prevPath.section) {
             indexPaths.append(prevPath)
         }
         collectionView.reloadItems(at: indexPaths)

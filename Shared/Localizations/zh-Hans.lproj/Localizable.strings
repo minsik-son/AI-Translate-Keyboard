@@ -440,6 +440,13 @@
 "theme.premium_stardust_drift" = "星尘漂移";
 "theme.section_free" = "免费主题";
 "theme.section_premium" = "高级主题";
+"theme.category_all" = "全部";
+"theme.category_free" = "免费";
+"theme.category_neon" = "霓虹";
+"theme.category_nature" = "自然";
+"theme.category_animation" = "动画";
+"theme.category_space" = "宇宙";
+"theme.category_minimal" = "极简";
 "accessibility.locked" = "已锁定";
 "accessibility.selected" = "已选择";
 "accessibility.theme_locked_hint" = "双击查看订阅选项";

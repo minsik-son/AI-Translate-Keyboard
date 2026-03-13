@@ -440,6 +440,13 @@
 "theme.premium_stardust_drift" = "Sternenstaub-Drift";
 "theme.section_free" = "Kostenlose Themen";
 "theme.section_premium" = "Premium-Themen";
+"theme.category_all" = "Alle";
+"theme.category_free" = "Kostenlos";
+"theme.category_neon" = "Neon";
+"theme.category_nature" = "Natur";
+"theme.category_animation" = "Animiert";
+"theme.category_space" = "Weltraum";
+"theme.category_minimal" = "Minimal";
 "accessibility.locked" = "Gesperrt";
 "accessibility.selected" = "Ausgewählt";
 "accessibility.theme_locked_hint" = "Doppeltippen, um Abo-Optionen anzuzeigen";

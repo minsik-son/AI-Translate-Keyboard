@@ -440,6 +440,13 @@
 "theme.premium_stardust_drift" = "Deriva Estelar";
 "theme.section_free" = "Temas Gratuitos";
 "theme.section_premium" = "Temas Premium";
+"theme.category_all" = "Todos";
+"theme.category_free" = "Gratis";
+"theme.category_neon" = "Neón";
+"theme.category_nature" = "Naturaleza";
+"theme.category_animation" = "Animados";
+"theme.category_space" = "Espacio";
+"theme.category_minimal" = "Minimal";
 "accessibility.locked" = "Bloqueado";
 "accessibility.selected" = "Seleccionado";
 "accessibility.theme_locked_hint" = "Toca dos veces para ver opciones de suscripción";

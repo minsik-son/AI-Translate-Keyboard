@@ -440,6 +440,13 @@
 "theme.premium_stardust_drift" = "스타더스트 드릿트";
 "theme.section_free" = "무료 테마";
 "theme.section_premium" = "프리미엄 테마";
+"theme.category_all" = "전체";
+"theme.category_free" = "무료";
+"theme.category_neon" = "네온";
+"theme.category_nature" = "자연";
+"theme.category_animation" = "애니메이션";
+"theme.category_space" = "우주";
+"theme.category_minimal" = "미니멀";
 "accessibility.locked" = "잠김";
 "accessibility.selected" = "선택됨";
 "accessibility.theme_locked_hint" = "이중 탭하여 구독 옵션 보기";
