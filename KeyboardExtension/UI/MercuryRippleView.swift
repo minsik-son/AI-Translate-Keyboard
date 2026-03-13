@@ -9,12 +9,17 @@ final class MercuryRippleView: UIView {
     private static let rippleMaxRadius: CGFloat = 200    // 최대 반경
     private static let rippleLifetime: CGFloat = 1.2     // 초
 
-    // 물결 출렁임 파라미터
-    private static let waveSegments: Int = 48            // 경로 세그먼트 수 (7.5° 간격)
-    private static let wavePrimaryFreq: CGFloat = 5.0    // 주 파동 봉우리 수
-    private static let waveSecondaryFreq: CGFloat = 11.0 // 미세 파동 봉우리 수
-    private static let wavePhaseSpeed: CGFloat = 3.0     // 위상 회전 속도 (rad/sec)
-    private static let perspectiveY: CGFloat = 0.65      // Y축 압축 비율 (원근감)
+    static let perspectiveY: CGFloat = 0.65               // Y축 압축 비율 (원근감)
+
+    // MARK: - Ripple Snapshot (외부 노출용)
+    struct RippleSnapshot {
+        let centerX: CGFloat
+        let centerY: CGFloat
+        let radius: CGFloat
+        let ringWidth: CGFloat
+        let progress: CGFloat      // 0.0 → 1.0 (수명 진행도)
+        let intensity: CGFloat     // 0.3 ~ 1.0
+    }
 
     // MARK: - Ripple State
     private struct Ripple {
@@ -126,6 +131,37 @@ final class MercuryRippleView: UIView {
         displayLink = dl
     }
 
+    // MARK: - Snapshot API (렌즈 효과용)
+
+    /// 현재 활성 리플들의 기하 정보 스냅샷 반환
+    func activeRippleSnapshots() -> [RippleSnapshot] {
+        guard isAnimating, !ripples.isEmpty else { return [] }
+        let now = CACurrentMediaTime()
+        var snapshots: [RippleSnapshot] = []
+        snapshots.reserveCapacity(ripples.count)
+
+        for ripple in ripples {
+            let age = CGFloat(now - ripple.startTime)
+            let progress = age / Self.rippleLifetime
+            guard progress >= 0, progress <= 1.0 else { continue }
+
+            let radius = Self.rippleSpeed * age
+            guard radius > 0 else { continue }
+
+            let ringWidth = radius * 0.3
+
+            snapshots.append(RippleSnapshot(
+                centerX: ripple.centerX,
+                centerY: ripple.centerY,
+                radius: radius,
+                ringWidth: ringWidth,
+                progress: progress,
+                intensity: ripple.intensity
+            ))
+        }
+        return snapshots
+    }
+
     // MARK: - Animation Loop
 
     @objc private func animationTick(_ dl: CADisplayLink) {
@@ -183,40 +219,30 @@ final class MercuryRippleView: UIView {
             // 알파: 시작 시 밝고 점차 사라짐 (ease-out)
             let baseAlpha = ripple.intensity * (1.0 - progress * progress) * 0.35
 
-            // 물결 출렁임 진폭: 반경이 클수록, 진행될수록 출렁임 커짐
-            let waveAmplitude = radius * 0.10 * min(progress * 3.0, 1.0)
-
-            // 시간 기반 위상 (물결 봉우리가 회전하듯 이동)
-            let phase = age * Self.wavePhaseSpeed
-
-            // 주 물결 (사인파 변조 도넛)
+            // 주 물결 (원형 도넛)
             let innerRadius = max(radius - ringWidth * 0.5, 0)
             let outerRadius = radius + ringWidth * 0.5
-            drawWaveRing(ctx: ctx, cx: ripple.centerX, cy: ripple.centerY,
-                         innerR: innerRadius, outerR: outerRadius,
-                         amplitude: waveAmplitude, phase: phase,
-                         r: r, g: g, b: b, alpha: baseAlpha)
+            drawCircularRing(ctx: ctx, cx: ripple.centerX, cy: ripple.centerY,
+                             innerR: innerRadius, outerR: outerRadius,
+                             r: r, g: g, b: b, alpha: baseAlpha)
 
-            // 외곽 물결 (50% 크기, 40% 알파, 역위상)
+            // 외곽 물결 (50% 크기, 40% 알파)
             let outerWaveRadius = radius * 1.5
             let outerRingWidth = ringWidth * 0.6
             let outerInner = max(outerWaveRadius - outerRingWidth * 0.5, 0)
             let outerOuter = outerWaveRadius + outerRingWidth * 0.5
-            let outerAmplitude = waveAmplitude * 1.3
-            drawWaveRing(ctx: ctx, cx: ripple.centerX, cy: ripple.centerY,
-                         innerR: outerInner, outerR: outerOuter,
-                         amplitude: outerAmplitude, phase: phase + .pi,
-                         r: r, g: g, b: b, alpha: baseAlpha * 0.4)
+            drawCircularRing(ctx: ctx, cx: ripple.centerX, cy: ripple.centerY,
+                             innerR: outerInner, outerR: outerOuter,
+                             r: r, g: g, b: b, alpha: baseAlpha * 0.4)
         }
     }
 
-    /// 사인파 변조 물결 링 — 수면파 출렁임 효과
-    private func drawWaveRing(ctx: CGContext,
-                               cx: CGFloat, cy: CGFloat,
-                               innerR: CGFloat, outerR: CGFloat,
-                               amplitude: CGFloat, phase: CGFloat,
-                               r: CGFloat, g: CGFloat, b: CGFloat,
-                               alpha: CGFloat) {
+    /// 원형 도넛 링 — 깔끔한 원형 수면파
+    private func drawCircularRing(ctx: CGContext,
+                                   cx: CGFloat, cy: CGFloat,
+                                   innerR: CGFloat, outerR: CGFloat,
+                                   r: CGFloat, g: CGFloat, b: CGFloat,
+                                   alpha: CGFloat) {
         guard alpha > 0.005 else { return }
         guard outerR > 0 else { return }
 
@@ -226,52 +252,11 @@ final class MercuryRippleView: UIView {
         ctx.translateBy(x: cx, y: cy)
         ctx.scaleBy(x: 1.0, y: Self.perspectiveY)
 
-        let segments = Self.waveSegments
-        let angleStep = (.pi * 2.0) / CGFloat(segments)
-
-        // 외곽 경로 (시계 방향)
-        let outerPath = CGMutablePath()
-        for i in 0...segments {
-            let angle = CGFloat(i) * angleStep
-            let waveMod = amplitude * (
-                sin(Self.wavePrimaryFreq * angle + phase)
-                + 0.3 * sin(Self.waveSecondaryFreq * angle - phase * 0.7)
-            )
-            let modR = outerR + waveMod
-            let px = modR * cos(angle)
-            let py = modR * sin(angle)
-
-            if i == 0 {
-                outerPath.move(to: CGPoint(x: px, y: py))
-            } else {
-                outerPath.addLine(to: CGPoint(x: px, y: py))
-            }
-        }
-        outerPath.closeSubpath()
-
-        // 내곽 경로 (시계 방향, even-odd로 빈 공간 생성)
-        let innerPath = CGMutablePath()
-        for i in 0...segments {
-            let angle = CGFloat(i) * angleStep
-            let waveMod = amplitude * 0.7 * (
-                sin(Self.wavePrimaryFreq * angle + phase)
-                + 0.3 * sin(Self.waveSecondaryFreq * angle - phase * 0.7)
-            )
-            let modR = max(innerR + waveMod, 0)
-            let px = modR * cos(angle)
-            let py = modR * sin(angle)
-
-            if i == 0 {
-                innerPath.move(to: CGPoint(x: px, y: py))
-            } else {
-                innerPath.addLine(to: CGPoint(x: px, y: py))
-            }
-        }
-        innerPath.closeSubpath()
-
-        // 도넛 합성: 외곽 + 내곽 → even-odd fill
-        ctx.addPath(outerPath)
-        ctx.addPath(innerPath)
+        // 도넛 합성: 외곽 타원 + 내곽 타원 → even-odd fill
+        let outerRect = CGRect(x: -outerR, y: -outerR, width: outerR * 2, height: outerR * 2)
+        let innerRect = CGRect(x: -innerR, y: -innerR, width: innerR * 2, height: innerR * 2)
+        ctx.addEllipse(in: outerRect)
+        ctx.addEllipse(in: innerRect)
         ctx.setFillColor(CGColor(red: r, green: g, blue: b, alpha: alpha))
         ctx.fillPath(using: .evenOdd)
 

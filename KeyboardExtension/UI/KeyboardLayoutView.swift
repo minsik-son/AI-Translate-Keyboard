@@ -87,6 +87,11 @@ class KeyboardLayoutView: UIView {
     private var stardustView: StardustView?
     private var isMemoryConstrained = false
 
+    // Mercury Ripple 렌즈 굴절 애니메이션
+    private var lensDisplayLink: CADisplayLink?
+    private var isLensAnimationActive = false
+    private var cachedButtonCentersInRippleView: [(button: UIButton, center: CGPoint)] = []
+
     // Matrix Pulse 웨이브 애니메이션
     private var waveDisplayLink: CADisplayLink?
     private var waveStartTime: CFTimeInterval = 0
@@ -336,6 +341,8 @@ class KeyboardLayoutView: UIView {
         if wasRippleAnimating {
             mercuryRippleView?.pauseAnimation()
         }
+        let wasLensAnimating = isLensAnimationActive
+        if wasLensAnimating { pauseLensAnimation() }
         let wasStardustAnimating = stardustView?.isActive ?? false
         if wasStardustAnimating { stardustView?.pauseAnimation() }
 
@@ -346,6 +353,7 @@ class KeyboardLayoutView: UIView {
 
         // 웨이브 projection 캐시 즉시 정리 — 버튼 제거 전에 stale 참조 방지
         cachedKeyProjections.removeAll()
+        cachedButtonCentersInRippleView.removeAll()
 
         keyboardContainer.subviews.forEach { $0.removeFromSuperview() }
         allKeyButtons.removeAll()
@@ -416,6 +424,14 @@ class KeyboardLayoutView: UIView {
                   !isMemoryConstrained, let rv = mercuryRippleView, !rv.isActive,
                   !ProcessInfo.processInfo.isLowPowerModeEnabled {
             rv.startAnimation()
+        }
+
+        // Lens animation: 빌드 후 캐시 갱신/재개
+        if wasLensAnimating {
+            resumeLensAnimation()
+        } else if let theme = customTheme, theme.needsRippleAnimation,
+                  !isMemoryConstrained, !ProcessInfo.processInfo.isLowPowerModeEnabled {
+            startLensAnimation()
         }
 
         // Resume stardust animation
@@ -1438,6 +1454,7 @@ class KeyboardLayoutView: UIView {
         }
         matrixRainView?.stopAnimation()
         mercuryRippleView?.stopAnimation()
+        stopLensAnimation()
         stardustView?.stopAnimation()
         isTrackpadMode = true
         selectionHaptic.prepare()
@@ -1668,6 +1685,7 @@ class KeyboardLayoutView: UIView {
             }
         } else {
             mercuryRippleView?.stopAnimation()
+            stopLensAnimation()
             mercuryRippleView?.isHidden = true
         }
 
@@ -1871,11 +1889,147 @@ class KeyboardLayoutView: UIView {
         )
     }
 
+    // MARK: - Mercury Ripple Lens Animation
+
+    private func startLensAnimation() {
+        guard !isLensAnimationActive else { return }
+        guard let _ = mercuryRippleView, mercuryRippleView?.isActive == true else { return }
+        guard !ProcessInfo.processInfo.isLowPowerModeEnabled else { return }
+
+        isLensAnimationActive = true
+        rebuildLensButtonCache()
+
+        // 줄임표 방지: 스케일 확대 시 UILabel이 truncation하지 않도록 설정
+        for button in allKeyButtons {
+            button.titleLabel?.lineBreakMode = .byClipping
+        }
+
+        lensDisplayLink?.invalidate()
+        lensDisplayLink = nil
+
+        let dl = CADisplayLink(target: self, selector: #selector(lensAnimationTick))
+        if #available(iOS 15.0, *) {
+            dl.preferredFrameRateRange = CAFrameRateRange(minimum: 15, maximum: 30, preferred: 24)
+        } else {
+            dl.preferredFramesPerSecond = 24
+        }
+        dl.add(to: .main, forMode: .common)
+        lensDisplayLink = dl
+    }
+
+    private func stopLensAnimation() {
+        guard isLensAnimationActive else { return }
+        isLensAnimationActive = false
+        lensDisplayLink?.invalidate()
+        lensDisplayLink = nil
+        cachedButtonCentersInRippleView.removeAll()
+
+        // 모든 버튼 titleLabel 트랜스폼 리셋 + lineBreakMode 복원
+        for button in allKeyButtons {
+            button.titleLabel?.transform = .identity
+            button.titleLabel?.lineBreakMode = .byTruncatingTail
+        }
+    }
+
+    private func pauseLensAnimation() {
+        guard isLensAnimationActive else { return }
+        isLensAnimationActive = false
+        lensDisplayLink?.invalidate()
+        lensDisplayLink = nil
+    }
+
+    private func resumeLensAnimation() {
+        guard !isLensAnimationActive else { return }
+        guard let rv = mercuryRippleView, rv.isActive else { return }
+        guard !ProcessInfo.processInfo.isLowPowerModeEnabled else { return }
+
+        isLensAnimationActive = true
+        rebuildLensButtonCache()
+
+        let dl = CADisplayLink(target: self, selector: #selector(lensAnimationTick))
+        if #available(iOS 15.0, *) {
+            dl.preferredFrameRateRange = CAFrameRateRange(minimum: 15, maximum: 30, preferred: 24)
+        } else {
+            dl.preferredFramesPerSecond = 24
+        }
+        dl.add(to: .main, forMode: .common)
+        lensDisplayLink = dl
+    }
+
+    private func rebuildLensButtonCache() {
+        cachedButtonCentersInRippleView.removeAll(keepingCapacity: true)
+        guard let rv = mercuryRippleView, !allKeyButtons.isEmpty else { return }
+
+        for button in allKeyButtons {
+            let center = button.superview?.convert(button.center, to: rv) ?? button.center
+            cachedButtonCentersInRippleView.append((button: button, center: center))
+        }
+    }
+
+    @objc private func lensAnimationTick() {
+        guard isLensAnimationActive, let rv = mercuryRippleView else { return }
+
+        if ProcessInfo.processInfo.isLowPowerModeEnabled {
+            stopLensAnimation()
+            return
+        }
+
+        let snapshots = rv.activeRippleSnapshots()
+
+        // 리플이 없으면 모든 버튼 리셋 후 idle
+        if snapshots.isEmpty {
+            for (button, _) in cachedButtonCentersInRippleView {
+                if button.titleLabel?.transform != .identity {
+                    button.titleLabel?.transform = .identity
+                }
+            }
+            return
+        }
+
+        let perspY = MercuryRippleView.perspectiveY
+
+        for (button, btnCenter) in cachedButtonCentersInRippleView {
+            var totalContribution: CGFloat = 0
+
+            for snap in snapshots {
+                // 리플 중심으로부터 거리 (Y축 perspectiveY 압축 적용)
+                let dx = btnCenter.x - snap.centerX
+                let dy = (btnCenter.y - snap.centerY) / perspY
+                let dist = sqrt(dx * dx + dy * dy)
+
+                // 파면(radius)으로부터의 거리
+                let distFromWavefront = abs(dist - snap.radius)
+
+                // ringWidth 이내일 때만 기여
+                guard distFromWavefront < snap.ringWidth else { continue }
+
+                // cosine bell curve: 파면 위에서 최대, 멀어질수록 0
+                let t = distFromWavefront / snap.ringWidth
+                let bell = (cos(t * .pi) + 1.0) * 0.5
+
+                // 수명에 따른 fade (ease-out: 1 - progress²)
+                let fade = 1.0 - snap.progress * snap.progress
+
+                totalContribution += bell * fade * snap.intensity
+            }
+
+            // scale = 1.0 + total * 0.20, max 1.25
+            let scale = min(1.0 + totalContribution * 0.20, 1.25)
+
+            if scale > 1.001 {
+                button.titleLabel?.transform = CGAffineTransform(scaleX: scale, y: scale)
+            } else if button.titleLabel?.transform != .identity {
+                button.titleLabel?.transform = .identity
+            }
+        }
+    }
+
     func handlePowerStateChange() {
         if ProcessInfo.processInfo.isLowPowerModeEnabled {
             stopWaveAnimation()
             matrixRainView?.stopAnimation()
             mercuryRippleView?.stopAnimation()
+            stopLensAnimation()
             stardustView?.stopAnimation()
         } else {
             if let theme = customTheme, theme.needsWaveAnimation {
@@ -1888,6 +2042,7 @@ class KeyboardLayoutView: UIView {
             if let theme = customTheme, theme.needsRippleAnimation,
                !isMemoryConstrained {
                 mercuryRippleView?.startAnimation()
+                startLensAnimation()
             }
             if let theme = customTheme, theme.needsStardustAnimation,
                !isMemoryConstrained {
@@ -1905,7 +2060,8 @@ class KeyboardLayoutView: UIView {
             matrixRainView = nil
         }
 
-        // 리플 애니메이션 정리
+        // 리플 + 렌즈 애니메이션 정리
+        stopLensAnimation()
         if let rv = mercuryRippleView {
             rv.stopAnimation()
             rv.removeFromSuperview()
@@ -1931,6 +2087,9 @@ class KeyboardLayoutView: UIView {
         stopWaveAnimation()
         waveDisplayLink?.invalidate()
         waveDisplayLink = nil
+        stopLensAnimation()
+        lensDisplayLink?.invalidate()
+        lensDisplayLink = nil
         matrixRainView?.stopAnimation()
         mercuryRippleView?.stopAnimation()
         stardustView?.stopAnimation()
