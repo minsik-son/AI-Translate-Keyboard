@@ -77,6 +77,7 @@ class ThemeSelectionViewController: UIViewController {
 
         // 프리미엄 - 자연/애니메이션
         "premium_midnight_snowfall": [.nature, .animation],
+        "premium_cherry_blossom":    [.nature, .animation],
 
         // 프리미엄 - 미니멀
         "premium_rose_gold":        [.minimal],
@@ -1335,7 +1336,8 @@ private class PremiumThemeCell: UICollectionViewCell {
 
     private func configureAnimationPreview(theme: KeyboardTheme) {
         guard theme.hasWaveAnimation || theme.hasRainAnimation || theme.hasRippleAnimation
-              || theme.hasStardustAnimation || theme.hasEdgeGlowAnimation || theme.hasSnowfallAnimation else {
+              || theme.hasStardustAnimation || theme.hasEdgeGlowAnimation || theme.hasSnowfallAnimation
+              || theme.hasCherryBlossomAnimation else {
             animationEffectView?.isHidden = true
             return
         }
@@ -1373,6 +1375,8 @@ private class PremiumThemeCell: UICollectionViewCell {
             addEdgeGlowPreviewEffect(to: effectView, theme: theme)
         } else if theme.hasSnowfallAnimation {
             addSnowfallPreviewEffect(to: effectView, theme: theme)
+        } else if theme.hasCherryBlossomAnimation {
+            addCherryBlossomPreviewEffect(to: effectView, theme: theme)
         }
     }
 
@@ -1534,6 +1538,54 @@ private class PremiumThemeCell: UICollectionViewCell {
             dot.shadowRadius = flake.size * 0.4
             dot.shadowOpacity = Float(flake.alpha * 0.5)
             view.layer.addSublayer(dot)
+        }
+    }
+
+    private func addCherryBlossomPreviewEffect(to view: UIView, theme: KeyboardTheme) {
+        // 핑크 꽃잎 점 20개 (오른쪽 상단 → 왼쪽 하단 방향 분포)
+        let petals: [(x: CGFloat, y: CGFloat, size: CGFloat, alpha: CGFloat)] = [
+            (140, 8, 4.0, 0.7), (155, 15, 3.5, 0.6), (125, 20, 3.0, 0.55),
+            (148, 28, 4.5, 0.65), (160, 5, 3.0, 0.5), (130, 12, 3.5, 0.6),
+            (118, 35, 3.0, 0.5), (135, 42, 2.5, 0.45), (105, 50, 3.5, 0.55),
+            (90, 55, 3.0, 0.5), (115, 60, 2.5, 0.4), (75, 65, 3.5, 0.5),
+            (60, 72, 3.0, 0.45), (95, 78, 2.5, 0.4), (45, 85, 3.5, 0.5),
+            (30, 90, 3.0, 0.45), (70, 95, 2.5, 0.35), (15, 100, 3.0, 0.4),
+            (50, 108, 2.5, 0.35), (25, 115, 3.0, 0.3),
+        ]
+
+        let petalColors: [UIColor] = [
+            UIColor(red: 1.0, green: 0.718, blue: 0.773, alpha: 1),
+            UIColor(red: 1.0, green: 0.784, blue: 0.839, alpha: 1),
+            UIColor(red: 1.0, green: 0.667, blue: 0.733, alpha: 1),
+            UIColor(red: 1.0, green: 0.816, blue: 0.855, alpha: 1),
+        ]
+
+        for (i, petal) in petals.enumerated() {
+            let dot = CAShapeLayer()
+            // 간단한 타원 꽃잎 형태
+            let path = UIBezierPath(ovalIn: CGRect(x: 0, y: 0, width: petal.size, height: petal.size * 1.3))
+            dot.path = path.cgPath
+            dot.fillColor = petalColors[i % petalColors.count].withAlphaComponent(petal.alpha).cgColor
+            dot.position = CGPoint(x: petal.x, y: petal.y)
+            dot.bounds = CGRect(x: 0, y: 0, width: petal.size, height: petal.size * 1.3)
+            // 회전으로 자연스러운 흩날림 효과
+            dot.transform = CATransform3DMakeRotation(CGFloat(i) * 0.5, 0, 0, 1)
+            view.layer.addSublayer(dot)
+        }
+
+        // 오른쪽 상단 꽃 클러스터 (핑크 원형 뭉치)
+        let clusterDots: [(x: CGFloat, y: CGFloat, size: CGFloat, alpha: CGFloat)] = [
+            (145, 5, 6.0, 0.5), (152, 12, 5.0, 0.6), (138, 10, 7.0, 0.55),
+            (158, 3, 5.5, 0.45), (148, 18, 4.5, 0.5), (160, 10, 6.0, 0.4),
+            (133, 5, 5.0, 0.5), (155, 22, 4.0, 0.45),
+        ]
+
+        for dot in clusterDots {
+            let layer = CALayer()
+            layer.frame = CGRect(x: dot.x, y: dot.y, width: dot.size, height: dot.size)
+            layer.cornerRadius = dot.size / 2
+            layer.backgroundColor = UIColor(red: 1.0, green: 0.80, blue: 0.85, alpha: dot.alpha).cgColor
+            view.layer.addSublayer(layer)
         }
     }
 

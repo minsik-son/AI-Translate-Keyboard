@@ -86,6 +86,7 @@ class KeyboardLayoutView: UIView {
     private var mercuryRippleView: MercuryRippleView?
     private var stardustView: StardustView?
     private var snowfallView: SnowfallView?
+    private var cherryBlossomView: CherryBlossomView?
     private var isMemoryConstrained = false
 
     // Mercury Ripple 렌즈 굴절 애니메이션
@@ -362,6 +363,8 @@ class KeyboardLayoutView: UIView {
         if wasStardustAnimating { stardustView?.pauseAnimation() }
         let wasSnowfallAnimating = snowfallView?.isActive ?? false
         if wasSnowfallAnimating { snowfallView?.pauseAnimation() }
+        let wasCherryBlossomAnimating = cherryBlossomView?.isActive ?? false
+        if wasCherryBlossomAnimating { cherryBlossomView?.pauseAnimation() }
 
         // 예약된 build가 있으면 취소 (직접 호출 시 중복 방지)
         pendingBuildWork?.cancel()
@@ -479,6 +482,20 @@ class KeyboardLayoutView: UIView {
                   !isMemoryConstrained, let sv = snowfallView, !sv.isActive,
                   !ProcessInfo.processInfo.isLowPowerModeEnabled {
             sv.startAnimation()
+        }
+
+        // Resume cherry blossom animation + keyFrames 업데이트
+        if let cv = cherryBlossomView {
+            cv.keyFrames = allKeyButtons.map { btn in
+                btn.superview?.convert(btn.frame, to: cv) ?? btn.frame
+            }
+        }
+        if wasCherryBlossomAnimating {
+            cherryBlossomView?.resumeAnimation()
+        } else if let theme = customTheme, theme.needsCherryBlossomAnimation,
+                  !isMemoryConstrained, let cv = cherryBlossomView, !cv.isActive,
+                  !ProcessInfo.processInfo.isLowPowerModeEnabled {
+            cv.startAnimation()
         }
     }
 
@@ -1575,6 +1592,7 @@ class KeyboardLayoutView: UIView {
         stopLensAnimation()
         stardustView?.stopAnimation()
         snowfallView?.stopAnimation()
+        cherryBlossomView?.stopAnimation()
         stopEdgeGlowAnimation()
         isTrackpadMode = true
         selectionHaptic.prepare()
@@ -1853,6 +1871,29 @@ class KeyboardLayoutView: UIView {
         } else {
             snowfallView?.stopAnimation()
             snowfallView?.isHidden = true
+        }
+
+        // ── Cherry Blossom ──
+        if let theme = customTheme, theme.needsCherryBlossomAnimation {
+            if !isMemoryConstrained {
+                if cherryBlossomView == nil {
+                    let cv = CherryBlossomView()
+                    cv.translatesAutoresizingMaskIntoConstraints = false
+                    cv.isUserInteractionEnabled = false
+                    insertSubview(cv, belowSubview: keyboardContainer)
+                    NSLayoutConstraint.activate([
+                        cv.topAnchor.constraint(equalTo: topAnchor),
+                        cv.bottomAnchor.constraint(equalTo: bottomAnchor),
+                        cv.leadingAnchor.constraint(equalTo: leadingAnchor),
+                        cv.trailingAnchor.constraint(equalTo: trailingAnchor),
+                    ])
+                    cherryBlossomView = cv
+                }
+                cherryBlossomView?.isHidden = false
+            }
+        } else {
+            cherryBlossomView?.stopAnimation()
+            cherryBlossomView?.isHidden = true
         }
 
         buildKeyboard()
@@ -2397,6 +2438,7 @@ class KeyboardLayoutView: UIView {
             stopLensAnimation()
             stardustView?.stopAnimation()
             snowfallView?.stopAnimation()
+            cherryBlossomView?.stopAnimation()
             stopEdgeGlowAnimation()
         } else {
             if let theme = customTheme, theme.needsWaveAnimation {
@@ -2421,6 +2463,10 @@ class KeyboardLayoutView: UIView {
             if let theme = customTheme, theme.needsSnowfallAnimation,
                !isMemoryConstrained {
                 snowfallView?.startAnimation()
+            }
+            if let theme = customTheme, theme.needsCherryBlossomAnimation,
+               !isMemoryConstrained {
+                cherryBlossomView?.startAnimation()
             }
         }
     }
@@ -2454,6 +2500,12 @@ class KeyboardLayoutView: UIView {
             snowfallView = nil
         }
 
+        if let cv = cherryBlossomView {
+            cv.stopAnimation()
+            cv.removeFromSuperview()
+            cherryBlossomView = nil
+        }
+
         if isWaveAnimationActive {
             stopWaveAnimation()
         }
@@ -2477,6 +2529,7 @@ class KeyboardLayoutView: UIView {
         mercuryRippleView?.stopAnimation()
         stardustView?.stopAnimation()
         snowfallView?.stopAnimation()
+        cherryBlossomView?.stopAnimation()
         stopEdgeGlowAnimation()
         edgeGlowDisplayLink?.invalidate()
         edgeGlowDisplayLink = nil
