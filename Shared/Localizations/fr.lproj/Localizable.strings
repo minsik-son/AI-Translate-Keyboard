@@ -439,6 +439,10 @@
 "theme.premium_mercury_ripple" = "Ondulation Mercure";
 "theme.premium_stardust_drift" = "Dérive Stellaire";
 "theme.premium_edge_glow_green" = "Lueur Verte Bordure";
+"theme.premium_edge_glow_red" = "Lueur Rouge Bordure";
+"theme.premium_edge_glow_blue" = "Lueur Bleue Bordure";
+"theme.premium_edge_glow_yellow" = "Lueur Jaune Bordure";
+"theme.premium_edge_glow_purple" = "Lueur Violette Bordure";
 "theme.section_free" = "Thèmes Gratuits";
 "theme.section_premium" = "Thèmes Premium";
 "theme.category_all" = "Tous";

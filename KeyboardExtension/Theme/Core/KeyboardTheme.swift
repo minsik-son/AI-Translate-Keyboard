@@ -709,6 +709,150 @@ extension KeyboardTheme {
         returnKeyAccentTextColor: UIColor(hex: "#00FF55")
     )
 
+    static let premiumEdgeGlowRed = KeyboardTheme(
+        id: "premium_edge_glow_red",
+        displayName: L("theme.premium_edge_glow_red"),
+        keyboardBackground: UIColor(hex: "#000000"),
+        keyBackground: UIColor(hex: "#000000"),
+        specialKeyBackground: UIColor(hex: "#000000"),
+        keyTextColor: UIColor(hex: "#FF3B30"),
+        toolbarBackground: .clear,
+        gradientColors: nil,
+        gradientLocations: nil,
+        gradientDirection: .topToBottom,
+        patternStyle: .none,
+        patternOpacity: 0.0,
+        patternTint: UIColor(hex: "#FF3B30"),
+        keyVisualStyle: .edgeGlow(
+            borderColor: UIColor(hex: "#FF3B30"),
+            glowColor: UIColor(hex: "#FF3B30")
+        ),
+        specialKeyVisualStyle: .edgeGlow(
+            borderColor: UIColor(hex: "#FF3B30"),
+            glowColor: UIColor(hex: "#FF3B30")
+        ),
+        textShadowColor: .clear,
+        textShadowOffset: .zero,
+        textHighlightColor: .clear,
+        textHighlightOffset: .zero,
+        woodTileImageName: nil,
+        hasWaveAnimation: false,
+        hasRainAnimation: false,
+        hasRippleAnimation: false,
+        hasStardustAnimation: false,
+        hasEdgeGlowAnimation: true,
+        returnKeyAccentColor: UIColor(hex: "#FF3B30").withAlphaComponent(0.20),
+        returnKeyAccentTextColor: UIColor(hex: "#FF3B30")
+    )
+
+    static let premiumEdgeGlowBlue = KeyboardTheme(
+        id: "premium_edge_glow_blue",
+        displayName: L("theme.premium_edge_glow_blue"),
+        keyboardBackground: UIColor(hex: "#000000"),
+        keyBackground: UIColor(hex: "#000000"),
+        specialKeyBackground: UIColor(hex: "#000000"),
+        keyTextColor: UIColor(hex: "#007AFF"),
+        toolbarBackground: .clear,
+        gradientColors: nil,
+        gradientLocations: nil,
+        gradientDirection: .topToBottom,
+        patternStyle: .none,
+        patternOpacity: 0.0,
+        patternTint: UIColor(hex: "#007AFF"),
+        keyVisualStyle: .edgeGlow(
+            borderColor: UIColor(hex: "#007AFF"),
+            glowColor: UIColor(hex: "#007AFF")
+        ),
+        specialKeyVisualStyle: .edgeGlow(
+            borderColor: UIColor(hex: "#007AFF"),
+            glowColor: UIColor(hex: "#007AFF")
+        ),
+        textShadowColor: .clear,
+        textShadowOffset: .zero,
+        textHighlightColor: .clear,
+        textHighlightOffset: .zero,
+        woodTileImageName: nil,
+        hasWaveAnimation: false,
+        hasRainAnimation: false,
+        hasRippleAnimation: false,
+        hasStardustAnimation: false,
+        hasEdgeGlowAnimation: true,
+        returnKeyAccentColor: UIColor(hex: "#007AFF").withAlphaComponent(0.20),
+        returnKeyAccentTextColor: UIColor(hex: "#007AFF")
+    )
+
+    static let premiumEdgeGlowYellow = KeyboardTheme(
+        id: "premium_edge_glow_yellow",
+        displayName: L("theme.premium_edge_glow_yellow"),
+        keyboardBackground: UIColor(hex: "#000000"),
+        keyBackground: UIColor(hex: "#000000"),
+        specialKeyBackground: UIColor(hex: "#000000"),
+        keyTextColor: UIColor(hex: "#FFD60A"),
+        toolbarBackground: .clear,
+        gradientColors: nil,
+        gradientLocations: nil,
+        gradientDirection: .topToBottom,
+        patternStyle: .none,
+        patternOpacity: 0.0,
+        patternTint: UIColor(hex: "#FFD60A"),
+        keyVisualStyle: .edgeGlow(
+            borderColor: UIColor(hex: "#FFD60A"),
+            glowColor: UIColor(hex: "#FFD60A")
+        ),
+        specialKeyVisualStyle: .edgeGlow(
+            borderColor: UIColor(hex: "#FFD60A"),
+            glowColor: UIColor(hex: "#FFD60A")
+        ),
+        textShadowColor: .clear,
+        textShadowOffset: .zero,
+        textHighlightColor: .clear,
+        textHighlightOffset: .zero,
+        woodTileImageName: nil,
+        hasWaveAnimation: false,
+        hasRainAnimation: false,
+        hasRippleAnimation: false,
+        hasStardustAnimation: false,
+        hasEdgeGlowAnimation: true,
+        returnKeyAccentColor: UIColor(hex: "#FFD60A").withAlphaComponent(0.20),
+        returnKeyAccentTextColor: UIColor(hex: "#FFD60A")
+    )
+
+    static let premiumEdgeGlowPurple = KeyboardTheme(
+        id: "premium_edge_glow_purple",
+        displayName: L("theme.premium_edge_glow_purple"),
+        keyboardBackground: UIColor(hex: "#000000"),
+        keyBackground: UIColor(hex: "#000000"),
+        specialKeyBackground: UIColor(hex: "#000000"),
+        keyTextColor: UIColor(hex: "#BF5AF2"),
+        toolbarBackground: .clear,
+        gradientColors: nil,
+        gradientLocations: nil,
+        gradientDirection: .topToBottom,
+        patternStyle: .none,
+        patternOpacity: 0.0,
+        patternTint: UIColor(hex: "#BF5AF2"),
+        keyVisualStyle: .edgeGlow(
+            borderColor: UIColor(hex: "#BF5AF2"),
+            glowColor: UIColor(hex: "#BF5AF2")
+        ),
+        specialKeyVisualStyle: .edgeGlow(
+            borderColor: UIColor(hex: "#BF5AF2"),
+            glowColor: UIColor(hex: "#BF5AF2")
+        ),
+        textShadowColor: .clear,
+        textShadowOffset: .zero,
+        textHighlightColor: .clear,
+        textHighlightOffset: .zero,
+        woodTileImageName: nil,
+        hasWaveAnimation: false,
+        hasRainAnimation: false,
+        hasRippleAnimation: false,
+        hasStardustAnimation: false,
+        hasEdgeGlowAnimation: true,
+        returnKeyAccentColor: UIColor(hex: "#BF5AF2").withAlphaComponent(0.20),
+        returnKeyAccentTextColor: UIColor(hex: "#BF5AF2")
+    )
+
     // MARK: - Wood Premium Themes
 
     static let premiumDarkWalnut = KeyboardTheme(
@@ -797,7 +941,11 @@ extension KeyboardTheme {
         .premiumDarkWalnut, .premiumNaturalOak,
         .premiumMatrixPulse, .premiumDigitalRain,
         .premiumMercuryRipple, .premiumStardustDrift,
-        .premiumEdgeGlowGreen
+        .premiumEdgeGlowGreen,
+        .premiumEdgeGlowRed,
+        .premiumEdgeGlowBlue,
+        .premiumEdgeGlowYellow,
+        .premiumEdgeGlowPurple
     ]
 
     static let allThemesIncludingPremium: [KeyboardTheme] = allThemes + allPremiumThemes

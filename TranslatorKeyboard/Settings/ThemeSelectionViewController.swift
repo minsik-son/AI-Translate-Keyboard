@@ -63,6 +63,10 @@ class ThemeSelectionViewController: UIViewController {
         // 프리미엄 - 우주
         "premium_stardust_drift":   [.space, .animation],
         "premium_edge_glow_green":  [.neon, .animation],
+        "premium_edge_glow_red":    [.neon, .animation],
+        "premium_edge_glow_blue":   [.neon, .animation],
+        "premium_edge_glow_yellow": [.neon, .animation],
+        "premium_edge_glow_purple": [.neon, .animation],
 
         // 프리미엄 - 미니멀
         "premium_rose_gold":        [.minimal],

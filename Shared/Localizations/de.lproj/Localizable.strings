@@ -439,6 +439,10 @@
 "theme.premium_mercury_ripple" = "Quecksilber-Welle";
 "theme.premium_stardust_drift" = "Sternenstaub-Drift";
 "theme.premium_edge_glow_green" = "Kantenlicht Grün";
+"theme.premium_edge_glow_red" = "Kantenlicht Rot";
+"theme.premium_edge_glow_blue" = "Kantenlicht Blau";
+"theme.premium_edge_glow_yellow" = "Kantenlicht Gelb";
+"theme.premium_edge_glow_purple" = "Kantenlicht Lila";
 "theme.section_free" = "Kostenlose Themen";
 "theme.section_premium" = "Premium-Themen";
 "theme.category_all" = "Alle";

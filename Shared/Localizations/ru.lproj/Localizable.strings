@@ -439,6 +439,10 @@
 "theme.premium_mercury_ripple" = "Ртутная рябь";
 "theme.premium_stardust_drift" = "Звёздный дрейф";
 "theme.premium_edge_glow_green" = "Зелёное свечение краёв";
+"theme.premium_edge_glow_red" = "Красное свечение краёв";
+"theme.premium_edge_glow_blue" = "Синее свечение краёв";
+"theme.premium_edge_glow_yellow" = "Жёлтое свечение краёв";
+"theme.premium_edge_glow_purple" = "Фиолетовое свечение краёв";
 "theme.section_free" = "Бесплатные темы";
 "theme.section_premium" = "Премиум темы";
 "theme.category_all" = "Все";

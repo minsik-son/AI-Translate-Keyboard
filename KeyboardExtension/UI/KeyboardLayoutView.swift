@@ -1946,7 +1946,7 @@ class KeyboardLayoutView: UIView {
     // MARK: - Edge Glow Animation
 
     // Edge Glow 색상 캐싱
-    private static let edgeGlowColor = UIColor(hex: "#00FF55")
+    private var cachedEdgeGlowColor: UIColor = UIColor(hex: "#00FF55")
 
     // Edge Glow 밝기 파라미터
     private static let edgeGlowWavePeriod: Double = 3.5
@@ -1987,6 +1987,11 @@ class KeyboardLayoutView: UIView {
         guard !ProcessInfo.processInfo.isLowPowerModeEnabled else {
             stopEdgeGlowAnimation()
             return
+        }
+
+        // 테마 색상 캐시 업데이트
+        if case .edgeGlow(let borderColor, _) = theme.keyVisualStyle {
+            cachedEdgeGlowColor = borderColor
         }
 
         if isEdgeGlowAnimationActive {
@@ -2075,7 +2080,7 @@ class KeyboardLayoutView: UIView {
 
         // ── 색상 컴포넌트 1회 추출 ──
         var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
-        Self.edgeGlowColor.getRed(&r, green: &g, blue: &b, alpha: &a)
+        cachedEdgeGlowColor.getRed(&r, green: &g, blue: &b, alpha: &a)
 
         for (button, proj) in cachedKeyProjections {
 
@@ -2139,7 +2144,7 @@ class KeyboardLayoutView: UIView {
         edgeGlowLastKeypressTime = now
 
         var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
-        Self.edgeGlowColor.getRed(&r, green: &g, blue: &b, alpha: &a)
+        cachedEdgeGlowColor.getRed(&r, green: &g, blue: &b, alpha: &a)
 
         // 눌린 키 즉시 번쩍
         let colorSpace = CGColorSpaceCreateDeviceRGB()

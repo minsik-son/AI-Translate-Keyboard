@@ -439,6 +439,10 @@
 "theme.premium_mercury_ripple" = "マーキュリーリプル";
 "theme.premium_stardust_drift" = "スターダストドリフト";
 "theme.premium_edge_glow_green" = "エッジグローグリーン";
+"theme.premium_edge_glow_red" = "エッジグロー レッド";
+"theme.premium_edge_glow_blue" = "エッジグロー ブルー";
+"theme.premium_edge_glow_yellow" = "エッジグロー イエロー";
+"theme.premium_edge_glow_purple" = "エッジグロー パープル";
 "theme.section_free" = "無料テーマ";
 "theme.section_premium" = "プレミアムテーマ";
 "theme.category_all" = "すべて";

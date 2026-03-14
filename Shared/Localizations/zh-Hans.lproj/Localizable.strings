@@ -439,6 +439,10 @@
 "theme.premium_mercury_ripple" = "水银涟漪";
 "theme.premium_stardust_drift" = "星尘漂移";
 "theme.premium_edge_glow_green" = "边缘辉光绿";
+"theme.premium_edge_glow_red" = "边缘辉光红";
+"theme.premium_edge_glow_blue" = "边缘辉光蓝";
+"theme.premium_edge_glow_yellow" = "边缘辉光黄";
+"theme.premium_edge_glow_purple" = "边缘辉光紫";
 "theme.section_free" = "免费主题";
 "theme.section_premium" = "高级主题";
 "theme.category_all" = "全部";

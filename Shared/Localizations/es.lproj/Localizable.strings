@@ -439,6 +439,10 @@
 "theme.premium_mercury_ripple" = "Onda de Mercurio";
 "theme.premium_stardust_drift" = "Deriva Estelar";
 "theme.premium_edge_glow_green" = "Brillo de Borde Verde";
+"theme.premium_edge_glow_red" = "Brillo de Borde Rojo";
+"theme.premium_edge_glow_blue" = "Brillo de Borde Azul";
+"theme.premium_edge_glow_yellow" = "Brillo de Borde Amarillo";
+"theme.premium_edge_glow_purple" = "Brillo de Borde Púrpura";
 "theme.section_free" = "Temas Gratuitos";
 "theme.section_premium" = "Temas Premium";
 "theme.category_all" = "Todos";
