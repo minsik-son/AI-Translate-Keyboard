@@ -1962,9 +1962,9 @@ class KeyboardLayoutView: UIView {
     private static let edgeGlowIdleShadowPeak: Float = 0.35
 
     // Typing dim 밝기
-    private static let edgeGlowTypingBorderAlpha: CGFloat = 0.25
-    private static let edgeGlowTypingTextAlpha: CGFloat = 0.35
-    private static let edgeGlowTypingShadow: Float = 0.09
+    private static let edgeGlowTypingBorderAlpha: CGFloat = 0.45
+    private static let edgeGlowTypingTextAlpha: CGFloat = 0.55
+    private static let edgeGlowTypingShadow: Float = 0.15
 
     // Typing flash 밝기 (눌린 키)
     private static let edgeGlowFlashBorderAlpha: CGFloat = 0.95
