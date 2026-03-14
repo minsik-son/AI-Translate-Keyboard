@@ -91,12 +91,16 @@ final class MatrixRainView: UIView {
 
     // MARK: - Column State
 
-    private struct RainColumn {
+    private struct Trail {
         var headY: CGFloat
-        var speed: CGFloat
-        var trailLength: CGFloat
         var chars: [Int]
         var changeCountdown: Int
+    }
+
+    private struct RainColumn {
+        var speed: CGFloat
+        var trailLength: CGFloat
+        var trails: [Trail]  // 항상 2개
     }
 
     private var columns: [RainColumn] = []
@@ -219,19 +223,50 @@ final class MatrixRainView: UIView {
 
     private func createColumn(viewHeight: CGFloat, staggered: Bool) -> RainColumn {
         let maxVisibleChars = Int(viewHeight / Self.charSize) + 5
+        let speed = CGFloat.random(in: 150...220)
+        let trailLength = CGFloat.random(in: 550...700)
+
+        // Trail A: 메인 트레일
+        let startYA: CGFloat = staggered
+            ? -CGFloat.random(in: 0...(viewHeight * 0.8))
+            : -CGFloat.random(in: 20...120)
+        let charsA = (0..<maxVisibleChars).map { _ in
+            Int.random(in: 0..<Self.characters.count)
+        }
+        let trailA = Trail(
+            headY: startYA,
+            chars: charsA,
+            changeCountdown: Int.random(in: 4...18)
+        )
+
+        // Trail B: Trail A 뒤를 잇는 두 번째 트레일
+        let startYB = startYA - trailLength - CGFloat.random(in: 0...30)
+        let charsB = (0..<maxVisibleChars).map { _ in
+            Int.random(in: 0..<Self.characters.count)
+        }
+        let trailB = Trail(
+            headY: startYB,
+            chars: charsB,
+            changeCountdown: Int.random(in: 4...18)
+        )
+
+        return RainColumn(
+            speed: speed,
+            trailLength: trailLength,
+            trails: [trailA, trailB]
+        )
+    }
+
+    /// 단일 트레일 재생성 — 화면 밖으로 나간 트레일만 리셋
+    private func createTrail(viewHeight: CGFloat, siblingHeadY: CGFloat, trailLength: CGFloat) -> Trail {
+        let maxVisibleChars = Int(viewHeight / Self.charSize) + 5
         let chars = (0..<maxVisibleChars).map { _ in
             Int.random(in: 0..<Self.characters.count)
         }
-        let speed = CGFloat.random(in: 150...220)// 이전값 150...220
-        let trailLength = CGFloat.random(in: 550...700) //250...300
-        let startY: CGFloat = staggered
-            ? -CGFloat.random(in: 0...(viewHeight * 2.5))
-            : -CGFloat.random(in: 20...120)
-
-        return RainColumn(
+        let siblingTailY = siblingHeadY - trailLength
+        let startY = min(siblingTailY - CGFloat.random(in: 0...30), -CGFloat.random(in: 20...120))
+        return Trail(
             headY: startY,
-            speed: speed,
-            trailLength: trailLength,
             chars: chars,
             changeCountdown: Int.random(in: 4...18)
         )
@@ -266,17 +301,31 @@ final class MatrixRainView: UIView {
         guard viewHeight > 0 else { return }
 
         for i in columns.indices {
-            columns[i].headY += columns[i].speed * dt
+            let speed = columns[i].speed
+            let trailLen = columns[i].trailLength
 
-            if columns[i].headY - columns[i].trailLength > viewHeight {
-                columns[i] = createColumn(viewHeight: viewHeight, staggered: false)
-            }
+            for t in columns[i].trails.indices {
+                columns[i].trails[t].headY += speed * dt
 
-            columns[i].changeCountdown -= 1
-            if columns[i].changeCountdown <= 0 {
-                let randIdx = Int.random(in: 0..<columns[i].chars.count)
-                columns[i].chars[randIdx] = Int.random(in: 0..<Self.characters.count)
-                columns[i].changeCountdown = Int.random(in: 4...18)
+                if columns[i].trails[t].headY - trailLen > viewHeight {
+                    let siblingIdx = (t == 0) ? 1 : 0
+                    let siblingHeadY = columns[i].trails[siblingIdx].headY
+                    columns[i].trails[t] = createTrail(
+                        viewHeight: viewHeight,
+                        siblingHeadY: siblingHeadY,
+                        trailLength: trailLen
+                    )
+                }
+
+                columns[i].trails[t].changeCountdown -= 1
+                if columns[i].trails[t].changeCountdown <= 0 {
+                    let chars = columns[i].trails[t].chars
+                    if !chars.isEmpty {
+                        let randIdx = Int.random(in: 0..<chars.count)
+                        columns[i].trails[t].chars[randIdx] = Int.random(in: 0..<Self.characters.count)
+                    }
+                    columns[i].trails[t].changeCountdown = Int.random(in: 4...18)
+                }
             }
         }
 
@@ -299,39 +348,41 @@ final class MatrixRainView: UIView {
         for (colIdx, col) in columns.enumerated() {
             let x = CGFloat(colIdx) * Self.columnWidth + 1
 
-            let headCharRow = Int(col.headY / charH)
-            let tailY = col.headY - col.trailLength
-            let tailCharRow = max(0, Int(tailY / charH))
+            for trail in col.trails {
+                let headCharRow = Int(trail.headY / charH)
+                let tailY = trail.headY - col.trailLength
+                let tailCharRow = max(0, Int(tailY / charH))
 
-            guard headCharRow >= 0 else { continue }
-            guard tailCharRow <= headCharRow else { continue }
+                guard headCharRow >= 0 else { continue }
+                guard tailCharRow <= headCharRow else { continue }
 
-            for charRow in tailCharRow...headCharRow {
-                let y = CGFloat(charRow) * charH
+                for charRow in tailCharRow...headCharRow {
+                    let y = CGFloat(charRow) * charH
 
-                guard y >= -charH, y < viewHeight + charH else { continue }
+                    guard y >= -charH, y < viewHeight + charH else { continue }
 
-                let distFromHead = col.headY - y
-                let normalized = distFromHead / col.trailLength
+                    let distFromHead = trail.headY - y
+                    let normalized = distFromHead / col.trailLength
 
-                guard normalized >= 0, normalized <= 1.0 else { continue }
+                    guard normalized >= 0, normalized <= 1.0 else { continue }
 
-                let paletteIdx = min(Int(normalized * CGFloat(paletteCount)), paletteCount - 1)
+                    let paletteIdx = min(Int(normalized * CGFloat(paletteCount)), paletteCount - 1)
 
-                let charIdx = abs(charRow) % col.chars.count
-                let imageIdx = col.chars[charIdx]
-                guard imageIdx < charImages.count else { continue }
-                let charImage = charImages[imageIdx]
+                    let charIdx = abs(charRow) % trail.chars.count
+                    let imageIdx = trail.chars[charIdx]
+                    guard imageIdx < charImages.count else { continue }
+                    let charImage = charImages[imageIdx]
 
-                let drawRect = CGRect(x: x, y: y, width: charH, height: charH)
+                    let drawRect = CGRect(x: x, y: y, width: charH, height: charH)
 
-                let color = Self.colorPalette[paletteIdx]
+                    let color = Self.colorPalette[paletteIdx]
 
-                ctx.saveGState()
-                ctx.clip(to: drawRect, mask: charImage)
-                ctx.setFillColor(red: color.r, green: color.g, blue: color.b, alpha: color.a)
-                ctx.fill(drawRect)
-                ctx.restoreGState()
+                    ctx.saveGState()
+                    ctx.clip(to: drawRect, mask: charImage)
+                    ctx.setFillColor(red: color.r, green: color.g, blue: color.b, alpha: color.a)
+                    ctx.fill(drawRect)
+                    ctx.restoreGState()
+                }
             }
         }
     }
