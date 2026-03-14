@@ -443,6 +443,11 @@
 "theme.premium_edge_glow_blue" = "Bagliore Bordo Blu";
 "theme.premium_edge_glow_yellow" = "Bagliore Bordo Giallo";
 "theme.premium_edge_glow_purple" = "Bagliore Bordo Viola";
+"theme.premium_static_neon_green" = "Neon Verde";
+"theme.premium_static_neon_red" = "Neon Rosso";
+"theme.premium_static_neon_blue" = "Neon Blu";
+"theme.premium_static_neon_yellow" = "Neon Giallo";
+"theme.premium_static_neon_purple" = "Neon Viola";
 "theme.section_free" = "Temi Gratuiti";
 "theme.section_premium" = "Temi Premium";
 "theme.category_all" = "Tutti";

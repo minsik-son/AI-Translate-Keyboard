@@ -68,6 +68,13 @@ class ThemeSelectionViewController: UIViewController {
         "premium_edge_glow_yellow": [.neon, .animation],
         "premium_edge_glow_purple": [.neon, .animation],
 
+        // 프리미엄 - 네온 (정적)
+        "premium_static_neon_green":  [.neon],
+        "premium_static_neon_red":    [.neon],
+        "premium_static_neon_blue":   [.neon],
+        "premium_static_neon_yellow": [.neon],
+        "premium_static_neon_purple": [.neon],
+
         // 프리미엄 - 미니멀
         "premium_rose_gold":        [.minimal],
         "premium_frost_crystal":    [.minimal],
@@ -170,10 +177,18 @@ class ThemeSelectionViewController: UIViewController {
             filteredPremiumThemes = []
         default:
             filteredFreeThemes = freeThemes.filter { theme in
-                Self.themeTagMap[theme.id]?.contains(selectedCategory) == true
+                guard let tags = Self.themeTagMap[theme.id] else { return false }
+                if selectedCategory != .animation && tags.contains(.animation) {
+                    return false
+                }
+                return tags.contains(selectedCategory)
             }
             filteredPremiumThemes = premiumThemes.filter { theme in
-                Self.themeTagMap[theme.id]?.contains(selectedCategory) == true
+                guard let tags = Self.themeTagMap[theme.id] else { return false }
+                if selectedCategory != .animation && tags.contains(.animation) {
+                    return false
+                }
+                return tags.contains(selectedCategory)
             }
         }
         collectionView.reloadData()

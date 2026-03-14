@@ -443,6 +443,11 @@
 "theme.premium_edge_glow_blue" = "Edge Glow Blue";
 "theme.premium_edge_glow_yellow" = "Edge Glow Yellow";
 "theme.premium_edge_glow_purple" = "Edge Glow Purple";
+"theme.premium_static_neon_green" = "Neon Green";
+"theme.premium_static_neon_red" = "Neon Red";
+"theme.premium_static_neon_blue" = "Neon Blue";
+"theme.premium_static_neon_yellow" = "Neon Yellow";
+"theme.premium_static_neon_purple" = "Neon Purple";
 "theme.section_free" = "Free Themes";
 "theme.section_premium" = "Premium Themes";
 "theme.category_all" = "All";

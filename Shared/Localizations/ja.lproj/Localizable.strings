@@ -443,6 +443,11 @@
 "theme.premium_edge_glow_blue" = "エッジグロー ブルー";
 "theme.premium_edge_glow_yellow" = "エッジグロー イエロー";
 "theme.premium_edge_glow_purple" = "エッジグロー パープル";
+"theme.premium_static_neon_green" = "ネオン グリーン";
+"theme.premium_static_neon_red" = "ネオン レッド";
+"theme.premium_static_neon_blue" = "ネオン ブルー";
+"theme.premium_static_neon_yellow" = "ネオン イエロー";
+"theme.premium_static_neon_purple" = "ネオン パープル";
 "theme.section_free" = "無料テーマ";
 "theme.section_premium" = "プレミアムテーマ";
 "theme.category_all" = "すべて";

@@ -443,6 +443,11 @@
 "theme.premium_edge_glow_blue" = "Синее свечение краёв";
 "theme.premium_edge_glow_yellow" = "Жёлтое свечение краёв";
 "theme.premium_edge_glow_purple" = "Фиолетовое свечение краёв";
+"theme.premium_static_neon_green" = "Неон зелёный";
+"theme.premium_static_neon_red" = "Неон красный";
+"theme.premium_static_neon_blue" = "Неон синий";
+"theme.premium_static_neon_yellow" = "Неон жёлтый";
+"theme.premium_static_neon_purple" = "Неон фиолетовый";
 "theme.section_free" = "Бесплатные темы";
 "theme.section_premium" = "Премиум темы";
 "theme.category_all" = "Все";

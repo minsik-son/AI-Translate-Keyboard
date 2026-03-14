@@ -443,6 +443,11 @@
 "theme.premium_edge_glow_blue" = "엣지 글로우 블루";
 "theme.premium_edge_glow_yellow" = "엣지 글로우 옐로우";
 "theme.premium_edge_glow_purple" = "엣지 글로우 퍼플";
+"theme.premium_static_neon_green" = "네온 그린";
+"theme.premium_static_neon_red" = "네온 레드";
+"theme.premium_static_neon_blue" = "네온 블루";
+"theme.premium_static_neon_yellow" = "네온 옐로우";
+"theme.premium_static_neon_purple" = "네온 퍼플";
 "theme.section_free" = "무료 테마";
 "theme.section_premium" = "프리미엄 테마";
 "theme.category_all" = "전체";

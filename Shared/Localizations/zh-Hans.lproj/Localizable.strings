@@ -443,6 +443,11 @@
 "theme.premium_edge_glow_blue" = "边缘辉光蓝";
 "theme.premium_edge_glow_yellow" = "边缘辉光黄";
 "theme.premium_edge_glow_purple" = "边缘辉光紫";
+"theme.premium_static_neon_green" = "霓虹绿";
+"theme.premium_static_neon_red" = "霓虹红";
+"theme.premium_static_neon_blue" = "霓虹蓝";
+"theme.premium_static_neon_yellow" = "霓虹黄";
+"theme.premium_static_neon_purple" = "霓虹紫";
 "theme.section_free" = "免费主题";
 "theme.section_premium" = "高级主题";
 "theme.category_all" = "全部";

@@ -853,6 +853,188 @@ extension KeyboardTheme {
         returnKeyAccentTextColor: UIColor(hex: "#BF5AF2")
     )
 
+    // MARK: - Static Neon Premium Themes
+
+    static let premiumStaticNeonGreen = KeyboardTheme(
+        id: "premium_static_neon_green",
+        displayName: L("theme.premium_static_neon_green"),
+        keyboardBackground: UIColor(hex: "#000000"),
+        keyBackground: UIColor(hex: "#000000"),
+        specialKeyBackground: UIColor(hex: "#000000"),
+        keyTextColor: UIColor(hex: "#00FF55"),
+        toolbarBackground: .clear,
+        gradientColors: nil,
+        gradientLocations: nil,
+        gradientDirection: .topToBottom,
+        patternStyle: .none,
+        patternOpacity: 0.0,
+        patternTint: UIColor(hex: "#00FF55"),
+        keyVisualStyle: .edgeGlow(
+            borderColor: UIColor(hex: "#00FF55"),
+            glowColor: UIColor(hex: "#00FF55")
+        ),
+        specialKeyVisualStyle: .edgeGlow(
+            borderColor: UIColor(hex: "#00FF55"),
+            glowColor: UIColor(hex: "#00FF55")
+        ),
+        textShadowColor: .clear,
+        textShadowOffset: .zero,
+        textHighlightColor: .clear,
+        textHighlightOffset: .zero,
+        woodTileImageName: nil,
+        hasWaveAnimation: false,
+        hasRainAnimation: false,
+        hasRippleAnimation: false,
+        hasStardustAnimation: false,
+        hasEdgeGlowAnimation: false,
+        returnKeyAccentColor: UIColor(hex: "#00FF55").withAlphaComponent(0.20),
+        returnKeyAccentTextColor: UIColor(hex: "#00FF55")
+    )
+
+    static let premiumStaticNeonRed = KeyboardTheme(
+        id: "premium_static_neon_red",
+        displayName: L("theme.premium_static_neon_red"),
+        keyboardBackground: UIColor(hex: "#000000"),
+        keyBackground: UIColor(hex: "#000000"),
+        specialKeyBackground: UIColor(hex: "#000000"),
+        keyTextColor: UIColor(hex: "#FF3B30"),
+        toolbarBackground: .clear,
+        gradientColors: nil,
+        gradientLocations: nil,
+        gradientDirection: .topToBottom,
+        patternStyle: .none,
+        patternOpacity: 0.0,
+        patternTint: UIColor(hex: "#FF3B30"),
+        keyVisualStyle: .edgeGlow(
+            borderColor: UIColor(hex: "#FF3B30"),
+            glowColor: UIColor(hex: "#FF3B30")
+        ),
+        specialKeyVisualStyle: .edgeGlow(
+            borderColor: UIColor(hex: "#FF3B30"),
+            glowColor: UIColor(hex: "#FF3B30")
+        ),
+        textShadowColor: .clear,
+        textShadowOffset: .zero,
+        textHighlightColor: .clear,
+        textHighlightOffset: .zero,
+        woodTileImageName: nil,
+        hasWaveAnimation: false,
+        hasRainAnimation: false,
+        hasRippleAnimation: false,
+        hasStardustAnimation: false,
+        hasEdgeGlowAnimation: false,
+        returnKeyAccentColor: UIColor(hex: "#FF3B30").withAlphaComponent(0.20),
+        returnKeyAccentTextColor: UIColor(hex: "#FF3B30")
+    )
+
+    static let premiumStaticNeonBlue = KeyboardTheme(
+        id: "premium_static_neon_blue",
+        displayName: L("theme.premium_static_neon_blue"),
+        keyboardBackground: UIColor(hex: "#000000"),
+        keyBackground: UIColor(hex: "#000000"),
+        specialKeyBackground: UIColor(hex: "#000000"),
+        keyTextColor: UIColor(hex: "#007AFF"),
+        toolbarBackground: .clear,
+        gradientColors: nil,
+        gradientLocations: nil,
+        gradientDirection: .topToBottom,
+        patternStyle: .none,
+        patternOpacity: 0.0,
+        patternTint: UIColor(hex: "#007AFF"),
+        keyVisualStyle: .edgeGlow(
+            borderColor: UIColor(hex: "#007AFF"),
+            glowColor: UIColor(hex: "#007AFF")
+        ),
+        specialKeyVisualStyle: .edgeGlow(
+            borderColor: UIColor(hex: "#007AFF"),
+            glowColor: UIColor(hex: "#007AFF")
+        ),
+        textShadowColor: .clear,
+        textShadowOffset: .zero,
+        textHighlightColor: .clear,
+        textHighlightOffset: .zero,
+        woodTileImageName: nil,
+        hasWaveAnimation: false,
+        hasRainAnimation: false,
+        hasRippleAnimation: false,
+        hasStardustAnimation: false,
+        hasEdgeGlowAnimation: false,
+        returnKeyAccentColor: UIColor(hex: "#007AFF").withAlphaComponent(0.20),
+        returnKeyAccentTextColor: UIColor(hex: "#007AFF")
+    )
+
+    static let premiumStaticNeonYellow = KeyboardTheme(
+        id: "premium_static_neon_yellow",
+        displayName: L("theme.premium_static_neon_yellow"),
+        keyboardBackground: UIColor(hex: "#000000"),
+        keyBackground: UIColor(hex: "#000000"),
+        specialKeyBackground: UIColor(hex: "#000000"),
+        keyTextColor: UIColor(hex: "#FFD60A"),
+        toolbarBackground: .clear,
+        gradientColors: nil,
+        gradientLocations: nil,
+        gradientDirection: .topToBottom,
+        patternStyle: .none,
+        patternOpacity: 0.0,
+        patternTint: UIColor(hex: "#FFD60A"),
+        keyVisualStyle: .edgeGlow(
+            borderColor: UIColor(hex: "#FFD60A"),
+            glowColor: UIColor(hex: "#FFD60A")
+        ),
+        specialKeyVisualStyle: .edgeGlow(
+            borderColor: UIColor(hex: "#FFD60A"),
+            glowColor: UIColor(hex: "#FFD60A")
+        ),
+        textShadowColor: .clear,
+        textShadowOffset: .zero,
+        textHighlightColor: .clear,
+        textHighlightOffset: .zero,
+        woodTileImageName: nil,
+        hasWaveAnimation: false,
+        hasRainAnimation: false,
+        hasRippleAnimation: false,
+        hasStardustAnimation: false,
+        hasEdgeGlowAnimation: false,
+        returnKeyAccentColor: UIColor(hex: "#FFD60A").withAlphaComponent(0.20),
+        returnKeyAccentTextColor: UIColor(hex: "#FFD60A")
+    )
+
+    static let premiumStaticNeonPurple = KeyboardTheme(
+        id: "premium_static_neon_purple",
+        displayName: L("theme.premium_static_neon_purple"),
+        keyboardBackground: UIColor(hex: "#000000"),
+        keyBackground: UIColor(hex: "#000000"),
+        specialKeyBackground: UIColor(hex: "#000000"),
+        keyTextColor: UIColor(hex: "#BF5AF2"),
+        toolbarBackground: .clear,
+        gradientColors: nil,
+        gradientLocations: nil,
+        gradientDirection: .topToBottom,
+        patternStyle: .none,
+        patternOpacity: 0.0,
+        patternTint: UIColor(hex: "#BF5AF2"),
+        keyVisualStyle: .edgeGlow(
+            borderColor: UIColor(hex: "#BF5AF2"),
+            glowColor: UIColor(hex: "#BF5AF2")
+        ),
+        specialKeyVisualStyle: .edgeGlow(
+            borderColor: UIColor(hex: "#BF5AF2"),
+            glowColor: UIColor(hex: "#BF5AF2")
+        ),
+        textShadowColor: .clear,
+        textShadowOffset: .zero,
+        textHighlightColor: .clear,
+        textHighlightOffset: .zero,
+        woodTileImageName: nil,
+        hasWaveAnimation: false,
+        hasRainAnimation: false,
+        hasRippleAnimation: false,
+        hasStardustAnimation: false,
+        hasEdgeGlowAnimation: false,
+        returnKeyAccentColor: UIColor(hex: "#BF5AF2").withAlphaComponent(0.20),
+        returnKeyAccentTextColor: UIColor(hex: "#BF5AF2")
+    )
+
     // MARK: - Wood Premium Themes
 
     static let premiumDarkWalnut = KeyboardTheme(
@@ -945,7 +1127,12 @@ extension KeyboardTheme {
         .premiumEdgeGlowRed,
         .premiumEdgeGlowBlue,
         .premiumEdgeGlowYellow,
-        .premiumEdgeGlowPurple
+        .premiumEdgeGlowPurple,
+        .premiumStaticNeonGreen,
+        .premiumStaticNeonRed,
+        .premiumStaticNeonBlue,
+        .premiumStaticNeonYellow,
+        .premiumStaticNeonPurple
     ]
 
     static let allThemesIncludingPremium: [KeyboardTheme] = allThemes + allPremiumThemes

@@ -443,6 +443,11 @@
 "theme.premium_edge_glow_blue" = "Kantenlicht Blau";
 "theme.premium_edge_glow_yellow" = "Kantenlicht Gelb";
 "theme.premium_edge_glow_purple" = "Kantenlicht Lila";
+"theme.premium_static_neon_green" = "Neon Grün";
+"theme.premium_static_neon_red" = "Neon Rot";
+"theme.premium_static_neon_blue" = "Neon Blau";
+"theme.premium_static_neon_yellow" = "Neon Gelb";
+"theme.premium_static_neon_purple" = "Neon Lila";
 "theme.section_free" = "Kostenlose Themen";
 "theme.section_premium" = "Premium-Themen";
 "theme.category_all" = "Alle";
