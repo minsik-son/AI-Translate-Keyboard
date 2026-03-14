@@ -36,6 +36,8 @@ final class ThemePatternRenderer {
                 drawMatrixRain(in: ctx.cgContext, rect: rect, tint: tint, opacity: opacity)
             case .ripple:
                 drawRipple(in: ctx.cgContext, rect: rect, tint: tint, opacity: opacity)
+            case .edgeGlow:
+                drawEdgeGlow(in: ctx.cgContext, rect: rect, tint: tint, opacity: opacity)
             case .none:
                 break
             }
@@ -229,6 +231,45 @@ final class ThemePatternRenderer {
 
                 ctx.setFillColor(tint.withAlphaComponent(alpha).cgColor)
                 ctx.fill(CGRect(x: x, y: y, width: dotSize, height: dotSize * 1.5))
+            }
+        }
+    }
+
+    // MARK: - Edge Glow Preview
+
+    private static func drawEdgeGlow(in ctx: CGContext, rect: CGRect, tint: UIColor, opacity: CGFloat) {
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        tint.getRed(&r, green: &g, blue: &b, alpha: &a)
+
+        // 미니 키 그리드 (3x2) — 테두리만 그리기
+        let cols = 3, rows = 2
+        let padding: CGFloat = 4
+        let gap: CGFloat = 3
+        let keyW = (rect.width - padding * 2 - gap * CGFloat(cols - 1)) / CGFloat(cols)
+        let keyH = (rect.height - padding * 2 - gap * CGFloat(rows - 1)) / CGFloat(rows)
+
+        for row in 0..<rows {
+            for col in 0..<cols {
+                let x = padding + CGFloat(col) * (keyW + gap)
+                let y = padding + CGFloat(row) * (keyH + gap)
+                let keyRect = CGRect(x: x, y: y, width: keyW, height: keyH).insetBy(dx: 0.5, dy: 0.5)
+
+                // 웨이브 시뮬레이션: 대각선(11→5시) 방향 밝기
+                let norm = (CGFloat(col) / CGFloat(cols - 1) * 0.5 + CGFloat(row) / CGFloat(rows - 1) * 0.866)
+                let wave = (sin(norm * .pi * 2 - .pi * 0.3) + 1.0) / 2.0
+                let alpha = opacity + wave * (1.0 - opacity) * 0.7
+
+                // 키 배경 (매우 어두운 초록 틴트)
+                ctx.setFillColor(red: r * 0.05, green: g * 0.05, blue: b * 0.05, alpha: alpha * 0.3)
+                let path = UIBezierPath(roundedRect: keyRect, cornerRadius: 3)
+                ctx.addPath(path.cgPath)
+                ctx.fillPath()
+
+                // 키 테두리 (초록 레이저)
+                ctx.setStrokeColor(red: r, green: g, blue: b, alpha: alpha * 0.6)
+                ctx.setLineWidth(0.8)
+                ctx.addPath(path.cgPath)
+                ctx.strokePath()
             }
         }
     }

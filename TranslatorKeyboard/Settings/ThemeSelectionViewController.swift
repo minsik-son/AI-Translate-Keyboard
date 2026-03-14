@@ -62,6 +62,7 @@ class ThemeSelectionViewController: UIViewController {
 
         // 프리미엄 - 우주
         "premium_stardust_drift":   [.space, .animation],
+        "premium_edge_glow_green":  [.neon, .animation],
 
         // 프리미엄 - 미니멀
         "premium_rose_gold":        [.minimal],
@@ -1123,6 +1124,15 @@ private class PremiumThemeCell: UICollectionViewCell {
                     label.layer.shadowOffset = CGSize(width: 0, height: 1.5)
                     label.layer.shadowRadius = 0.8
                     label.layer.shadowOpacity = 1.0
+                case .edgeGlow(let borderColor, let glowColor):
+                    label.backgroundColor = .clear
+                    label.layer.borderWidth = 0.5
+                    label.layer.borderColor = borderColor.withAlphaComponent(0.5).cgColor
+                    label.clipsToBounds = false
+                    label.layer.shadowColor = glowColor.cgColor
+                    label.layer.shadowOffset = .zero
+                    label.layer.shadowRadius = 1.5
+                    label.layer.shadowOpacity = 0.3
                 }
                 label.textColor = theme.keyTextColor
             }
@@ -1143,6 +1153,15 @@ private class PremiumThemeCell: UICollectionViewCell {
                 label.layer.shadowOffset = CGSize(width: 0, height: 1.5)
                 label.layer.shadowRadius = 0.8
                 label.layer.shadowOpacity = 1.0
+            case .edgeGlow(let borderColor, let glowColor):
+                label.backgroundColor = .clear
+                label.layer.borderWidth = 0.5
+                label.layer.borderColor = borderColor.withAlphaComponent(0.5).cgColor
+                label.clipsToBounds = false
+                label.layer.shadowColor = glowColor.cgColor
+                label.layer.shadowOffset = .zero
+                label.layer.shadowRadius = 1.5
+                label.layer.shadowOpacity = 0.3
             }
             label.textColor = theme.keyTextColor
         }
@@ -1164,6 +1183,15 @@ private class PremiumThemeCell: UICollectionViewCell {
                     label.layer.shadowOffset = CGSize(width: 0, height: 1.5)
                     label.layer.shadowRadius = 0.8
                     label.layer.shadowOpacity = 1.0
+                case .edgeGlow(let borderColor, let glowColor):
+                    label.backgroundColor = .clear
+                    label.layer.borderWidth = 0.5
+                    label.layer.borderColor = borderColor.withAlphaComponent(0.5).cgColor
+                    label.clipsToBounds = false
+                    label.layer.shadowColor = glowColor.cgColor
+                    label.layer.shadowOffset = .zero
+                    label.layer.shadowRadius = 1.5
+                    label.layer.shadowOpacity = 0.3
                 }
             } else {
                 switch theme.keyVisualStyle {
@@ -1178,6 +1206,15 @@ private class PremiumThemeCell: UICollectionViewCell {
                     label.layer.shadowOffset = CGSize(width: 0, height: 1.5)
                     label.layer.shadowRadius = 0.8
                     label.layer.shadowOpacity = 1.0
+                case .edgeGlow(let borderColor, let glowColor):
+                    label.backgroundColor = .clear
+                    label.layer.borderWidth = 0.5
+                    label.layer.borderColor = borderColor.withAlphaComponent(0.5).cgColor
+                    label.clipsToBounds = false
+                    label.layer.shadowColor = glowColor.cgColor
+                    label.layer.shadowOffset = .zero
+                    label.layer.shadowRadius = 1.5
+                    label.layer.shadowOpacity = 0.3
                 }
             }
             label.textColor = theme.keyTextColor

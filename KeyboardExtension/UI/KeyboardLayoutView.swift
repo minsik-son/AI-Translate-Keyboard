@@ -98,6 +98,20 @@ class KeyboardLayoutView: UIView {
     private var cachedKeyProjections: [(button: UIButton, projection: CGFloat)] = []
     private var isWaveAnimationActive = false
 
+    // MARK: - Edge Glow Animation State
+    private var edgeGlowDisplayLink: CADisplayLink?
+    private var edgeGlowStartTime: CFTimeInterval = 0
+    private var isEdgeGlowAnimationActive = false
+    private var edgeGlowState: EdgeGlowState = .idle
+    private var edgeGlowLastKeypressTime: CFTimeInterval = 0
+    private var edgeGlowIdleTransition: CGFloat = 1.0  // 0.0=typing, 1.0=idle (부드러운 전환용)
+    private var edgeGlowFlashedButtons: [(button: UIButton, flashTime: CFTimeInterval)] = []
+
+    private enum EdgeGlowState {
+        case idle       // 웨이브 흐름
+        case typing     // dim + 키 번쩍
+    }
+
     // Backspace long-press repeat
     private var backspaceTimer: Timer?
     private var backspaceRepeatTimer: Timer?
@@ -434,6 +448,13 @@ class KeyboardLayoutView: UIView {
             startLensAnimation()
         }
 
+        // Edge Glow animation
+        if let theme = customTheme, theme.needsEdgeGlowAnimation {
+            restartEdgeGlowAfterBuild()
+        } else if isEdgeGlowAnimationActive {
+            stopEdgeGlowAnimation()
+        }
+
         // Resume stardust animation
         if wasStardustAnimating {
             stardustView?.resumeAnimation()
@@ -700,7 +721,7 @@ class KeyboardLayoutView: UIView {
 
         button.layer.cornerRadius = Layout.cornerRadius
 
-        if let theme = customTheme, theme.hasWoodTexture {
+        if let theme = customTheme, (theme.hasWoodTexture || theme.needsEdgeGlowAnimation) {
             button.clipsToBounds = false
             button.layer.masksToBounds = false
         } else {
@@ -736,6 +757,15 @@ class KeyboardLayoutView: UIView {
                         applyWoodHighlightGradient(to: button, highlightAlpha: highlightAlpha)
                     }
                     button.setTitleColor(theme.keyTextColor, for: .normal)
+                } else if case .edgeGlow(let borderColor, let glowColor) = theme.specialKeyVisualStyle {
+                    button.backgroundColor = .clear
+                    button.layer.borderWidth = 1.0
+                    button.layer.borderColor = borderColor.withAlphaComponent(0.4).cgColor
+                    button.layer.shadowColor = glowColor.cgColor
+                    button.layer.shadowOffset = .zero
+                    button.layer.shadowRadius = 3.0
+                    button.layer.shadowOpacity = 0.2
+                    button.setTitleColor(theme.returnKeyAccentTextColor, for: .normal)
                 } else {
                     button.backgroundColor = returnKeyIsBlue ? theme.returnKeyAccentColor : theme.specialKeyBackground
                     button.setTitleColor(returnKeyIsBlue ? theme.returnKeyAccentTextColor : theme.keyTextColor, for: .normal)
@@ -762,6 +792,14 @@ class KeyboardLayoutView: UIView {
                     // 기존 tag 9902 UIView 정리 (v1 마이그레이션 안전 처리)
                     if let oldHv = button.viewWithTag(9902) { oldHv.removeFromSuperview() }
                     applyWoodHighlightGradient(to: button, highlightAlpha: highlightAlpha)
+                case .edgeGlow(let borderColor, let glowColor):
+                    button.backgroundColor = .clear
+                    button.layer.borderWidth = 1.0
+                    button.layer.borderColor = borderColor.withAlphaComponent(0.4).cgColor
+                    button.layer.shadowColor = glowColor.cgColor
+                    button.layer.shadowOffset = .zero
+                    button.layer.shadowRadius = 3.0
+                    button.layer.shadowOpacity = 0.2
                 }
                 button.setTitleColor(theme.keyTextColor, for: .normal)
 
@@ -786,6 +824,14 @@ class KeyboardLayoutView: UIView {
                     // 기존 tag 9902 UIView 정리 (v1 마이그레이션 안전 처리)
                     if let oldHv = button.viewWithTag(9902) { oldHv.removeFromSuperview() }
                     applyWoodHighlightGradient(to: button, highlightAlpha: highlightAlpha)
+                case .edgeGlow(let borderColor, let glowColor):
+                    button.backgroundColor = .clear
+                    button.layer.borderWidth = 1.0
+                    button.layer.borderColor = borderColor.withAlphaComponent(0.4).cgColor
+                    button.layer.shadowColor = glowColor.cgColor
+                    button.layer.shadowOffset = .zero
+                    button.layer.shadowRadius = 3.0
+                    button.layer.shadowOpacity = 0.2
                 }
                 button.setTitleColor(theme.keyTextColor, for: .normal)
             }
@@ -948,6 +994,7 @@ class KeyboardLayoutView: UIView {
                     self.enterTrackpadMode()
                 }
                 flashButton(button)
+                if isEdgeGlowAnimationActive { edgeGlowKeyPressed(button) }
                 if let rv = mercuryRippleView, rv.isActive {
                     let rippleLoc = button.superview?.convert(button.center, to: rv) ?? loc
                     rv.addRipple(at: rippleLoc, intensity: 1.0)
@@ -964,6 +1011,7 @@ class KeyboardLayoutView: UIView {
                 backspaceTrackingTouch = touch
                 onKeyTap?(Self.backKey)
                 flashButton(button)
+                if isEdgeGlowAnimationActive { edgeGlowKeyPressed(button) }
                 if let rv = mercuryRippleView, rv.isActive {
                     let rippleLoc = button.superview?.convert(button.center, to: rv) ?? loc
                     rv.addRipple(at: rippleLoc, intensity: 0.7)
@@ -990,6 +1038,7 @@ class KeyboardLayoutView: UIView {
                 accentBaseKey = key
                 accentSourceButton = button
                 flashButton(button)
+                if isEdgeGlowAnimationActive { edgeGlowKeyPressed(button) }
                 if let rv = mercuryRippleView, rv.isActive {
                     let rippleLoc = button.superview?.convert(button.center, to: rv) ?? loc
                     rv.addRipple(at: rippleLoc, intensity: 0.7)
@@ -1008,6 +1057,7 @@ class KeyboardLayoutView: UIView {
 
             // ── All other keys: handle immediately ──
             flashButton(button)
+            if isEdgeGlowAnimationActive { edgeGlowKeyPressed(button) }
             if let rv = mercuryRippleView, rv.isActive {
                 let rippleLoc = button.superview?.convert(button.center, to: rv) ?? loc
                 rv.addRipple(at: rippleLoc, intensity: 0.7)
@@ -1456,6 +1506,7 @@ class KeyboardLayoutView: UIView {
         mercuryRippleView?.stopAnimation()
         stopLensAnimation()
         stardustView?.stopAnimation()
+        stopEdgeGlowAnimation()
         isTrackpadMode = true
         selectionHaptic.prepare()
 
@@ -1740,6 +1791,9 @@ class KeyboardLayoutView: UIView {
         if isWaveAnimationActive {
             rebuildKeyProjections()
         }
+        if isEdgeGlowAnimationActive {
+            rebuildKeyProjections()
+        }
     }
 
     // MARK: - Wave Animation (Matrix Pulse)
@@ -1889,6 +1943,210 @@ class KeyboardLayoutView: UIView {
         )
     }
 
+    // MARK: - Edge Glow Animation
+
+    // Edge Glow 색상 캐싱
+    private static let edgeGlowColor = UIColor(hex: "#00FF55")
+
+    // Edge Glow 밝기 파라미터
+    private static let edgeGlowWavePeriod: Double = 3.5
+    private static let edgeGlowWaveWidth: CGFloat = 0.25
+    private static let edgeGlowIdleTimeout: CFTimeInterval = 4.0
+
+    // Idle 웨이브 밝기 범위
+    private static let edgeGlowIdleBorderAlphaBase: CGFloat = 0.15
+    private static let edgeGlowIdleBorderAlphaPeak: CGFloat = 0.70
+    private static let edgeGlowIdleTextAlphaBase: CGFloat = 0.25
+    private static let edgeGlowIdleTextAlphaPeak: CGFloat = 0.85
+    private static let edgeGlowIdleShadowBase: Float = 0.05
+    private static let edgeGlowIdleShadowPeak: Float = 0.35
+
+    // Typing dim 밝기
+    private static let edgeGlowTypingBorderAlpha: CGFloat = 0.12
+    private static let edgeGlowTypingTextAlpha: CGFloat = 0.30
+    private static let edgeGlowTypingShadow: Float = 0.03
+
+    // Typing flash 밝기 (눌린 키)
+    private static let edgeGlowFlashBorderAlpha: CGFloat = 0.95
+    private static let edgeGlowFlashTextAlpha: CGFloat = 1.0
+    private static let edgeGlowFlashShadow: Float = 0.6
+    private static let edgeGlowFlashShadowRadius: CGFloat = 8.0
+    private static let edgeGlowFlashDuration: CFTimeInterval = 0.15
+
+    private func restartEdgeGlowAfterBuild() {
+        guard let theme = customTheme, theme.needsEdgeGlowAnimation else {
+            stopEdgeGlowAnimation()
+            return
+        }
+        guard !ProcessInfo.processInfo.isLowPowerModeEnabled else {
+            stopEdgeGlowAnimation()
+            return
+        }
+
+        if isEdgeGlowAnimationActive {
+            rebuildKeyProjections()
+        } else {
+            startEdgeGlowAnimation()
+        }
+    }
+
+    private func startEdgeGlowAnimation() {
+        guard let theme = customTheme, theme.needsEdgeGlowAnimation else { return }
+        guard !ProcessInfo.processInfo.isLowPowerModeEnabled else { return }
+        guard !isEdgeGlowAnimationActive else { return }
+
+        edgeGlowDisplayLink?.invalidate()
+        edgeGlowDisplayLink = nil
+
+        isEdgeGlowAnimationActive = true
+        edgeGlowStartTime = CACurrentMediaTime()
+        edgeGlowState = .idle
+        edgeGlowIdleTransition = 1.0
+        rebuildKeyProjections()
+
+        let dl = CADisplayLink(target: self, selector: #selector(edgeGlowAnimationTick))
+        if #available(iOS 15.0, *) {
+            dl.preferredFrameRateRange = CAFrameRateRange(minimum: 15, maximum: 30, preferred: 24)
+        } else {
+            dl.preferredFramesPerSecond = 24
+        }
+        dl.add(to: .main, forMode: .common)
+        edgeGlowDisplayLink = dl
+    }
+
+    private func stopEdgeGlowAnimation() {
+        guard isEdgeGlowAnimationActive else { return }
+        isEdgeGlowAnimationActive = false
+        edgeGlowDisplayLink?.invalidate()
+        edgeGlowDisplayLink = nil
+        edgeGlowState = .idle
+
+        // 모든 키를 기본 상태로 복원
+        if let theme = customTheme {
+            for button in allKeyButtons {
+                button.setTitleColor(theme.keyTextColor, for: .normal)
+                if case .edgeGlow(let bc, _) = theme.keyVisualStyle {
+                    button.layer.borderColor = bc.withAlphaComponent(0.4).cgColor
+                    button.layer.shadowOpacity = 0.2
+                    button.layer.shadowRadius = 3.0
+                }
+            }
+        }
+    }
+
+    @objc private func edgeGlowAnimationTick() {
+        guard isEdgeGlowAnimationActive, let theme = customTheme else { return }
+
+        if ProcessInfo.processInfo.isLowPowerModeEnabled {
+            stopEdgeGlowAnimation()
+            return
+        }
+
+        let now = CACurrentMediaTime()
+
+        // ── 상태 전환 감지 ──
+        let timeSinceLastKey = now - edgeGlowLastKeypressTime
+        if edgeGlowState == .typing && timeSinceLastKey > Self.edgeGlowIdleTimeout {
+            edgeGlowState = .idle
+            edgeGlowStartTime = now
+        }
+
+        // ── 부드러운 idle ↔ typing 전환 (lerp) ──
+        let targetTransition: CGFloat = (edgeGlowState == .idle) ? 1.0 : 0.0
+        let lerpSpeed: CGFloat = 0.08
+        edgeGlowIdleTransition += (targetTransition - edgeGlowIdleTransition) * lerpSpeed
+
+        // ── 만료된 flash 정리 ──
+        edgeGlowFlashedButtons.removeAll { now - $0.flashTime > Self.edgeGlowFlashDuration }
+
+        // ── 현재 flash 중인 버튼 Set 구축 (O(1) lookup) ──
+        let flashedSet = Set(edgeGlowFlashedButtons.map { ObjectIdentifier($0.button) })
+
+        // ── 웨이브 계산 (idle일 때만 유효) ──
+        let elapsed = now - edgeGlowStartTime
+        let phase = CGFloat(elapsed.truncatingRemainder(dividingBy: Self.edgeGlowWavePeriod) / Self.edgeGlowWavePeriod)
+        let waveFront = phase * (1.0 + Self.edgeGlowWaveWidth * 2) - Self.edgeGlowWaveWidth
+
+        // ── 색상 컴포넌트 1회 추출 ──
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        Self.edgeGlowColor.getRed(&r, green: &g, blue: &b, alpha: &a)
+
+        for (button, proj) in cachedKeyProjections {
+
+            // ── flash 중인 키는 건너뜀 ──
+            if flashedSet.contains(ObjectIdentifier(button)) {
+                continue
+            }
+
+            // ── Idle 웨이브 밝기 ──
+            let dist = abs(proj - waveFront)
+            let waveIntensity: CGFloat
+            if dist < Self.edgeGlowWaveWidth {
+                waveIntensity = (cos(dist / Self.edgeGlowWaveWidth * .pi) + 1.0) / 2.0
+            } else {
+                waveIntensity = 0
+            }
+
+            let idleBorderAlpha = Self.edgeGlowIdleBorderAlphaBase + waveIntensity * (Self.edgeGlowIdleBorderAlphaPeak - Self.edgeGlowIdleBorderAlphaBase)
+            let idleTextAlpha = Self.edgeGlowIdleTextAlphaBase + waveIntensity * (Self.edgeGlowIdleTextAlphaPeak - Self.edgeGlowIdleTextAlphaBase)
+            let idleShadow = Self.edgeGlowIdleShadowBase + Float(waveIntensity) * (Self.edgeGlowIdleShadowPeak - Self.edgeGlowIdleShadowBase)
+            let idleShadowRadius: CGFloat = 3.0 + waveIntensity * 5.0
+
+            let typingBorderAlpha = Self.edgeGlowTypingBorderAlpha
+            let typingTextAlpha = Self.edgeGlowTypingTextAlpha
+            let typingShadow = Self.edgeGlowTypingShadow
+
+            // ── idle ↔ typing 블렌딩 ──
+            let t = edgeGlowIdleTransition
+            let finalBorderAlpha = idleBorderAlpha * t + typingBorderAlpha * (1.0 - t)
+            let finalTextAlpha = idleTextAlpha * t + typingTextAlpha * (1.0 - t)
+            let finalShadow = idleShadow * Float(t) + typingShadow * Float(1.0 - t)
+            let finalShadowRadius = idleShadowRadius * t + 3.0 * (1.0 - t)
+
+            // ── 적용 ──
+            let colorSpace = CGColorSpaceCreateDeviceRGB()
+            var borderComponents: [CGFloat] = [r, g, b, finalBorderAlpha]
+            if let borderCG = CGColor(colorSpace: colorSpace, components: &borderComponents) {
+                button.layer.borderColor = borderCG
+            }
+            var textComponents: [CGFloat] = [r, g, b, finalTextAlpha]
+            if let textCG = CGColor(colorSpace: colorSpace, components: &textComponents) {
+                button.setTitleColor(UIColor(cgColor: textCG), for: .normal)
+            }
+            button.layer.shadowOpacity = finalShadow
+            button.layer.shadowRadius = finalShadowRadius
+        }
+    }
+
+    private func edgeGlowKeyPressed(_ button: UIButton) {
+        guard isEdgeGlowAnimationActive else { return }
+
+        let now = CACurrentMediaTime()
+
+        // 상태 전환: idle → typing
+        edgeGlowState = .typing
+        edgeGlowLastKeypressTime = now
+
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        Self.edgeGlowColor.getRed(&r, green: &g, blue: &b, alpha: &a)
+
+        // 눌린 키 즉시 번쩍
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        var flashComponents: [CGFloat] = [r, g, b, Self.edgeGlowFlashBorderAlpha]
+        if let flashCG = CGColor(colorSpace: colorSpace, components: &flashComponents) {
+            button.layer.borderColor = flashCG
+        }
+        var textComponents: [CGFloat] = [r, g, b, Self.edgeGlowFlashTextAlpha]
+        if let textCG = CGColor(colorSpace: colorSpace, components: &textComponents) {
+            button.setTitleColor(UIColor(cgColor: textCG), for: .normal)
+        }
+        button.layer.shadowOpacity = Self.edgeGlowFlashShadow
+        button.layer.shadowRadius = Self.edgeGlowFlashShadowRadius
+
+        // flash 목록에 등록
+        edgeGlowFlashedButtons.append((button: button, flashTime: now))
+    }
+
     // MARK: - Mercury Ripple Lens Animation
 
     private func startLensAnimation() {
@@ -2030,6 +2288,7 @@ class KeyboardLayoutView: UIView {
             mercuryRippleView?.stopAnimation()
             stopLensAnimation()
             stardustView?.stopAnimation()
+            stopEdgeGlowAnimation()
         } else {
             if let theme = customTheme, theme.needsWaveAnimation {
                 startWaveAnimationIfNeeded()
@@ -2046,6 +2305,9 @@ class KeyboardLayoutView: UIView {
             if let theme = customTheme, theme.needsStardustAnimation,
                !isMemoryConstrained {
                 stardustView?.startAnimation()
+            }
+            if let theme = customTheme, theme.needsEdgeGlowAnimation {
+                startEdgeGlowAnimation()
             }
         }
     }
@@ -2076,6 +2338,9 @@ class KeyboardLayoutView: UIView {
         if isWaveAnimationActive {
             stopWaveAnimation()
         }
+        if isEdgeGlowAnimationActive {
+            stopEdgeGlowAnimation()
+        }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) { [weak self] in
             self?.isMemoryConstrained = false
@@ -2092,6 +2357,9 @@ class KeyboardLayoutView: UIView {
         matrixRainView?.stopAnimation()
         mercuryRippleView?.stopAnimation()
         stardustView?.stopAnimation()
+        stopEdgeGlowAnimation()
+        edgeGlowDisplayLink?.invalidate()
+        edgeGlowDisplayLink = nil
         NotificationCenter.default.removeObserver(self, name: UIApplication.didReceiveMemoryWarningNotification, object: nil)
     }
 
