@@ -310,11 +310,30 @@
 		43B6AA0B4788DDA803262AB2 /* Theme */ = {
 			isa = PBXGroup;
 			children = (
+				D68A81F5CC3E4B939FBB5EB7 /* Core */,
+				8DA69973A47E48CD82E08D8F /* Animation */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
+		D68A81F5CC3E4B939FBB5EB7 /* Core */ = {
+			isa = PBXGroup;
+			children = (
 				BB22CC33DD44EE5500070002 /* KeyboardTheme.swift */,
 				A131D0CE3D8515F4D942D37F /* ThemeManager.swift */,
 				TP01AA11BB22CC33DD550001 /* ThemePatternRenderer.swift */,
 			);
-			path = Theme;
+			path = Core;
+			sourceTree = "<group>";
+		};
+		8DA69973A47E48CD82E08D8F /* Animation */ = {
+			isa = PBXGroup;
+			children = (
+				C21417E39394CA9BB9353695 /* MatrixRainView.swift */,
+				MR01AA11BB22CC33DD440001 /* MercuryRippleView.swift */,
+				SD01AA11BB22CC33DD440001 /* StardustView.swift */,
+			);
+			path = Animation;
 			sourceTree = "<group>";
 		};
 		5D72009ADDC2558E8FB997E0 /* App */ = {
@@ -356,9 +375,6 @@
 				A1B2C3D4E5F607081920ABCE /* CorrectionLanguageBar.swift */,
 				03D7ABAFB25DE60E52119088 /* EmojiKeyboardView.swift */,
 				2074DF00A0D06308149CC621 /* KeyboardLayoutView.swift */,
-				C21417E39394CA9BB9353695 /* MatrixRainView.swift */,
-				MR01AA11BB22CC33DD440001 /* MercuryRippleView.swift */,
-				SD01AA11BB22CC33DD440001 /* StardustView.swift */,
 				A2C36F5FE7C33CE377D041C1 /* LanguagePickerView.swift */,
 				AA11BB22CC33DD44EE550006 /* PhraseInputHeaderView.swift */,
 				28A9A5F9D37A7DA5CBD32D56 /* QuickEmojiBar.swift */,
