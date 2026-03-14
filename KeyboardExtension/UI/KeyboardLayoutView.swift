@@ -333,7 +333,7 @@ class KeyboardLayoutView: UIView {
 
     // MARK: - Build Keyboard
 
-    private func scheduleBuildKeyboard(delay: TimeInterval = 0.08) {
+    private func scheduleBuildKeyboard(delay: TimeInterval = KeyboardLayoutView.buildDelayAfterFlash) {
         pendingBuildWork?.cancel()
         let work = DispatchWorkItem { [weak self] in
             self?.buildKeyboard()
@@ -1339,7 +1339,7 @@ class KeyboardLayoutView: UIView {
             flashView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
             button.addSubview(flashView)
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + Self.keyFlashDuration) {
                 flashView.removeFromSuperview()
             }
         } else {
@@ -1350,7 +1350,7 @@ class KeyboardLayoutView: UIView {
             button.backgroundColor = flashColor
             CATransaction.commit()
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + Self.keyFlashDuration) {
                 CATransaction.begin()
                 CATransaction.setDisableActions(true)
                 button.backgroundColor = original
@@ -1973,6 +1973,12 @@ class KeyboardLayoutView: UIView {
     private static let edgeGlowFlashShadowRadius: CGFloat = 8.0
     private static let edgeGlowFlashDuration: CFTimeInterval = 0.15
 
+    /// 키 누름 flash 애니메이션 표시 시간
+    private static let keyFlashDuration: TimeInterval = 0.15
+
+    /// flash 완료 후 keyboard rebuild까지 여유 시간
+    private static let buildDelayAfterFlash: TimeInterval = keyFlashDuration + 0.03
+
     private func restartEdgeGlowAfterBuild() {
         guard let theme = customTheme, theme.needsEdgeGlowAnimation else {
             stopEdgeGlowAnimation()
@@ -2383,7 +2389,7 @@ class KeyboardLayoutView: UIView {
         guard currentPage == .letters else { return }
         guard isShifted != shifted else { return }
         isShifted = shifted
-        buildKeyboard()
+        scheduleBuildKeyboard()
     }
 
     // MARK: - Mode-Aware Return Key (Proposal 03)
