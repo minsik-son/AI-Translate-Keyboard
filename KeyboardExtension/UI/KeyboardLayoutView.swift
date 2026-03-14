@@ -1954,17 +1954,17 @@ class KeyboardLayoutView: UIView {
     private static let edgeGlowIdleTimeout: CFTimeInterval = 4.0
 
     // Idle 웨이브 밝기 범위
-    private static let edgeGlowIdleBorderAlphaBase: CGFloat = 0.15
+    private static let edgeGlowIdleBorderAlphaBase: CGFloat = 0.35
     private static let edgeGlowIdleBorderAlphaPeak: CGFloat = 0.70
-    private static let edgeGlowIdleTextAlphaBase: CGFloat = 0.25
+    private static let edgeGlowIdleTextAlphaBase: CGFloat = 0.45
     private static let edgeGlowIdleTextAlphaPeak: CGFloat = 0.85
-    private static let edgeGlowIdleShadowBase: Float = 0.05
+    private static let edgeGlowIdleShadowBase: Float = 0.25
     private static let edgeGlowIdleShadowPeak: Float = 0.35
 
     // Typing dim 밝기
-    private static let edgeGlowTypingBorderAlpha: CGFloat = 0.12
-    private static let edgeGlowTypingTextAlpha: CGFloat = 0.30
-    private static let edgeGlowTypingShadow: Float = 0.03
+    private static let edgeGlowTypingBorderAlpha: CGFloat = 0.25
+    private static let edgeGlowTypingTextAlpha: CGFloat = 0.35
+    private static let edgeGlowTypingShadow: Float = 0.09
 
     // Typing flash 밝기 (눌린 키)
     private static let edgeGlowFlashBorderAlpha: CGFloat = 0.95
