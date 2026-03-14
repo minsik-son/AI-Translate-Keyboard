@@ -2078,6 +2078,11 @@ class KeyboardLayoutView: UIView {
                 continue
             }
 
+            // ── 교정/번역 모드 활성 시 return 키 건너뜀 ──
+            if returnKeyModeOverride != nil && button.accessibilityLabel == Self.returnKey {
+                continue
+            }
+
             // ── Idle 웨이브 밝기 ──
             let dist = abs(proj - waveFront)
             let waveIntensity: CGFloat
@@ -2390,24 +2395,76 @@ class KeyboardLayoutView: UIView {
         // Find the return key button and update it in-place (no full rebuild)
         guard let returnButton = allKeyButtons.first(where: { $0.accessibilityLabel == Self.returnKey }) else { return }
 
-        let config: (label: String, color: UIColor)
         switch mode {
         case .defaultMode, .phraseInputMode, .quickNoteMode:
             // Don't override — use the standard returnKeyDisplayName/returnKeyIsBlue logic
             returnButton.alpha = 1.0
             returnButton.isUserInteractionEnabled = false // touch handled at view level
             return
-        case .translationMode:
-            config = (L("keyboard.return.translate"), UIColor(red: 0.192, green: 0.510, blue: 0.965, alpha: 1))
-        case .correctionMode:
-            config = (L("keyboard.return.correct"), UIColor(red: 1, green: 0.624, blue: 0.263, alpha: 1))
+        case .translationMode, .correctionMode:
+            break
         }
 
-        returnButton.setTitle(config.label, for: .normal)
+        // ── 모드 레이블 설정 ──
+        let label = (mode == .translationMode) ? L("keyboard.return.translate") : L("keyboard.return.correct")
+        returnButton.setTitle(label, for: .normal)
         returnButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
         returnButton.setImage(nil, for: .normal)
-        returnButton.backgroundColor = config.color
-        returnButton.setTitleColor(.white, for: .normal)
+
+        // ── 테마 기반 스타일링 ──
+        if let theme = customTheme {
+            switch theme.specialKeyVisualStyle {
+
+            // Edge Glow: 배경 투명 + 밝은 border/glow
+            case .edgeGlow(let borderColor, let glowColor):
+                returnButton.backgroundColor = .clear
+                returnButton.layer.borderWidth = 1.0
+                returnButton.layer.borderColor = borderColor.cgColor
+                returnButton.layer.shadowColor = glowColor.cgColor
+                returnButton.layer.shadowOffset = .zero
+                returnButton.layer.shadowRadius = 5.0
+                returnButton.layer.shadowOpacity = 0.5
+                returnButton.setTitleColor(theme.returnKeyAccentTextColor, for: .normal)
+
+            // Wood Block: 나무 스타일 유지 + 테마 엑센트 배경
+            case .woodBlock(let borderColor, let shadowColor, _):
+                returnButton.backgroundColor = theme.returnKeyAccentColor
+                returnButton.layer.borderWidth = 1
+                returnButton.layer.borderColor = borderColor.cgColor
+                returnButton.layer.shadowColor = shadowColor.cgColor
+                returnButton.layer.shadowOffset = CGSize(width: 0, height: 3)
+                returnButton.layer.shadowRadius = 1.5
+                returnButton.layer.shadowOpacity = 1.0
+                returnButton.setTitleColor(theme.returnKeyAccentTextColor, for: .normal)
+
+            // Solid / Translucent: 테마 엑센트 색상 사용
+            default:
+                // alpha가 너무 낮은 테마 대응 (Digital Rain 0.08 등)
+                let accentColor = theme.returnKeyAccentColor
+                var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+                accentColor.getRed(&r, green: &g, blue: &b, alpha: &a)
+                returnButton.backgroundColor = (a < 0.25)
+                    ? UIColor(red: r, green: g, blue: b, alpha: 0.25)
+                    : accentColor
+                returnButton.setTitleColor(theme.returnKeyAccentTextColor, for: .normal)
+
+                // 기존 border/shadow 초기화 (다른 테마에서 전환 시 잔여값 방지)
+                returnButton.layer.borderWidth = 0
+                returnButton.layer.shadowOpacity = 0
+            }
+        } else {
+            // ── 기본 테마: 기존 하드코딩 색상 유지 ──
+            let defaultColor: UIColor = (mode == .translationMode)
+                ? UIColor(red: 0.192, green: 0.510, blue: 0.965, alpha: 1)
+                : UIColor(red: 1, green: 0.624, blue: 0.263, alpha: 1)
+            returnButton.backgroundColor = defaultColor
+            returnButton.setTitleColor(.white, for: .normal)
+
+            // border/shadow 초기화
+            returnButton.layer.borderWidth = 0
+            returnButton.layer.shadowOpacity = 0
+        }
+
         returnButton.alpha = hasText ? 1.0 : 0.5
     }
 
