@@ -792,6 +792,7 @@ private class PremiumThemeCell: UICollectionViewCell {
 
     private var previewGradientLayer: CAGradientLayer?
     private var previewPatternView: UIView?
+    private var animationEffectView: UIView?
 
     private var keyLabels: [[UILabel]] = []
     private var specialKeyLabels: [UILabel] = []
@@ -865,6 +866,9 @@ private class PremiumThemeCell: UICollectionViewCell {
         previewGradientLayer?.removeFromSuperlayer()
         previewGradientLayer = nil
         previewPatternView?.isHidden = true
+        animationEffectView?.subviews.forEach { $0.removeFromSuperview() }
+        animationEffectView?.layer.sublayers?.forEach { $0.removeFromSuperlayer() }
+        animationEffectView?.isHidden = true
         cardView.layer.borderColor = UIColor.clear.cgColor
         cardView.layer.borderWidth = 1
 
@@ -1123,6 +1127,9 @@ private class PremiumThemeCell: UICollectionViewCell {
             previewPatternView?.isHidden = true
         }
 
+        // 2.5. Animation effect overlay (정적 프리뷰)
+        configureAnimationPreview(theme: theme)
+
         // 3. Key labels by language
         let lang = LocalizationManager.shared.currentLanguage.rawValue
         let layout = PreviewKeyboardLayout.rows(for: lang)
@@ -1324,8 +1331,223 @@ private class PremiumThemeCell: UICollectionViewCell {
         }
     }
 
+    // MARK: - Animation Preview Effects
+
+    private func configureAnimationPreview(theme: KeyboardTheme) {
+        guard theme.hasWaveAnimation || theme.hasRainAnimation || theme.hasRippleAnimation
+              || theme.hasStardustAnimation || theme.hasEdgeGlowAnimation || theme.hasSnowfallAnimation else {
+            animationEffectView?.isHidden = true
+            return
+        }
+
+        if animationEffectView == nil {
+            let v = UIView()
+            v.isUserInteractionEnabled = false
+            v.translatesAutoresizingMaskIntoConstraints = false
+            v.clipsToBounds = true
+            previewContainer.insertSubview(v, belowSubview: lockOverlay)
+            NSLayoutConstraint.activate([
+                v.topAnchor.constraint(equalTo: previewContainer.topAnchor),
+                v.leadingAnchor.constraint(equalTo: previewContainer.leadingAnchor),
+                v.trailingAnchor.constraint(equalTo: previewContainer.trailingAnchor),
+                v.bottomAnchor.constraint(equalTo: previewContainer.bottomAnchor),
+            ])
+            animationEffectView = v
+        }
+
+        animationEffectView?.subviews.forEach { $0.removeFromSuperview() }
+        animationEffectView?.layer.sublayers?.forEach { $0.removeFromSuperlayer() }
+        animationEffectView?.isHidden = false
+
+        guard let effectView = animationEffectView else { return }
+
+        if theme.hasWaveAnimation {
+            addWavePreviewEffect(to: effectView, theme: theme)
+        } else if theme.hasRainAnimation {
+            addRainPreviewEffect(to: effectView, theme: theme)
+        } else if theme.hasRippleAnimation {
+            addRipplePreviewEffect(to: effectView, theme: theme)
+        } else if theme.hasStardustAnimation {
+            addStardustPreviewEffect(to: effectView, theme: theme)
+        } else if theme.hasEdgeGlowAnimation {
+            addEdgeGlowPreviewEffect(to: effectView, theme: theme)
+        } else if theme.hasSnowfallAnimation {
+            addSnowfallPreviewEffect(to: effectView, theme: theme)
+        }
+    }
+
+    private func addWavePreviewEffect(to view: UIView, theme: KeyboardTheme) {
+        let glowLayer = CAGradientLayer()
+        glowLayer.frame = view.bounds.isEmpty ? CGRect(x: 0, y: 0, width: 168, height: 130) : view.bounds
+        glowLayer.colors = [
+            UIColor.clear.cgColor,
+            UIColor.clear.cgColor,
+            theme.keyTextColor.withAlphaComponent(0.12).cgColor,
+            theme.keyTextColor.withAlphaComponent(0.20).cgColor,
+            theme.keyTextColor.withAlphaComponent(0.12).cgColor,
+            UIColor.clear.cgColor,
+            UIColor.clear.cgColor,
+        ]
+        glowLayer.locations = [0.0, 0.25, 0.38, 0.45, 0.52, 0.65, 1.0]
+        glowLayer.startPoint = CGPoint(x: 0, y: 0)
+        glowLayer.endPoint = CGPoint(x: 1, y: 1)
+        view.layer.addSublayer(glowLayer)
+    }
+
+    private func addRainPreviewEffect(to view: UIView, theme: KeyboardTheme) {
+        let chars = "アイウエオカキクケコ0123456789"
+        let tint = theme.keyTextColor
+
+        let columns: [(x: CGFloat, chars: Int, topOffset: CGFloat)] = [
+            (8, 10, -5), (22, 8, 10), (38, 11, -15),
+            (55, 9, 5), (72, 10, -10), (88, 7, 15),
+            (105, 11, -8), (120, 9, 3), (135, 8, -12),
+            (148, 10, 8), (160, 7, -3), (42, 6, 20),
+        ]
+
+        for col in columns {
+            for i in 0..<col.chars {
+                let charIndex = ((Int(col.x) &* 7) &+ (i &* 13)) % chars.count
+                let char = chars[chars.index(chars.startIndex, offsetBy: charIndex)]
+
+                let label = UILabel()
+                label.text = String(char)
+                label.font = .monospacedSystemFont(ofSize: 6, weight: .regular)
+
+                let normalizedPos = CGFloat(i) / CGFloat(col.chars)
+                let alpha: CGFloat = normalizedPos > 0.7 ? (0.5 + (normalizedPos - 0.7) * 1.5) : (normalizedPos * 0.35)
+                label.textColor = tint.withAlphaComponent(alpha)
+
+                let y = col.topOffset + CGFloat(i) * 9
+                label.frame = CGRect(x: col.x, y: y, width: 8, height: 9)
+                view.addSubview(label)
+            }
+        }
+    }
+
+    private func addRipplePreviewEffect(to view: UIView, theme: KeyboardTheme) {
+        let tint = theme.patternTint
+        let center = CGPoint(x: 70, y: 60)
+
+        let radii: [(r: CGFloat, alpha: CGFloat, width: CGFloat)] = [
+            (22, 0.28, 1.2),
+            (38, 0.16, 1.0),
+            (55, 0.08, 0.8),
+        ]
+
+        for ring in radii {
+            let circleLayer = CAShapeLayer()
+            let path = UIBezierPath(
+                arcCenter: center,
+                radius: ring.r,
+                startAngle: 0,
+                endAngle: 2 * .pi,
+                clockwise: true
+            )
+            circleLayer.path = path.cgPath
+            circleLayer.fillColor = UIColor.clear.cgColor
+            circleLayer.strokeColor = tint.withAlphaComponent(ring.alpha).cgColor
+            circleLayer.lineWidth = ring.width
+            view.layer.addSublayer(circleLayer)
+        }
+
+        let glowLayer = CALayer()
+        glowLayer.frame = CGRect(x: center.x - 12, y: center.y - 12, width: 24, height: 24)
+        glowLayer.cornerRadius = 12
+        glowLayer.backgroundColor = tint.withAlphaComponent(0.08).cgColor
+        view.layer.addSublayer(glowLayer)
+    }
+
+    private func addStardustPreviewEffect(to view: UIView, theme: KeyboardTheme) {
+        let tint = theme.keyTextColor
+
+        let stars: [(x: CGFloat, y: CGFloat, size: CGFloat, alpha: CGFloat)] = [
+            (12, 15, 2.0, 0.6), (35, 30, 1.5, 0.4), (60, 10, 2.5, 0.5),
+            (85, 40, 1.8, 0.55), (110, 18, 2.0, 0.45), (140, 35, 1.5, 0.5),
+            (160, 12, 2.2, 0.4), (20, 55, 1.8, 0.5), (50, 70, 2.0, 0.45),
+            (75, 50, 1.5, 0.55), (100, 65, 2.5, 0.4), (130, 55, 1.8, 0.5),
+            (155, 70, 2.0, 0.45), (45, 95, 1.5, 0.4),
+        ]
+
+        for star in stars {
+            let dot = CALayer()
+            dot.frame = CGRect(x: star.x, y: star.y, width: star.size, height: star.size)
+            dot.cornerRadius = star.size / 2
+            dot.backgroundColor = tint.withAlphaComponent(star.alpha).cgColor
+            view.layer.addSublayer(dot)
+        }
+
+        let burstCenter = CGPoint(x: 90, y: 35)
+        let burstParticles: [(dx: CGFloat, dy: CGFloat)] = [
+            (-6, -10), (4, -12), (10, -4), (-8, 3),
+            (7, 7), (-3, -14), (12, -8), (-10, -6),
+        ]
+
+        for p in burstParticles {
+            let dot = CALayer()
+            dot.frame = CGRect(x: burstCenter.x + p.dx, y: burstCenter.y + p.dy, width: 1.5, height: 1.5)
+            dot.cornerRadius = 0.75
+            dot.backgroundColor = tint.withAlphaComponent(0.7).cgColor
+            view.layer.addSublayer(dot)
+        }
+    }
+
+    private func addEdgeGlowPreviewEffect(to view: UIView, theme: KeyboardTheme) {
+        guard case .edgeGlow(_, let glowColor) = theme.keyVisualStyle else { return }
+
+        let glowLayer = CAGradientLayer()
+        glowLayer.frame = view.bounds.isEmpty ? CGRect(x: 0, y: 0, width: 168, height: 130) : view.bounds
+        glowLayer.colors = [
+            UIColor.clear.cgColor,
+            UIColor.clear.cgColor,
+            glowColor.withAlphaComponent(0.08).cgColor,
+            glowColor.withAlphaComponent(0.15).cgColor,
+            glowColor.withAlphaComponent(0.08).cgColor,
+            UIColor.clear.cgColor,
+            UIColor.clear.cgColor,
+        ]
+        glowLayer.locations = [0.0, 0.20, 0.35, 0.42, 0.49, 0.60, 1.0]
+        glowLayer.startPoint = CGPoint(x: 0, y: 0)
+        glowLayer.endPoint = CGPoint(x: 1, y: 1)
+        view.layer.addSublayer(glowLayer)
+    }
+
+    private func addSnowfallPreviewEffect(to view: UIView, theme: KeyboardTheme) {
+        let flakes: [(x: CGFloat, y: CGFloat, size: CGFloat, alpha: CGFloat)] = [
+            (8, 12, 2.5, 0.6), (28, 35, 1.8, 0.45), (48, 8, 3.0, 0.55),
+            (65, 50, 2.0, 0.5), (85, 20, 3.5, 0.6), (108, 45, 2.2, 0.45),
+            (130, 10, 2.8, 0.55), (150, 55, 1.5, 0.4), (18, 65, 2.5, 0.5),
+            (40, 80, 3.0, 0.55), (58, 58, 1.8, 0.4), (78, 72, 2.5, 0.5),
+            (98, 38, 2.0, 0.45), (118, 68, 3.0, 0.55), (140, 42, 2.2, 0.5),
+            (158, 75, 1.8, 0.4), (25, 95, 2.5, 0.5), (50, 108, 3.2, 0.55),
+            (72, 90, 2.0, 0.45), (95, 102, 2.8, 0.5), (115, 85, 1.5, 0.4),
+            (138, 98, 3.0, 0.5), (155, 110, 2.5, 0.45), (35, 118, 2.0, 0.4),
+        ]
+
+        for flake in flakes {
+            let dot = CALayer()
+            dot.frame = CGRect(x: flake.x, y: flake.y, width: flake.size, height: flake.size)
+            dot.cornerRadius = flake.size / 2
+            dot.backgroundColor = UIColor.white.withAlphaComponent(flake.alpha).cgColor
+            dot.shadowColor = UIColor.white.cgColor
+            dot.shadowOffset = .zero
+            dot.shadowRadius = flake.size * 0.4
+            dot.shadowOpacity = Float(flake.alpha * 0.5)
+            view.layer.addSublayer(dot)
+        }
+    }
+
     override func layoutSubviews() {
         super.layoutSubviews()
         previewGradientLayer?.frame = previewContainer.bounds
+
+        // animationEffectView의 글로우 레이어 프레임 업데이트
+        if let effectView = animationEffectView {
+            for sublayer in effectView.layer.sublayers ?? [] {
+                if let gradientLayer = sublayer as? CAGradientLayer {
+                    gradientLayer.frame = effectView.bounds
+                }
+            }
+        }
     }
 }

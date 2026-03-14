@@ -223,7 +223,7 @@ final class MatrixRainView: UIView {
             Int.random(in: 0..<Self.characters.count)
         }
         let speed = CGFloat.random(in: 150...220)// 이전값 150...220
-        let trailLength = CGFloat.random(in: 300...350) //250...300
+        let trailLength = CGFloat.random(in: 550...700) //250...300
         let startY: CGFloat = staggered
             ? -CGFloat.random(in: 0...(viewHeight * 2.5))
             : -CGFloat.random(in: 20...120)
