@@ -85,6 +85,7 @@ class KeyboardLayoutView: UIView {
     private var matrixRainView: MatrixRainView?
     private var mercuryRippleView: MercuryRippleView?
     private var stardustView: StardustView?
+    private var snowfallView: SnowfallView?
     private var isMemoryConstrained = false
 
     // Mercury Ripple 렌즈 굴절 애니메이션
@@ -359,6 +360,8 @@ class KeyboardLayoutView: UIView {
         if wasLensAnimating { pauseLensAnimation() }
         let wasStardustAnimating = stardustView?.isActive ?? false
         if wasStardustAnimating { stardustView?.pauseAnimation() }
+        let wasSnowfallAnimating = snowfallView?.isActive ?? false
+        if wasSnowfallAnimating { snowfallView?.pauseAnimation() }
 
         // 예약된 build가 있으면 취소 (직접 호출 시 중복 방지)
         pendingBuildWork?.cancel()
@@ -460,6 +463,20 @@ class KeyboardLayoutView: UIView {
             stardustView?.resumeAnimation()
         } else if let theme = customTheme, theme.needsStardustAnimation,
                   !isMemoryConstrained, let sv = stardustView, !sv.isActive,
+                  !ProcessInfo.processInfo.isLowPowerModeEnabled {
+            sv.startAnimation()
+        }
+
+        // Resume snowfall animation + keyFrames 업데이트
+        if let sv = snowfallView {
+            sv.keyFrames = allKeyButtons.map { btn in
+                btn.superview?.convert(btn.frame, to: sv) ?? btn.frame
+            }
+        }
+        if wasSnowfallAnimating {
+            snowfallView?.resumeAnimation()
+        } else if let theme = customTheme, theme.needsSnowfallAnimation,
+                  !isMemoryConstrained, let sv = snowfallView, !sv.isActive,
                   !ProcessInfo.processInfo.isLowPowerModeEnabled {
             sv.startAnimation()
         }
@@ -766,6 +783,16 @@ class KeyboardLayoutView: UIView {
                     button.layer.shadowRadius = 3.0
                     button.layer.shadowOpacity = 0.2
                     button.setTitleColor(theme.returnKeyAccentTextColor, for: .normal)
+                } else if case .frostedGlass(_, let borderColor, _) = theme.specialKeyVisualStyle {
+                    button.backgroundColor = theme.returnKeyAccentColor
+                    button.layer.borderWidth = 1.0
+                    button.layer.borderColor = borderColor.cgColor
+                    button.layer.shadowColor = UIColor(red: 180/255, green: 200/255, blue: 240/255, alpha: 1).cgColor
+                    button.layer.shadowOffset = .zero
+                    button.layer.shadowRadius = 2.0
+                    button.layer.shadowOpacity = 0.05
+                    button.setTitleColor(theme.returnKeyAccentTextColor, for: .normal)
+                    addSnowCap(to: button)
                 } else {
                     button.backgroundColor = returnKeyIsBlue ? theme.returnKeyAccentColor : theme.specialKeyBackground
                     button.setTitleColor(returnKeyIsBlue ? theme.returnKeyAccentTextColor : theme.keyTextColor, for: .normal)
@@ -800,6 +827,15 @@ class KeyboardLayoutView: UIView {
                     button.layer.shadowOffset = .zero
                     button.layer.shadowRadius = 3.0
                     button.layer.shadowOpacity = 0.2
+                case .frostedGlass(let bgAlpha, let borderColor, _):
+                    button.backgroundColor = UIColor(hex: "#192846").withAlphaComponent(bgAlpha)
+                    button.layer.borderWidth = 1.0
+                    button.layer.borderColor = borderColor.cgColor
+                    button.layer.shadowColor = UIColor(red: 180/255, green: 200/255, blue: 240/255, alpha: 1).cgColor
+                    button.layer.shadowOffset = .zero
+                    button.layer.shadowRadius = 2.0
+                    button.layer.shadowOpacity = 0.05
+                    addSnowCap(to: button)
                 }
                 button.setTitleColor(theme.keyTextColor, for: .normal)
 
@@ -832,6 +868,15 @@ class KeyboardLayoutView: UIView {
                     button.layer.shadowOffset = .zero
                     button.layer.shadowRadius = 3.0
                     button.layer.shadowOpacity = 0.2
+                case .frostedGlass(let bgAlpha, let borderColor, _):
+                    button.backgroundColor = UIColor(hex: "#192846").withAlphaComponent(bgAlpha)
+                    button.layer.borderWidth = 1.0
+                    button.layer.borderColor = borderColor.cgColor
+                    button.layer.shadowColor = UIColor(red: 180/255, green: 200/255, blue: 240/255, alpha: 1).cgColor
+                    button.layer.shadowOffset = .zero
+                    button.layer.shadowRadius = 2.0
+                    button.layer.shadowOpacity = 0.05
+                    addSnowCap(to: button)
                 }
                 button.setTitleColor(theme.keyTextColor, for: .normal)
             }
@@ -1406,6 +1451,29 @@ class KeyboardLayoutView: UIView {
         button.layer.insertSublayer(gl, at: 0)
     }
 
+    /// 키 상단 눈 쌓임 효과 (frostedGlass 테마 전용)
+    private func addSnowCap(to button: UIButton) {
+        let layerName = "snowCapGradient"
+        if button.layer.sublayers?.contains(where: { $0.name == layerName }) == true { return }
+
+        let snowCap = CAGradientLayer()
+        snowCap.name = layerName
+        snowCap.frame = CGRect(x: button.bounds.width * 0.12, y: 0,
+                                width: button.bounds.width * 0.76, height: 2)
+        snowCap.colors = [
+            UIColor.clear.cgColor,
+            UIColor(white: 1.0, alpha: 0.15).cgColor,
+            UIColor(white: 1.0, alpha: 0.28).cgColor,
+            UIColor(white: 1.0, alpha: 0.15).cgColor,
+            UIColor.clear.cgColor
+        ]
+        snowCap.locations = [0, 0.2, 0.5, 0.8, 1.0]
+        snowCap.startPoint = CGPoint(x: 0, y: 0.5)
+        snowCap.endPoint = CGPoint(x: 1, y: 0.5)
+        snowCap.cornerRadius = 1
+        button.layer.addSublayer(snowCap)
+    }
+
     /// 음각(Intaglio) 텍스트 이펙트 — 나무에 파낸 듯한 글자
     private func applyEngravedTextEffect(to button: UIButton, theme: KeyboardTheme, key: String) {
         guard !Self.specialKeys.contains(key) || key == Self.returnKey else {
@@ -1506,6 +1574,7 @@ class KeyboardLayoutView: UIView {
         mercuryRippleView?.stopAnimation()
         stopLensAnimation()
         stardustView?.stopAnimation()
+        snowfallView?.stopAnimation()
         stopEdgeGlowAnimation()
         isTrackpadMode = true
         selectionHaptic.prepare()
@@ -1761,6 +1830,29 @@ class KeyboardLayoutView: UIView {
         } else {
             stardustView?.stopAnimation()
             stardustView?.isHidden = true
+        }
+
+        // ── Midnight Snowfall ──
+        if let theme = customTheme, theme.needsSnowfallAnimation {
+            if !isMemoryConstrained {
+                if snowfallView == nil {
+                    let sv = SnowfallView()
+                    sv.translatesAutoresizingMaskIntoConstraints = false
+                    sv.isUserInteractionEnabled = false
+                    insertSubview(sv, belowSubview: keyboardContainer)
+                    NSLayoutConstraint.activate([
+                        sv.topAnchor.constraint(equalTo: topAnchor),
+                        sv.bottomAnchor.constraint(equalTo: bottomAnchor),
+                        sv.leadingAnchor.constraint(equalTo: leadingAnchor),
+                        sv.trailingAnchor.constraint(equalTo: trailingAnchor),
+                    ])
+                    snowfallView = sv
+                }
+                snowfallView?.isHidden = false
+            }
+        } else {
+            snowfallView?.stopAnimation()
+            snowfallView?.isHidden = true
         }
 
         buildKeyboard()
@@ -2304,6 +2396,7 @@ class KeyboardLayoutView: UIView {
             mercuryRippleView?.stopAnimation()
             stopLensAnimation()
             stardustView?.stopAnimation()
+            snowfallView?.stopAnimation()
             stopEdgeGlowAnimation()
         } else {
             if let theme = customTheme, theme.needsWaveAnimation {
@@ -2324,6 +2417,10 @@ class KeyboardLayoutView: UIView {
             }
             if let theme = customTheme, theme.needsEdgeGlowAnimation {
                 startEdgeGlowAnimation()
+            }
+            if let theme = customTheme, theme.needsSnowfallAnimation,
+               !isMemoryConstrained {
+                snowfallView?.startAnimation()
             }
         }
     }
@@ -2351,6 +2448,12 @@ class KeyboardLayoutView: UIView {
             stardustView = nil
         }
 
+        if let sv = snowfallView {
+            sv.stopAnimation()
+            sv.removeFromSuperview()
+            snowfallView = nil
+        }
+
         if isWaveAnimationActive {
             stopWaveAnimation()
         }
@@ -2373,6 +2476,7 @@ class KeyboardLayoutView: UIView {
         matrixRainView?.stopAnimation()
         mercuryRippleView?.stopAnimation()
         stardustView?.stopAnimation()
+        snowfallView?.stopAnimation()
         stopEdgeGlowAnimation()
         edgeGlowDisplayLink?.invalidate()
         edgeGlowDisplayLink = nil

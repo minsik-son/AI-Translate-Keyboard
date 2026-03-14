@@ -38,6 +38,8 @@ final class ThemePatternRenderer {
                 drawRipple(in: ctx.cgContext, rect: rect, tint: tint, opacity: opacity)
             case .edgeGlow:
                 drawEdgeGlow(in: ctx.cgContext, rect: rect, tint: tint, opacity: opacity)
+            case .snowfall:
+                break  // 눈 파티클은 SnowfallView에서 처리, 패턴 이미지 불필요
             case .none:
                 break
             }

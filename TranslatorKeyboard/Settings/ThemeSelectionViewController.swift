@@ -75,6 +75,9 @@ class ThemeSelectionViewController: UIViewController {
         "premium_static_neon_yellow": [.neon],
         "premium_static_neon_purple": [.neon],
 
+        // 프리미엄 - 자연/애니메이션
+        "premium_midnight_snowfall": [.nature, .animation],
+
         // 프리미엄 - 미니멀
         "premium_rose_gold":        [.minimal],
         "premium_frost_crystal":    [.minimal],
@@ -1152,6 +1155,15 @@ private class PremiumThemeCell: UICollectionViewCell {
                     label.layer.shadowOffset = .zero
                     label.layer.shadowRadius = 1.5
                     label.layer.shadowOpacity = 0.3
+                case .frostedGlass(let bgAlpha, let borderColor, _):
+                    label.backgroundColor = UIColor(hex: "#192846").withAlphaComponent(bgAlpha)
+                    label.layer.borderWidth = 0.5
+                    label.layer.borderColor = borderColor.cgColor
+                    label.clipsToBounds = false
+                    label.layer.shadowColor = UIColor(red: 180/255, green: 200/255, blue: 240/255, alpha: 1).cgColor
+                    label.layer.shadowOffset = .zero
+                    label.layer.shadowRadius = 1.0
+                    label.layer.shadowOpacity = 0.05
                 }
                 label.textColor = theme.keyTextColor
             }
@@ -1181,6 +1193,15 @@ private class PremiumThemeCell: UICollectionViewCell {
                 label.layer.shadowOffset = .zero
                 label.layer.shadowRadius = 1.5
                 label.layer.shadowOpacity = 0.3
+            case .frostedGlass(let bgAlpha, let borderColor, _):
+                label.backgroundColor = UIColor(hex: "#192846").withAlphaComponent(bgAlpha)
+                label.layer.borderWidth = 0.5
+                label.layer.borderColor = borderColor.cgColor
+                label.clipsToBounds = false
+                label.layer.shadowColor = UIColor(red: 180/255, green: 200/255, blue: 240/255, alpha: 1).cgColor
+                label.layer.shadowOffset = .zero
+                label.layer.shadowRadius = 1.0
+                label.layer.shadowOpacity = 0.05
             }
             label.textColor = theme.keyTextColor
         }
@@ -1211,6 +1232,15 @@ private class PremiumThemeCell: UICollectionViewCell {
                     label.layer.shadowOffset = .zero
                     label.layer.shadowRadius = 1.5
                     label.layer.shadowOpacity = 0.3
+                case .frostedGlass(let bgAlpha, let borderColor, _):
+                    label.backgroundColor = UIColor(hex: "#192846").withAlphaComponent(bgAlpha)
+                    label.layer.borderWidth = 0.5
+                    label.layer.borderColor = borderColor.cgColor
+                    label.clipsToBounds = false
+                    label.layer.shadowColor = UIColor(red: 180/255, green: 200/255, blue: 240/255, alpha: 1).cgColor
+                    label.layer.shadowOffset = .zero
+                    label.layer.shadowRadius = 1.0
+                    label.layer.shadowOpacity = 0.05
                 }
             } else {
                 switch theme.keyVisualStyle {
@@ -1234,6 +1264,15 @@ private class PremiumThemeCell: UICollectionViewCell {
                     label.layer.shadowOffset = .zero
                     label.layer.shadowRadius = 1.5
                     label.layer.shadowOpacity = 0.3
+                case .frostedGlass(let bgAlpha, let borderColor, _):
+                    label.backgroundColor = UIColor(hex: "#192846").withAlphaComponent(bgAlpha)
+                    label.layer.borderWidth = 0.5
+                    label.layer.borderColor = borderColor.cgColor
+                    label.clipsToBounds = false
+                    label.layer.shadowColor = UIColor(red: 180/255, green: 200/255, blue: 240/255, alpha: 1).cgColor
+                    label.layer.shadowOffset = .zero
+                    label.layer.shadowRadius = 1.0
+                    label.layer.shadowOpacity = 0.05
                 }
             }
             label.textColor = theme.keyTextColor

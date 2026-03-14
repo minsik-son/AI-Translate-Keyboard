@@ -34,6 +34,7 @@ enum PatternStyle {
     case matrixRain
     case ripple
     case edgeGlow
+    case snowfall
 }
 
 enum KeyVisualStyle {
@@ -41,6 +42,7 @@ enum KeyVisualStyle {
     case translucent(alpha: CGFloat, tint: UIColor)
     case woodBlock(borderColor: UIColor, shadowColor: UIColor, highlightAlpha: CGFloat)
     case edgeGlow(borderColor: UIColor, glowColor: UIColor)
+    case frostedGlass(bgAlpha: CGFloat, borderColor: UIColor, textColor: UIColor)
 }
 
 struct KeyboardTheme {
@@ -96,6 +98,9 @@ struct KeyboardTheme {
     // 엣지 글로우 애니메이션 (Edge Glow)
     let hasEdgeGlowAnimation: Bool
 
+    // 스노우폴 애니메이션 (Midnight Snowfall)
+    let hasSnowfallAnimation: Bool
+
     // 엔터키 Accent (returnKeyIsBlue 시 사용)
     let returnKeyAccentColor: UIColor
     let returnKeyAccentTextColor: UIColor
@@ -103,7 +108,7 @@ struct KeyboardTheme {
     var hasWoodTexture: Bool { woodTileImageName != nil }
     var needsWaveAnimation: Bool { hasWaveAnimation }
     var needsRainAnimation: Bool {
-        assert([hasWaveAnimation, hasRainAnimation, hasRippleAnimation, hasStardustAnimation, hasEdgeGlowAnimation].filter { $0 }.count <= 1,
+        assert([hasWaveAnimation, hasRainAnimation, hasRippleAnimation, hasStardustAnimation, hasEdgeGlowAnimation, hasSnowfallAnimation].filter { $0 }.count <= 1,
                "Theme cannot enable multiple animations simultaneously")
         return hasRainAnimation
     }
@@ -111,6 +116,7 @@ struct KeyboardTheme {
     var needsRippleAnimation: Bool { hasRippleAnimation }
     var needsStardustAnimation: Bool { hasStardustAnimation }
     var needsEdgeGlowAnimation: Bool { hasEdgeGlowAnimation }
+    var needsSnowfallAnimation: Bool { hasSnowfallAnimation }
 
     var hasGradient: Bool {
         guard let colors = gradientColors else { return false }
@@ -151,6 +157,7 @@ extension KeyboardTheme {
         self.hasRippleAnimation = false
         self.hasStardustAnimation = false
         self.hasEdgeGlowAnimation = false
+        self.hasSnowfallAnimation = false
         self.returnKeyAccentColor = .systemBlue
         self.returnKeyAccentTextColor = .white
     }
@@ -309,6 +316,7 @@ extension KeyboardTheme {
         textShadowColor: .clear, textShadowOffset: .zero,
         textHighlightColor: .clear, textHighlightOffset: .zero,
         woodTileImageName: nil, hasWaveAnimation: false, hasRainAnimation: false, hasRippleAnimation: false, hasStardustAnimation: false, hasEdgeGlowAnimation: false,
+        hasSnowfallAnimation: false,
         returnKeyAccentColor: UIColor(red: 0.00, green: 0.65, blue: 0.65, alpha: 1),
         returnKeyAccentTextColor: .white
     )
@@ -327,6 +335,7 @@ extension KeyboardTheme {
         textShadowColor: .clear, textShadowOffset: .zero,
         textHighlightColor: .clear, textHighlightOffset: .zero,
         woodTileImageName: nil, hasWaveAnimation: false, hasRainAnimation: false, hasRippleAnimation: false, hasStardustAnimation: false, hasEdgeGlowAnimation: false,
+        hasSnowfallAnimation: false,
         returnKeyAccentColor: UIColor(red: 0.70, green: 0.45, blue: 0.38, alpha: 1),
         returnKeyAccentTextColor: .white
     )
@@ -345,6 +354,7 @@ extension KeyboardTheme {
         textShadowColor: .clear, textShadowOffset: .zero,
         textHighlightColor: .clear, textHighlightOffset: .zero,
         woodTileImageName: nil, hasWaveAnimation: false, hasRainAnimation: false, hasRippleAnimation: false, hasStardustAnimation: false, hasEdgeGlowAnimation: false,
+        hasSnowfallAnimation: false,
         returnKeyAccentColor: UIColor(red: 0.10, green: 0.45, blue: 0.60, alpha: 1),
         returnKeyAccentTextColor: .white
     )
@@ -363,6 +373,7 @@ extension KeyboardTheme {
         textShadowColor: .clear, textShadowOffset: .zero,
         textHighlightColor: .clear, textHighlightOffset: .zero,
         woodTileImageName: nil, hasWaveAnimation: false, hasRainAnimation: false, hasRippleAnimation: false, hasStardustAnimation: false, hasEdgeGlowAnimation: false,
+        hasSnowfallAnimation: false,
         returnKeyAccentColor: UIColor(red: 0.70, green: 0.42, blue: 0.15, alpha: 1),
         returnKeyAccentTextColor: .white
     )
@@ -381,6 +392,7 @@ extension KeyboardTheme {
         textShadowColor: .clear, textShadowOffset: .zero,
         textHighlightColor: .clear, textHighlightOffset: .zero,
         woodTileImageName: nil, hasWaveAnimation: false, hasRainAnimation: false, hasRippleAnimation: false, hasStardustAnimation: false, hasEdgeGlowAnimation: false,
+        hasSnowfallAnimation: false,
         returnKeyAccentColor: UIColor(red: 0.45, green: 0.60, blue: 0.75, alpha: 1),
         returnKeyAccentTextColor: .white
     )
@@ -411,6 +423,7 @@ extension KeyboardTheme {
         hasWaveAnimation: false,
         hasRainAnimation: false,
         hasRippleAnimation: false, hasStardustAnimation: false, hasEdgeGlowAnimation: false,
+        hasSnowfallAnimation: false,
         returnKeyAccentColor: UIColor(hex: "#7B64D0"),
         returnKeyAccentTextColor: .white
     )
@@ -439,6 +452,7 @@ extension KeyboardTheme {
         hasWaveAnimation: false,
         hasRainAnimation: false,
         hasRippleAnimation: false, hasStardustAnimation: false, hasEdgeGlowAnimation: false,
+        hasSnowfallAnimation: false,
         returnKeyAccentColor: UIColor(hex: "#E07818"),
         returnKeyAccentTextColor: .white
     )
@@ -467,6 +481,7 @@ extension KeyboardTheme {
         hasWaveAnimation: false,
         hasRainAnimation: false,
         hasRippleAnimation: false, hasStardustAnimation: false, hasEdgeGlowAnimation: false,
+        hasSnowfallAnimation: false,
         returnKeyAccentColor: UIColor(hex: "#00C878"),
         returnKeyAccentTextColor: .white
     )
@@ -495,6 +510,7 @@ extension KeyboardTheme {
         hasWaveAnimation: false,
         hasRainAnimation: false,
         hasRippleAnimation: false, hasStardustAnimation: false, hasEdgeGlowAnimation: false,
+        hasSnowfallAnimation: false,
         returnKeyAccentColor: UIColor(hex: "#6E7480"),
         returnKeyAccentTextColor: .white
     )
@@ -523,6 +539,7 @@ extension KeyboardTheme {
         hasWaveAnimation: false,
         hasRainAnimation: false,
         hasRippleAnimation: false, hasStardustAnimation: false, hasEdgeGlowAnimation: false,
+        hasSnowfallAnimation: false,
         returnKeyAccentColor: UIColor(hex: "#C8648A"),
         returnKeyAccentTextColor: .white
     )
@@ -551,6 +568,7 @@ extension KeyboardTheme {
         hasWaveAnimation: false,
         hasRainAnimation: false,
         hasRippleAnimation: false, hasStardustAnimation: false, hasEdgeGlowAnimation: false,
+        hasSnowfallAnimation: false,
         returnKeyAccentColor: UIColor(hex: "#0082B4"),
         returnKeyAccentTextColor: .white
     )
@@ -581,6 +599,7 @@ extension KeyboardTheme {
         hasWaveAnimation: true,
         hasRainAnimation: false,
         hasRippleAnimation: false, hasStardustAnimation: false, hasEdgeGlowAnimation: false,
+        hasSnowfallAnimation: false,
         returnKeyAccentColor: UIColor(hex: "#00FF41").withAlphaComponent(0.30),
         returnKeyAccentTextColor: .white
     )
@@ -609,6 +628,7 @@ extension KeyboardTheme {
         hasWaveAnimation: false,
         hasRainAnimation: true,
         hasRippleAnimation: false, hasStardustAnimation: false, hasEdgeGlowAnimation: false,
+        hasSnowfallAnimation: false,
         returnKeyAccentColor: UIColor(hex: "#00FF41").withAlphaComponent(0.08),
         returnKeyAccentTextColor: UIColor(hex: "#00FF41")
     )
@@ -638,6 +658,7 @@ extension KeyboardTheme {
         hasRainAnimation: false,
         hasRippleAnimation: true,
         hasStardustAnimation: false, hasEdgeGlowAnimation: false,
+        hasSnowfallAnimation: false,
         returnKeyAccentColor: UIColor(hex: "#3A5A8C"),
         returnKeyAccentTextColor: .white
     )
@@ -667,6 +688,7 @@ extension KeyboardTheme {
         hasRainAnimation: false,
         hasRippleAnimation: false,
         hasStardustAnimation: true, hasEdgeGlowAnimation: false,
+        hasSnowfallAnimation: false,
         returnKeyAccentColor: UIColor(hex: "#6040B0"),
         returnKeyAccentTextColor: .white
     )
@@ -705,6 +727,7 @@ extension KeyboardTheme {
         hasRippleAnimation: false,
         hasStardustAnimation: false,
         hasEdgeGlowAnimation: true,
+        hasSnowfallAnimation: false,
         returnKeyAccentColor: UIColor(hex: "#00FF55").withAlphaComponent(0.20),
         returnKeyAccentTextColor: UIColor(hex: "#00FF55")
     )
@@ -741,6 +764,7 @@ extension KeyboardTheme {
         hasRippleAnimation: false,
         hasStardustAnimation: false,
         hasEdgeGlowAnimation: true,
+        hasSnowfallAnimation: false,
         returnKeyAccentColor: UIColor(hex: "#FF3B30").withAlphaComponent(0.20),
         returnKeyAccentTextColor: UIColor(hex: "#FF3B30")
     )
@@ -777,6 +801,7 @@ extension KeyboardTheme {
         hasRippleAnimation: false,
         hasStardustAnimation: false,
         hasEdgeGlowAnimation: true,
+        hasSnowfallAnimation: false,
         returnKeyAccentColor: UIColor(hex: "#007AFF").withAlphaComponent(0.20),
         returnKeyAccentTextColor: UIColor(hex: "#007AFF")
     )
@@ -813,6 +838,7 @@ extension KeyboardTheme {
         hasRippleAnimation: false,
         hasStardustAnimation: false,
         hasEdgeGlowAnimation: true,
+        hasSnowfallAnimation: false,
         returnKeyAccentColor: UIColor(hex: "#FFD60A").withAlphaComponent(0.20),
         returnKeyAccentTextColor: UIColor(hex: "#FFD60A")
     )
@@ -849,6 +875,7 @@ extension KeyboardTheme {
         hasRippleAnimation: false,
         hasStardustAnimation: false,
         hasEdgeGlowAnimation: true,
+        hasSnowfallAnimation: false,
         returnKeyAccentColor: UIColor(hex: "#BF5AF2").withAlphaComponent(0.20),
         returnKeyAccentTextColor: UIColor(hex: "#BF5AF2")
     )
@@ -887,6 +914,7 @@ extension KeyboardTheme {
         hasRippleAnimation: false,
         hasStardustAnimation: false,
         hasEdgeGlowAnimation: false,
+        hasSnowfallAnimation: false,
         returnKeyAccentColor: UIColor(hex: "#00FF55").withAlphaComponent(0.20),
         returnKeyAccentTextColor: UIColor(hex: "#00FF55")
     )
@@ -923,6 +951,7 @@ extension KeyboardTheme {
         hasRippleAnimation: false,
         hasStardustAnimation: false,
         hasEdgeGlowAnimation: false,
+        hasSnowfallAnimation: false,
         returnKeyAccentColor: UIColor(hex: "#FF3B30").withAlphaComponent(0.20),
         returnKeyAccentTextColor: UIColor(hex: "#FF3B30")
     )
@@ -959,6 +988,7 @@ extension KeyboardTheme {
         hasRippleAnimation: false,
         hasStardustAnimation: false,
         hasEdgeGlowAnimation: false,
+        hasSnowfallAnimation: false,
         returnKeyAccentColor: UIColor(hex: "#007AFF").withAlphaComponent(0.20),
         returnKeyAccentTextColor: UIColor(hex: "#007AFF")
     )
@@ -995,6 +1025,7 @@ extension KeyboardTheme {
         hasRippleAnimation: false,
         hasStardustAnimation: false,
         hasEdgeGlowAnimation: false,
+        hasSnowfallAnimation: false,
         returnKeyAccentColor: UIColor(hex: "#FFD60A").withAlphaComponent(0.20),
         returnKeyAccentTextColor: UIColor(hex: "#FFD60A")
     )
@@ -1031,8 +1062,55 @@ extension KeyboardTheme {
         hasRippleAnimation: false,
         hasStardustAnimation: false,
         hasEdgeGlowAnimation: false,
+        hasSnowfallAnimation: false,
         returnKeyAccentColor: UIColor(hex: "#BF5AF2").withAlphaComponent(0.20),
         returnKeyAccentTextColor: UIColor(hex: "#BF5AF2")
+    )
+
+    // MARK: - Snowfall Premium Theme
+
+    static let premiumMidnightSnowfall = KeyboardTheme(
+        id: "premium_midnight_snowfall",
+        displayName: L("theme.premium_midnight_snowfall"),
+        keyboardBackground: UIColor(hex: "#0a1220"),
+        keyBackground: UIColor(hex: "#192846").withAlphaComponent(0.18),
+        specialKeyBackground: UIColor(hex: "#14213C").withAlphaComponent(0.22),
+        keyTextColor: UIColor(red: 210/255, green: 225/255, blue: 245/255, alpha: 0.88),
+        toolbarBackground: .clear,
+        gradientColors: [
+            UIColor(hex: "#0d1525"),
+            UIColor(hex: "#121d33"),
+            UIColor(hex: "#0f1a2e"),
+            UIColor(hex: "#0a1220")
+        ],
+        gradientLocations: [0, 0.3, 0.6, 1.0],
+        gradientDirection: .topToBottom,
+        patternStyle: .snowfall,
+        patternOpacity: 0.0,
+        patternTint: UIColor(hex: "#C8DFF5"),
+        keyVisualStyle: .frostedGlass(
+            bgAlpha: 0.18,
+            borderColor: UIColor(red: 150/255, green: 185/255, blue: 230/255, alpha: 0.10),
+            textColor: UIColor(red: 210/255, green: 225/255, blue: 245/255, alpha: 0.88)
+        ),
+        specialKeyVisualStyle: .frostedGlass(
+            bgAlpha: 0.22,
+            borderColor: UIColor(red: 130/255, green: 160/255, blue: 210/255, alpha: 0.10),
+            textColor: UIColor(red: 175/255, green: 200/255, blue: 235/255, alpha: 0.75)
+        ),
+        textShadowColor: UIColor(red: 180/255, green: 200/255, blue: 240/255, alpha: 0.15),
+        textShadowOffset: .zero,
+        textHighlightColor: .clear,
+        textHighlightOffset: .zero,
+        woodTileImageName: nil,
+        hasWaveAnimation: false,
+        hasRainAnimation: false,
+        hasRippleAnimation: false,
+        hasStardustAnimation: false,
+        hasEdgeGlowAnimation: false,
+        hasSnowfallAnimation: true,
+        returnKeyAccentColor: UIColor(hex: "#375A96").withAlphaComponent(0.18),
+        returnKeyAccentTextColor: UIColor(red: 185/255, green: 215/255, blue: 255/255, alpha: 0.90)
     )
 
     // MARK: - Wood Premium Themes
@@ -1072,6 +1150,7 @@ extension KeyboardTheme {
         hasWaveAnimation: false,
         hasRainAnimation: false,
         hasRippleAnimation: false, hasStardustAnimation: false, hasEdgeGlowAnimation: false,
+        hasSnowfallAnimation: false,
         returnKeyAccentColor: UIColor(red: 0.22, green: 0.15, blue: 0.10, alpha: 1),
         returnKeyAccentTextColor: UIColor(white: 1.0, alpha: 0.75)
     )
@@ -1111,6 +1190,7 @@ extension KeyboardTheme {
         hasWaveAnimation: false,
         hasRainAnimation: false,
         hasRippleAnimation: false, hasStardustAnimation: false, hasEdgeGlowAnimation: false,
+        hasSnowfallAnimation: false,
         returnKeyAccentColor: UIColor(red: 0.68, green: 0.56, blue: 0.42, alpha: 1),
         returnKeyAccentTextColor: UIColor(red: 0.16, green: 0.10, blue: 0.04, alpha: 0.70)
     )
@@ -1132,7 +1212,8 @@ extension KeyboardTheme {
         .premiumStaticNeonRed,
         .premiumStaticNeonBlue,
         .premiumStaticNeonYellow,
-        .premiumStaticNeonPurple
+        .premiumStaticNeonPurple,
+        .premiumMidnightSnowfall
     ]
 
     static let allThemesIncludingPremium: [KeyboardTheme] = allThemes + allPremiumThemes
