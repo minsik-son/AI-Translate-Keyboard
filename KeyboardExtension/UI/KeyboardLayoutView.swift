@@ -1261,21 +1261,37 @@ class KeyboardLayoutView: UIView {
             updateKeyLabelsForShift()
 
         case Self.langKR:
+            let oldLang = currentLanguage
+            let oldPage = currentPage
+            let wasShifted = isShifted
             currentLanguage = .korean
             isShifted = false
             currentPage = .letters
-            scheduleBuildKeyboard()
+            if oldPage != .letters {
+                buildKeyboard()
+            } else {
+                updateKeyLabelsForLanguage(from: oldLang, to: .korean, wasShifted: wasShifted)
+            }
             onLanguageChanged?(.korean)
 
         case Self.langEN:
+            let oldLang = currentLanguage
+            let oldPage = currentPage
+            let wasShifted = isShifted
             currentLanguage = .english
             isShifted = false
             currentPage = .letters
-            scheduleBuildKeyboard()
+            if oldPage != .letters {
+                buildKeyboard()
+            } else {
+                updateKeyLabelsForLanguage(from: oldLang, to: .english, wasShifted: wasShifted)
+            }
             onLanguageChanged?(.english)
 
         case Self.globeLangKey:
             // Toggle between paired language and English
+            let oldLang = currentLanguage
+            let oldPage = currentPage
             if currentLanguage == .english {
                 currentLanguage = pairedLanguage
                 onLanguageChanged?(pairedLanguage)
@@ -1283,26 +1299,34 @@ class KeyboardLayoutView: UIView {
                 currentLanguage = .english
                 onLanguageChanged?(.english)
             }
+            let wasShifted = isShifted
             isShifted = false
             currentPage = .letters
-            scheduleBuildKeyboard()
+            // 심볼 페이지에서 전환했으면 버튼이 심볼 레이아웃 → 풀 rebuild 필수
+            if oldPage != .letters {
+                buildKeyboard()
+            } else {
+                updateKeyLabelsForLanguage(from: oldLang, to: currentLanguage, wasShifted: wasShifted)
+            }
 
         case Self.symbolToggleKey:
             currentPage = .symbols1
-            scheduleBuildKeyboard()
+            buildKeyboard()  // letters → symbols1: 행 구조 다름 → 풀 rebuild (0.18s 딜레이 제거)
 
         case Self.symbolKey:
+            let oldPage = currentPage
             currentPage = .symbols1
-            scheduleBuildKeyboard()
+            updateKeyLabelsForSymbolPage(from: oldPage, to: .symbols1)
 
         case Self.moreSymKey:
+            let oldPage = currentPage
             currentPage = .symbols2
-            scheduleBuildKeyboard()
+            updateKeyLabelsForSymbolPage(from: oldPage, to: .symbols2)
 
         case Self.abcKey:
             currentPage = .letters
             isShifted = false
-            scheduleBuildKeyboard()
+            buildKeyboard()  // symbols → letters: 행 구조 다름 → 풀 rebuild (0.18s 딜레이 제거)
 
         default:
             onKeyTap?(key)
@@ -2541,10 +2565,18 @@ class KeyboardLayoutView: UIView {
     }
 
     func setLanguage(_ language: KeyboardLanguage) {
+        let oldLang = currentLanguage
+        let oldPage = currentPage
+        let wasShifted = isShifted
         currentLanguage = language
         isShifted = false
         currentPage = .letters
-        buildKeyboard()
+        // 초기 로딩, 심볼 페이지, 또는 버튼 미생성 시 풀 build
+        if allKeyButtons.isEmpty || oldPage != .letters {
+            buildKeyboard()
+        } else {
+            updateKeyLabelsForLanguage(from: oldLang, to: language, wasShifted: wasShifted)
+        }
     }
 
     /// Shift 상태 변경 시 키 라벨만 업데이트 (전체 rebuild 없이)
@@ -2621,6 +2653,199 @@ class KeyboardLayoutView: UIView {
             // 딕셔너리에서 새 라벨 조회
             // - 매핑 있음 → 라벨 교체 (문자 키)
             // - 매핑 없음 → skip (special key, 숫자, 또는 변경 불필요한 키)
+            if let newLabel = labelMapping[currentLabel] {
+                button.setTitle(newLabel, for: .normal)
+                button.accessibilityLabel = newLabel
+            }
+        }
+    }
+
+    /// symbols1 ↔ symbols2 전환 시 라벨만 즉시 교체 (전체 rebuild 없이)
+    /// UI/UX 시각적 결과는 buildKeyboard()와 100% 동일
+    ///
+    /// ⚠️ 사용 조건: symbols1 → symbols2, 또는 symbols2 → symbols1 에서만 호출
+    /// ⚠️ letters → symbols, symbols → letters 전환에는 사용 금지 → buildKeyboard() 사용
+    private func updateKeyLabelsForSymbolPage(from oldPage: KeyboardPage, to newPage: KeyboardPage) {
+        guard !isRebuilding else { return }
+        guard !allKeyButtons.isEmpty else {
+            buildKeyboard()
+            return
+        }
+
+        // 전환 전/후 심볼 배열 결정
+        let oldRows: [[String]]
+        let newRows: [[String]]
+        switch oldPage {
+        case .symbols1:
+            oldRows = Self.symbolRows1
+        case .symbols2:
+            oldRows = Self.symbolRows2
+        default:
+            buildKeyboard()
+            return
+        }
+        switch newPage {
+        case .symbols1:
+            newRows = Self.symbolRows1
+        case .symbols2:
+            newRows = Self.symbolRows2
+        default:
+            buildKeyboard()
+            return
+        }
+
+        // 행 구조 호환성 검증
+        if oldRows.count != newRows.count {
+            buildKeyboard()
+            return
+        }
+        for (oldRow, newRow) in zip(oldRows, newRows) {
+            if oldRow.count != newRow.count {
+                buildKeyboard()
+                return
+            }
+        }
+
+        // 딕셔너리 매핑 구축: 현재 버튼 라벨 → 목표 라벨
+        var labelMapping: [String: String] = [:]
+        for (oldRow, newRow) in zip(oldRows, newRows) {
+            for (oldKey, newKey) in zip(oldRow, newRow) {
+                guard !Self.specialKeys.contains(oldKey) else { continue }
+                guard !Self.specialKeys.contains(newKey) else { continue }
+                if oldKey != newKey {
+                    labelMapping[oldKey] = newKey
+                }
+            }
+        }
+
+        // 토글 키 매핑: "#+=", "123"은 specialKeys에 포함 → 명시적 처리
+        let toggleKeyMapping: [String: String]
+        if oldPage == .symbols1 && newPage == .symbols2 {
+            toggleKeyMapping = [Self.moreSymKey: Self.symbolKey]
+        } else if oldPage == .symbols2 && newPage == .symbols1 {
+            toggleKeyMapping = [Self.symbolKey: Self.moreSymKey]
+        } else {
+            toggleKeyMapping = [:]
+        }
+
+        // 모든 키 버튼 순회하며 라벨 교체
+        for button in allKeyButtons {
+            guard let currentLabel = button.accessibilityLabel else { continue }
+
+            // 토글 키 ("#+=" ↔ "123")
+            if let newToggleLabel = toggleKeyMapping[currentLabel] {
+                button.setTitle(newToggleLabel, for: .normal)
+                button.accessibilityLabel = newToggleLabel
+                continue
+            }
+
+            // 심볼 키 — 딕셔너리에서 새 라벨 조회
+            if let newLabel = labelMapping[currentLabel] {
+                button.setTitle(newLabel, for: .normal)
+                button.accessibilityLabel = newLabel
+            }
+        }
+    }
+
+    /// 행 구조가 동일한 언어 간 전환 시 라벨만 즉시 교체 (전체 rebuild 없이)
+    /// UI/UX 시각적 결과는 buildKeyboard()와 100% 동일
+    ///
+    /// ⚠️ 사용 조건: 전환 전후 언어의 행별 키 개수가 동일할 때만 호출
+    /// ⚠️ 러시아어(11,11,11) ↔ 영어/한국어(10,9,9) 전환에는 사용 금지 → buildKeyboard() 사용
+    private func updateKeyLabelsForLanguage(from oldLanguage: KeyboardLanguage, to newLanguage: KeyboardLanguage, wasShifted: Bool) {
+        guard !isRebuilding else { return }
+        guard !allKeyButtons.isEmpty else {
+            buildKeyboard()
+            return
+        }
+
+        // 전환 전 언어의 배열 (현재 버튼에 표시된 라벨 기준)
+        // ⚠️ wasShifted 파라미터 사용 — 호출 시점에서 isShifted는 이미 false로 리셋됨
+        let oldRows: [[String]]
+        switch oldLanguage {
+        case .korean:
+            oldRows = wasShifted ? Self.koreanShiftRows : Self.koreanRows
+        case .russian:
+            oldRows = wasShifted ? Self.russianShiftRows : Self.russianRows
+        default:
+            oldRows = wasShifted ? Self.englishShiftRows : Self.englishRows
+        }
+
+        // 전환 후 언어의 배열 (목표 라벨)
+        // ⚠️ 언어 전환 시 isShifted는 false로 리셋되므로 항상 normal rows
+        let newRows: [[String]]
+        switch newLanguage {
+        case .korean:
+            newRows = Self.koreanRows
+        case .russian:
+            newRows = Self.russianRows
+        default:
+            newRows = Self.englishRows
+        }
+
+        // 행 구조 호환성 검증 — 만약 키 수가 다르면 안전하게 풀 rebuild
+        let oldLetterRows = oldRows.dropLast()
+        let newLetterRows = newRows.dropLast()
+        if oldLetterRows.count != newLetterRows.count {
+            buildKeyboard()
+            return
+        }
+        for (oldRow, newRow) in zip(oldLetterRows, newLetterRows) {
+            if oldRow.count != newRow.count {
+                buildKeyboard()
+                return
+            }
+        }
+
+        // 딕셔너리 매핑 구축: 현재 버튼 라벨 → 목표 라벨
+        var labelMapping: [String: String] = [:]
+        for (oldRow, newRow) in zip(oldRows, newRows) {
+            for (oldKey, newKey) in zip(oldRow, newRow) {
+                guard !Self.specialKeys.contains(oldKey) else { continue }
+                guard !Self.specialKeys.contains(newKey) else { continue }
+                if oldKey != newKey {
+                    labelMapping[oldKey] = newKey
+                }
+            }
+        }
+
+        // 모든 키 버튼 순회하며 라벨 교체
+        for button in allKeyButtons {
+            guard let currentLabel = button.accessibilityLabel else { continue }
+
+            // Shift 키 — isShifted가 false로 리셋되었으므로 normal 상태로 업데이트
+            if currentLabel == Self.shiftKey {
+                let config = UIImage.SymbolConfiguration(
+                    pointSize: 16, weight: .regular)
+                button.setImage(
+                    UIImage(systemName: "shift", withConfiguration: config),
+                    for: .normal)
+                button.backgroundColor = customTheme?.specialKeyBackground
+                    ?? (isDark ? UIColor(white: 0.35, alpha: 1)
+                               : UIColor(white: 0.78, alpha: 1))
+                continue
+            }
+
+            // 🌐 Globe 키 — 전환 후 "다른 언어" 라벨 업데이트
+            if currentLabel == Self.globeLangKey {
+                for subview in button.subviews {
+                    if let langLabel = subview as? UILabel {
+                        langLabel.text = (newLanguage == .english)
+                            ? pairedLanguage.shortLabel
+                            : "A"
+                        break
+                    }
+                }
+                continue
+            }
+
+            // 스페이스 바 — 언어 표시명 업데이트
+            if currentLabel == " " {
+                button.setTitle(newLanguage.displayName, for: .normal)
+                continue
+            }
+
+            // 문자 키 — 딕셔너리에서 새 라벨 조회
             if let newLabel = labelMapping[currentLabel] {
                 button.setTitle(newLabel, for: .normal)
                 button.accessibilityLabel = newLabel
