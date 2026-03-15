@@ -38,6 +38,9 @@ class ThemeSelectionViewController: UIViewController {
 
     private var selectedThemeId: String = "default"
 
+    /// 애니메이션 프리뷰 스냅샷 캐시 — theme.id를 키로 사용
+    private var animationPreviewCache: [String: UIImage] = [:]
+
     // MARK: - Category Tag Map
     // 태그가 없는 테마는 "전체"에만 표시됨
     private static let themeTagMap: [String: Set<ThemeCategory>] = [
@@ -134,7 +137,13 @@ class ThemeSelectionViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         selectedThemeId = AppGroupManager.shared.string(forKey: AppConstants.UserDefaultsKeys.keyboardTheme) ?? "default"
+        animationPreviewCache.removeAll()
         applyFilter()
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        animationPreviewCache.removeAll()
     }
 
     @objc private func handleLanguageChange() {
@@ -318,6 +327,15 @@ extension ThemeSelectionViewController: UICollectionViewDataSource, UICollection
         switch type {
         case .premium:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PremiumThemeCell.reuseId, for: indexPath) as! PremiumThemeCell
+
+            // 캐시된 애니메이션 프리뷰 전달
+            cell.setAnimationPreviewCache(animationPreviewCache[theme.id])
+
+            // 캐시 미스 시 렌더링 완료 콜백 설정
+            cell.onPreviewRendered = { [weak self] image in
+                self?.animationPreviewCache[theme.id] = image
+            }
+
             cell.configure(theme: theme, isSelected: isSelected, isLocked: isLocked)
             return cell
         case .free:
@@ -405,6 +423,12 @@ extension ThemeSelectionViewController: UICollectionViewDataSource, UICollection
                     cell.transform = .identity
                 }
             }
+        }
+    }
+
+    func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        if let premiumCell = cell as? PremiumThemeCell {
+            premiumCell.clearOffscreenResources()
         }
     }
 }
@@ -775,6 +799,23 @@ private class PremiumThemeCell: UICollectionViewCell {
 
     static let reuseId = "PremiumThemeCell"
 
+    /// 프리뷰 렌더링 완료 시 ViewController에 스냅샷 전달하는 콜백
+    var onPreviewRendered: ((UIImage) -> Void)?
+
+    /// 캐시된 프리뷰 이미지를 설정 — 레이어 생성을 건너뜀
+    func setAnimationPreviewCache(_ image: UIImage?) {
+        cachedPreviewImage = image
+    }
+
+    private var cachedPreviewImage: UIImage?
+
+    /// 화면 밖 셀의 무거운 리소스 해제 — ViewController의 didEndDisplaying에서 호출
+    func clearOffscreenResources() {
+        animationEffectView?.subviews.forEach { $0.removeFromSuperview() }
+        animationEffectView?.layer.sublayers?.forEach { $0.removeFromSuperlayer() }
+        cardView.layer.shouldRasterize = false
+    }
+
     private let cardView: UIView = {
         let v = UIView()
         v.layer.cornerRadius = 16
@@ -873,24 +914,43 @@ private class PremiumThemeCell: UICollectionViewCell {
         cardView.layer.borderColor = UIColor.clear.cgColor
         cardView.layer.borderWidth = 1
 
-        // woodBlock cleanup
+        // woodBlock cleanup — shadow 렌더링 경로 완전 해제
         for rowLabels in keyLabels {
             for label in rowLabels {
                 label.clipsToBounds = true
                 label.layer.borderWidth = 0
                 label.layer.shadowOpacity = 0
+                label.layer.shadowPath = nil
+                label.layer.shadowColor = nil
+                label.layer.shadowRadius = 0
             }
         }
         for label in specialKeyLabels {
             label.clipsToBounds = true
             label.layer.borderWidth = 0
             label.layer.shadowOpacity = 0
+            label.layer.shadowPath = nil
+            label.layer.shadowColor = nil
+            label.layer.shadowRadius = 0
         }
         for label in bottomKeyLabels {
             label.clipsToBounds = true
             label.layer.borderWidth = 0
             label.layer.shadowOpacity = 0
+            label.layer.shadowPath = nil
+            label.layer.shadowColor = nil
+            label.layer.shadowRadius = 0
         }
+
+        // 캐시된 스냅샷 UIImageView 제거
+        animationEffectView?.viewWithTag(9999)?.removeFromSuperview()
+
+        // 래스터화 해제
+        cardView.layer.shouldRasterize = false
+
+        // 캐시 관련 리셋
+        cachedPreviewImage = nil
+        onPreviewRendered = nil
 
         accessibilityLabel = nil
         accessibilityHint = nil
@@ -1154,6 +1214,7 @@ private class PremiumThemeCell: UICollectionViewCell {
                     label.layer.shadowOffset = CGSize(width: 0, height: 1.5)
                     label.layer.shadowRadius = 0.8
                     label.layer.shadowOpacity = 1.0
+                    label.layer.shadowPath = UIBezierPath(roundedRect: label.bounds, cornerRadius: label.layer.cornerRadius).cgPath
                 case .edgeGlow(let borderColor, let glowColor):
                     label.backgroundColor = .clear
                     label.layer.borderWidth = 0.5
@@ -1163,6 +1224,7 @@ private class PremiumThemeCell: UICollectionViewCell {
                     label.layer.shadowOffset = .zero
                     label.layer.shadowRadius = 1.5
                     label.layer.shadowOpacity = 0.3
+                    label.layer.shadowPath = UIBezierPath(roundedRect: label.bounds, cornerRadius: label.layer.cornerRadius).cgPath
                 case .frostedGlass(let bgAlpha, let borderColor, _):
                     label.backgroundColor = UIColor(hex: "#192846").withAlphaComponent(bgAlpha)
                     label.layer.borderWidth = 0.5
@@ -1172,6 +1234,7 @@ private class PremiumThemeCell: UICollectionViewCell {
                     label.layer.shadowOffset = .zero
                     label.layer.shadowRadius = 1.0
                     label.layer.shadowOpacity = 0.05
+                    label.layer.shadowPath = UIBezierPath(roundedRect: label.bounds, cornerRadius: label.layer.cornerRadius).cgPath
                 }
                 label.textColor = theme.keyTextColor
             }
@@ -1192,6 +1255,7 @@ private class PremiumThemeCell: UICollectionViewCell {
                 label.layer.shadowOffset = CGSize(width: 0, height: 1.5)
                 label.layer.shadowRadius = 0.8
                 label.layer.shadowOpacity = 1.0
+                label.layer.shadowPath = UIBezierPath(roundedRect: label.bounds, cornerRadius: label.layer.cornerRadius).cgPath
             case .edgeGlow(let borderColor, let glowColor):
                 label.backgroundColor = .clear
                 label.layer.borderWidth = 0.5
@@ -1201,6 +1265,7 @@ private class PremiumThemeCell: UICollectionViewCell {
                 label.layer.shadowOffset = .zero
                 label.layer.shadowRadius = 1.5
                 label.layer.shadowOpacity = 0.3
+                label.layer.shadowPath = UIBezierPath(roundedRect: label.bounds, cornerRadius: label.layer.cornerRadius).cgPath
             case .frostedGlass(let bgAlpha, let borderColor, _):
                 label.backgroundColor = UIColor(hex: "#192846").withAlphaComponent(bgAlpha)
                 label.layer.borderWidth = 0.5
@@ -1210,6 +1275,7 @@ private class PremiumThemeCell: UICollectionViewCell {
                 label.layer.shadowOffset = .zero
                 label.layer.shadowRadius = 1.0
                 label.layer.shadowOpacity = 0.05
+                label.layer.shadowPath = UIBezierPath(roundedRect: label.bounds, cornerRadius: label.layer.cornerRadius).cgPath
             }
             label.textColor = theme.keyTextColor
         }
@@ -1231,6 +1297,7 @@ private class PremiumThemeCell: UICollectionViewCell {
                     label.layer.shadowOffset = CGSize(width: 0, height: 1.5)
                     label.layer.shadowRadius = 0.8
                     label.layer.shadowOpacity = 1.0
+                    label.layer.shadowPath = UIBezierPath(roundedRect: label.bounds, cornerRadius: label.layer.cornerRadius).cgPath
                 case .edgeGlow(let borderColor, let glowColor):
                     label.backgroundColor = .clear
                     label.layer.borderWidth = 0.5
@@ -1240,6 +1307,7 @@ private class PremiumThemeCell: UICollectionViewCell {
                     label.layer.shadowOffset = .zero
                     label.layer.shadowRadius = 1.5
                     label.layer.shadowOpacity = 0.3
+                    label.layer.shadowPath = UIBezierPath(roundedRect: label.bounds, cornerRadius: label.layer.cornerRadius).cgPath
                 case .frostedGlass(let bgAlpha, let borderColor, _):
                     label.backgroundColor = UIColor(hex: "#192846").withAlphaComponent(bgAlpha)
                     label.layer.borderWidth = 0.5
@@ -1249,6 +1317,7 @@ private class PremiumThemeCell: UICollectionViewCell {
                     label.layer.shadowOffset = .zero
                     label.layer.shadowRadius = 1.0
                     label.layer.shadowOpacity = 0.05
+                    label.layer.shadowPath = UIBezierPath(roundedRect: label.bounds, cornerRadius: label.layer.cornerRadius).cgPath
                 }
             } else {
                 switch theme.keyVisualStyle {
@@ -1263,6 +1332,7 @@ private class PremiumThemeCell: UICollectionViewCell {
                     label.layer.shadowOffset = CGSize(width: 0, height: 1.5)
                     label.layer.shadowRadius = 0.8
                     label.layer.shadowOpacity = 1.0
+                    label.layer.shadowPath = UIBezierPath(roundedRect: label.bounds, cornerRadius: label.layer.cornerRadius).cgPath
                 case .edgeGlow(let borderColor, let glowColor):
                     label.backgroundColor = .clear
                     label.layer.borderWidth = 0.5
@@ -1272,6 +1342,7 @@ private class PremiumThemeCell: UICollectionViewCell {
                     label.layer.shadowOffset = .zero
                     label.layer.shadowRadius = 1.5
                     label.layer.shadowOpacity = 0.3
+                    label.layer.shadowPath = UIBezierPath(roundedRect: label.bounds, cornerRadius: label.layer.cornerRadius).cgPath
                 case .frostedGlass(let bgAlpha, let borderColor, _):
                     label.backgroundColor = UIColor(hex: "#192846").withAlphaComponent(bgAlpha)
                     label.layer.borderWidth = 0.5
@@ -1281,6 +1352,7 @@ private class PremiumThemeCell: UICollectionViewCell {
                     label.layer.shadowOffset = .zero
                     label.layer.shadowRadius = 1.0
                     label.layer.shadowOpacity = 0.05
+                    label.layer.shadowPath = UIBezierPath(roundedRect: label.bounds, cornerRadius: label.layer.cornerRadius).cgPath
                 }
             }
             label.textColor = theme.keyTextColor
@@ -1330,6 +1402,10 @@ private class PremiumThemeCell: UICollectionViewCell {
             accessibilityTraits = .button
             accessibilityHint = L("accessibility.theme_select_hint")
         }
+
+        // 셀 전체를 래스터화하여 스크롤 시 GPU 캐시 활용
+        cardView.layer.shouldRasterize = true
+        cardView.layer.rasterizationScale = UIScreen.main.scale
     }
 
     // MARK: - Animation Preview Effects
@@ -1363,6 +1439,19 @@ private class PremiumThemeCell: UICollectionViewCell {
 
         guard let effectView = animationEffectView else { return }
 
+        // 캐시된 스냅샷이 있으면 UIImageView로 즉시 표시 (레이어 생성 건너뜀)
+        if let cachedImage = cachedPreviewImage {
+            let imageView = UIImageView(image: cachedImage)
+            imageView.frame = effectView.bounds
+            imageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            imageView.contentMode = .scaleAspectFill
+            imageView.clipsToBounds = true
+            imageView.tag = 9999
+            effectView.addSubview(imageView)
+            return
+        }
+
+        // 캐시 미스 → 기존 방식으로 레이어 생성
         if theme.hasWaveAnimation {
             addWavePreviewEffect(to: effectView, theme: theme)
         } else if theme.hasRainAnimation {
@@ -1377,6 +1466,17 @@ private class PremiumThemeCell: UICollectionViewCell {
             addSnowfallPreviewEffect(to: effectView, theme: theme)
         } else if theme.hasCherryBlossomAnimation {
             addCherryBlossomPreviewEffect(to: effectView, theme: theme)
+        }
+
+        // 렌더링 완료 후 스냅샷 캐시 (다음 프레임에서 bounds 확정 후)
+        DispatchQueue.main.async { [weak self] in
+            guard let effectView = self?.animationEffectView,
+                  effectView.bounds.width > 0 else { return }
+            let renderer = UIGraphicsImageRenderer(bounds: effectView.bounds)
+            let image = renderer.image { ctx in
+                effectView.layer.render(in: ctx.cgContext)
+            }
+            self?.onPreviewRendered?(image)
         }
     }
 
@@ -1537,6 +1637,11 @@ private class PremiumThemeCell: UICollectionViewCell {
             dot.shadowOffset = .zero
             dot.shadowRadius = flake.size * 0.4
             dot.shadowOpacity = Float(flake.alpha * 0.5)
+            // shadowPath 명시 → 오프스크린 렌더링 회피
+            dot.shadowPath = UIBezierPath(
+                roundedRect: CGRect(x: 0, y: 0, width: flake.size, height: flake.size),
+                cornerRadius: flake.size / 2
+            ).cgPath
             view.layer.addSublayer(dot)
         }
     }
@@ -1599,6 +1704,34 @@ private class PremiumThemeCell: UICollectionViewCell {
                 if let gradientLayer = sublayer as? CAGradientLayer {
                     gradientLayer.frame = effectView.bounds
                 }
+            }
+        }
+
+        // Shadow path 갱신 — bounds 확정 후 재설정
+        for rowLabels in keyLabels {
+            for label in rowLabels {
+                if label.layer.shadowOpacity > 0 {
+                    label.layer.shadowPath = UIBezierPath(
+                        roundedRect: label.bounds,
+                        cornerRadius: label.layer.cornerRadius
+                    ).cgPath
+                }
+            }
+        }
+        for label in specialKeyLabels {
+            if label.layer.shadowOpacity > 0 {
+                label.layer.shadowPath = UIBezierPath(
+                    roundedRect: label.bounds,
+                    cornerRadius: label.layer.cornerRadius
+                ).cgPath
+            }
+        }
+        for label in bottomKeyLabels {
+            if label.layer.shadowOpacity > 0 {
+                label.layer.shadowPath = UIBezierPath(
+                    roundedRect: label.bounds,
+                    cornerRadius: label.layer.cornerRadius
+                ).cgPath
             }
         }
     }
