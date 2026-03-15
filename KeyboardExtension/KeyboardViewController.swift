@@ -91,13 +91,17 @@ class KeyboardViewController: UIInputViewController {
         return label
     }()
 
+    // MARK: - Cached Settings (UserDefaults I/O 최소화)
+    /// viewDidLoad에서 1회 로드, viewWillAppear에서 갱신. 이후 메모리 캐시 사용.
+    private var cachedIsAutocorrectEnabled: Bool = false
+    private var cachedAutoCapitalize: Bool = true
+
     private var isAutocorrectEnabled: Bool {
-        let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier)
-        if let obj = defaults?.object(forKey: AppConstants.UserDefaultsKeys.autoComplete) {
-            return (obj as? Bool) ?? false
-        }
-        return false
+        cachedIsAutocorrectEnabled
     }
+
+    /// stale 결과 무시용 토큰
+    private var pendingSuggestionToken: UUID?
 
     // Suggestion dismiss state
     private var isSuggestionDismissedForCurrentWord = false
@@ -139,6 +143,7 @@ class KeyboardViewController: UIInputViewController {
         setupUI()
         setupDelegates()
         setupCallbacks()
+        loadCachedSettings()
         switchMode(to: .defaultMode)
         restoreState()
 
@@ -166,6 +171,7 @@ class KeyboardViewController: UIInputViewController {
         // ── 즉시 필요한 것만 동기 실행 ──
         textProxyManager.updateProxy(textDocumentProxy)
         setupHeightConstraint()
+        loadCachedSettings()
 
         // ── 나머지는 다음 런루프에서 실행 (키보드 UI 먼저 표시) ──
         DispatchQueue.main.async { [weak self] in
@@ -366,6 +372,28 @@ class KeyboardViewController: UIInputViewController {
                 v.alpha = 1
             }
             completion()
+        }
+    }
+
+    // MARK: - Cached Settings
+
+    /// ⚠️ 반드시 setupUI() 이후에 호출할 것 (keyboardLayoutView 접근 필요)
+    private func loadCachedSettings() {
+        let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier)
+
+        // Autocorrect
+        if let obj = defaults?.object(forKey: AppConstants.UserDefaultsKeys.autoComplete) {
+            cachedIsAutocorrectEnabled = (obj as? Bool) ?? false
+        }
+
+        // AutoCapitalize
+        cachedAutoCapitalize = defaults?.bool(forKey: AppConstants.UserDefaultsKeys.autoCapitalize) ?? true
+
+        // Haptic — KeyboardLayoutView에 전달
+        if let hapticObj = defaults?.object(forKey: AppConstants.UserDefaultsKeys.hapticFeedback) {
+            keyboardLayoutView.cachedHapticEnabled = (hapticObj as? Bool) ?? true
+        } else {
+            keyboardLayoutView.cachedHapticEnabled = true
         }
     }
 
@@ -1633,30 +1661,33 @@ class KeyboardViewController: UIInputViewController {
         guard !isSuggestionDismissedForCurrentWord else { return }
 
         // Only show suggestions when actively typing a word (not after space/enter/empty)
-        let word = currentTypingWord()
-        guard let word = word, !word.isEmpty else {
+        guard let word = currentTypingWord(), !word.isEmpty else {
             toolbarView.hideSuggestions(); return
         }
 
+        let token = UUID()
+        pendingSuggestionToken = token
         let currentLang = keyboardLayoutView.getCurrentLanguage()
+
+        // Context는 메인에서 읽기 (UIKit 필수)
+        let context = textDocumentProxy.documentContextBeforeInput
         let isComposing = !defaultTextInputHandler.composingText.isEmpty
 
-        let result = suggestionManager.getSuggestions(
-            context: textDocumentProxy.documentContextBeforeInput,
+        // debounce 비동기로 제안 계산 (메인 스레드, UITextChecker safe)
+        suggestionManager.getSuggestionsAsync(
+            context: context,
             currentWord: word,
             isComposing: isComposing,
-            language: currentLang,
-            onPrediction: { [weak self] predictions in
-                guard let self = self else { return }
-                // 콜백 시점에 여전히 유효한지 확인
-                guard self.currentMode == .defaultMode,
-                      !self.isSuggestionDismissedForCurrentWord else { return }
-                self.toolbarView.showSuggestions(predictions)
+            language: currentLang
+        ) { [weak self] result in
+            guard let self = self else { return }
+            // 이미 새로운 요청이 들어왔으면 이전 결과 무시
+            guard self.pendingSuggestionToken == token else { return }
+
+            switch result.mode {
+            case .none: self.toolbarView.hideSuggestions()
+            case .autocorrect, .prediction: self.toolbarView.showSuggestions(result.suggestions)
             }
-        )
-        switch result.mode {
-        case .none: toolbarView.hideSuggestions()
-        case .autocorrect, .prediction: toolbarView.showSuggestions(result.suggestions)
         }
     }
 
@@ -1764,7 +1795,7 @@ class KeyboardViewController: UIInputViewController {
     // MARK: - Auto Capitalize
 
     private func checkAutoCapitalize() {
-        guard AppGroupManager.shared.bool(forKey: AppConstants.UserDefaultsKeys.autoCapitalize) else { return }
+        guard cachedAutoCapitalize else { return }
         guard currentMode == .defaultMode || currentMode == .quickNoteMode else { return }
 
         let lang = keyboardLayoutView.getCurrentLanguage()

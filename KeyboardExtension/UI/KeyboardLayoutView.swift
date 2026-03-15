@@ -1258,7 +1258,7 @@ class KeyboardLayoutView: UIView {
         switch key {
         case Self.shiftKey:
             isShifted.toggle()
-            scheduleBuildKeyboard()
+            updateKeyLabelsForShift()
 
         case Self.langKR:
             currentLanguage = .korean
@@ -1308,7 +1308,7 @@ class KeyboardLayoutView: UIView {
             onKeyTap?(key)
             if isShifted && !Self.specialKeys.contains(key) && currentPage == .letters {
                 isShifted = false
-                scheduleBuildKeyboard()
+                updateKeyLabelsForShift()
             }
             // ' 키 입력 후 자동으로 문자 키보드로 복귀
             if key == "'" && (currentPage == .symbols1 || currentPage == .symbols2) {
@@ -1355,11 +1355,11 @@ class KeyboardLayoutView: UIView {
 
     // MARK: - Visual Feedback
 
+    /// Haptic 설정 캐시 — 외부에서 주입 (KeyboardViewController가 관리)
+    var cachedHapticEnabled: Bool = true
+
     private func triggerHaptic() {
-        let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier)
-        if let obj = defaults?.object(forKey: AppConstants.UserDefaultsKeys.hapticFeedback) {
-            guard (obj as? Bool) == true else { return }
-        }
+        guard cachedHapticEnabled else { return }
         hapticGenerator.impactOccurred()
     }
 
@@ -1667,10 +1667,7 @@ class KeyboardLayoutView: UIView {
     }
 
     private func triggerTrackpadHaptic() {
-        let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier)
-        if let obj = defaults?.object(forKey: AppConstants.UserDefaultsKeys.hapticFeedback) {
-            guard (obj as? Bool) == true else { return }
-        }
+        guard cachedHapticEnabled else { return }
         selectionHaptic.selectionChanged()
     }
 
@@ -2081,6 +2078,9 @@ class KeyboardLayoutView: UIView {
     // Edge Glow 색상 캐싱
     private var cachedEdgeGlowColor: UIColor = UIColor(hex: "#00FF55")
 
+    // Edge Glow 공유 ColorSpace (매 프레임 생성 방지)
+    private static let deviceRGBColorSpace = CGColorSpaceCreateDeviceRGB()
+
     // Edge Glow 밝기 파라미터
     private static let edgeGlowWavePeriod: Double = 3.5
     private static let edgeGlowWaveWidth: CGFloat = 0.25
@@ -2253,7 +2253,7 @@ class KeyboardLayoutView: UIView {
             let finalShadowRadius = idleShadowRadius * t + 3.0 * (1.0 - t)
 
             // ── 적용 ──
-            let colorSpace = CGColorSpaceCreateDeviceRGB()
+            let colorSpace = Self.deviceRGBColorSpace
             var borderComponents: [CGFloat] = [r, g, b, finalBorderAlpha]
             if let borderCG = CGColor(colorSpace: colorSpace, components: &borderComponents) {
                 button.layer.borderColor = borderCG
@@ -2280,7 +2280,7 @@ class KeyboardLayoutView: UIView {
         cachedEdgeGlowColor.getRed(&r, green: &g, blue: &b, alpha: &a)
 
         // 눌린 키 즉시 번쩍
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let colorSpace = Self.deviceRGBColorSpace
         var flashComponents: [CGFloat] = [r, g, b, Self.edgeGlowFlashBorderAlpha]
         if let flashCG = CGColor(colorSpace: colorSpace, components: &flashComponents) {
             button.layer.borderColor = flashCG
@@ -2547,11 +2547,92 @@ class KeyboardLayoutView: UIView {
         buildKeyboard()
     }
 
+    /// Shift 상태 변경 시 키 라벨만 업데이트 (전체 rebuild 없이)
+    /// UI/UX 시각적 결과는 buildKeyboard()와 100% 동일
+    ///
+    /// ⚠️ 딕셔너리 매핑 방식 사용:
+    ///   - zip(normalRows, shiftedRows)로 1:1 매핑 테이블 구축
+    ///   - 한국어 ㅂ↔ㅃ, 영어 q↔Q 등 모든 언어에서 동작
+    ///   - row 구조/인덱스에 의존하지 않으므로 하단 행 오염 불가
+    ///   - specialKeys는 매핑에서 제외되어 자동 보호
+    private func updateKeyLabelsForShift() {
+        // 심볼/숫자 페이지에서는 Shift 개념 없음
+        guard currentPage == .letters else { return }
+        // buildKeyboard() 진행 중이면 스킵 (rebuild가 완료되면 올바른 상태가 됨)
+        guard !isRebuilding else { return }
+        // buildKeyboard() 완료 전 (초기화 전)에는 스킵
+        guard !allKeyButtons.isEmpty else { return }
+
+        // 현재 언어의 normal/shifted 배열 가져오기
+        let normalRows: [[String]]
+        let shiftedRows: [[String]]
+        switch currentLanguage {
+        case .korean:
+            normalRows = Self.koreanRows
+            shiftedRows = Self.koreanShiftRows
+        case .russian:
+            normalRows = Self.russianRows
+            shiftedRows = Self.russianShiftRows
+        default:
+            normalRows = Self.englishRows
+            shiftedRows = Self.englishShiftRows
+        }
+
+        // 딕셔너리 매핑 구축: 현재 버튼 라벨 → 목표 라벨
+        // isShifted=true  → 버튼은 현재 normal 상태, 목표는 shifted
+        // isShifted=false → 버튼은 현재 shifted 상태, 목표는 normal
+        var labelMapping: [String: String] = [:]
+        for (normalRow, shiftedRow) in zip(normalRows, shiftedRows) {
+            for (normal, shifted) in zip(normalRow, shiftedRow) {
+                // special key(\u{21E7}, \u{232B} 등)는 매핑에서 제외
+                guard !Self.specialKeys.contains(normal) else { continue }
+                if isShifted {
+                    labelMapping[normal] = shifted   // ㅂ → ㅃ, q → Q
+                } else {
+                    labelMapping[shifted] = normal   // ㅃ → ㅂ, Q → q
+                }
+            }
+        }
+
+        // 모든 키 버튼 순회하며 라벨 교체
+        for button in allKeyButtons {
+            guard let currentLabel = button.accessibilityLabel else { continue }
+
+            // Shift 키 자체 — 아이콘/배경 업데이트
+            if currentLabel == Self.shiftKey {
+                let config = UIImage.SymbolConfiguration(
+                    pointSize: 16, weight: isShifted ? .bold : .regular)
+                button.setImage(
+                    UIImage(systemName: isShifted ? "shift.fill" : "shift",
+                            withConfiguration: config),
+                    for: .normal)
+                if isShifted {
+                    button.backgroundColor = customTheme?.keyBackground
+                        ?? (isDark ? UIColor(white: 0.55, alpha: 1)
+                                   : UIColor(white: 0.95, alpha: 1))
+                } else {
+                    button.backgroundColor = customTheme?.specialKeyBackground
+                        ?? (isDark ? UIColor(white: 0.35, alpha: 1)
+                                   : UIColor(white: 0.78, alpha: 1))
+                }
+                continue
+            }
+
+            // 딕셔너리에서 새 라벨 조회
+            // - 매핑 있음 → 라벨 교체 (문자 키)
+            // - 매핑 없음 → skip (special key, 숫자, 또는 변경 불필요한 키)
+            if let newLabel = labelMapping[currentLabel] {
+                button.setTitle(newLabel, for: .normal)
+                button.accessibilityLabel = newLabel
+            }
+        }
+    }
+
     func setShifted(_ shifted: Bool) {
         guard currentPage == .letters else { return }
         guard isShifted != shifted else { return }
         isShifted = shifted
-        scheduleBuildKeyboard()
+        updateKeyLabelsForShift()
     }
 
     // MARK: - Mode-Aware Return Key (Proposal 03)
